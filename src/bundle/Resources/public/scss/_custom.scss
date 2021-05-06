@@ -85,8 +85,6 @@ $ibexa-color-accent-strong-200: #f9d0c3;
 $ibexa-color-accent-strong-100: #fce7e1;
 $ibexa-color-accent-strong-50: #fdf3f0;
 
-// ibexa-color-complementary-soft: ???
-
 $ibexa-color-complementary: #47bedb;
 $ibexa-color-complementary-400: #63c3da;
 $ibexa-color-complementary-300: #90d8e9;
@@ -102,27 +100,13 @@ $ibexa-color-complementary-strong-100: #ccdbde;
 $ibexa-color-complementary-strong-50: #e5edee;
 
 
-
-// $ibexa-white: #fff;
-// $ibexa-black: #131c26;
 $ibexa-white: $ibexa-color-white;
 $ibexa-black: $ibexa-color-dark;
 
-// $ibexa-color-primary: #ae1164;
-// $ibexa-color-primary-pale: #f3e4e7;
-// $ibexa-color-primary-light: #e75476;
-// $ibexa-color-deep-black: #222222;
 $ibexa-color-primary-pale: $ibexa-color-primary-50;
 $ibexa-color-primary-light: $ibexa-color-primary-400;
 $ibexa-color-deep-black: $ibexa-color-black-400;
 
-// $ibexa-color-base: #e0e0e8;
-// $ibexa-color-base-pale: #f5f5f5;
-// $ibexa-color-base-light: #f7f7f9;
-// $ibexa-color-base-medium: #ececf1;
-// $ibexa-color-base-dark: #878b90;
-// $ibexa-color-base-deep: #656565;
-// $ibexa-color-base-black: #131c26;
 $ibexa-color-base: $ibexa-color-light;
 $ibexa-color-base-pale: $ibexa-color-light-200;
 $ibexa-color-base-light: $ibexa-color-light-100;
@@ -131,35 +115,18 @@ $ibexa-color-base-dark: $ibexa-color-dark-200;
 $ibexa-color-base-deep: $ibexa-color-dark-300;
 $ibexa-color-base-black: $ibexa-color-dark;
 
-// $ibexa-color-ground-dark: #004d5d;
 $ibexa-color-ground-dark: $ibexa-color-complementary-strong;
 
-// $ibexa-color-font: #131c26;
-// $ibexa-color-font-light: #fff;
-// $ibexa-color-font-pale: #878b90;
-// $ibexa-color-font-black: #222222;
-// $ibexa-color-border-light: #ecdfd1;
 $ibexa-color-font: $ibexa-color-dark;
-$ibexa-color-font-light: $ibexa-color-white; // $ibexa-color-white
-$ibexa-color-font-pale: $ibexa-color-dark-200;  // $ibexa-color-dark-200
-$ibexa-color-font-black: $ibexa-color-black-400; // used NOwhere
+$ibexa-color-font-light: $ibexa-color-white;
+$ibexa-color-font-pale: $ibexa-color-dark-200;
+$ibexa-color-font-black: $ibexa-color-black-400;
 $ibexa-color-border-light: $ibexa-color-accent-100;
 
-// $ibexa-color-info: #47bedb;
-// $ibexa-color-positive: #00825c;
-// $ibexa-color-warning: #f7d000;
-// $ibexa-color-danger: #d92d42;
-// $ibexa-color-warning-dark: #aa0000;
-// $ibexa-color-warning-pale: #fceaec
-
-// $ibexa-color-info: #47bedb;
 $ibexa-color-positive: $ibexa-color-success;
-// $ibexa-color-warning: #f7d000;
-// $ibexa-color-danger: #d92d42;
 $ibexa-color-warning-dark: darken($ibexa-color-warning, 20%);
 $ibexa-color-warning-pale: $ibexa-color-warning-50;
 
-// $ibexa-color-primary-hover: #e75476;
 $ibexa-color-primary-hover: $ibexa-color-primary-400;
 
 /* eZ variables: These variables are deprecated, please use variables with the "ibexa" prefix */
@@ -205,7 +172,6 @@ $ez-ground-primary-inverted: $ibexa-color-base;
 $ez-color-warning-pale: $ibexa-color-warning-pale;
 $ez-color-warning-dark: $ibexa-color-warning-dark;
 
-// $ez-alloyeditor-color-hover: #65b6f0;
 $ez-alloyeditor-color-hover: $ibexa-color-info-300;
 
 $ez-pagination-bg: transparent;
