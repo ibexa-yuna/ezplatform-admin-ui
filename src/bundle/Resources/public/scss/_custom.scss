@@ -260,7 +260,7 @@ $headings-font-family: 'Work Sans SemiBold', sans-serif;
 $font-family-sans-serif: 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !default;
 
 //Border
-$ibexa-border-radius: calculateRem(2px);
+$ibexa-border-radius: calculateRem(10px);
 
 // Tables
 $table-cell-padding: calculateRem(12px) calculateRem(16px);

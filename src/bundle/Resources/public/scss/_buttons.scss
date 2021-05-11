@@ -1,36 +1,131 @@
 @import 'extra-actions';
 
 .ez-btn {
-    display: inline-block;
-    padding: calculateRem(11px) calculateRem(16px);
+    display: flex; // TODO: can we use flex in buttons???
+    padding: calculateRem(16px);
     outline: none;
     border: none;
     border-radius: $ibexa-border-radius;
     text-decoration: none;
-    font-size: calculateRem(15px);
+    font-size: calculateRem(14px);
     line-height: calculateRem(16px);
-    transition: all 0.2s $ibexa-admin-transition;
+    transition: all 0.2s $ibexa-admin-transition, border-width 0s, padding 0s;
 
-    &:hover,
-    &:focus,
-    &:active {
-        border: none;
-        outline: none;
-        text-decoration: none;
+    $btn-focus-box-shadow: 0 0 0 3px rgba($ibexa-color-primary, 0.2);
+
+    &:focus {
+        box-shadow: $btn-focus-box-shadow;
     }
 
     &--primary {
-        color: $ibexa-white;
-        background-color: $ibexa-color-primary;
+        color: $ibexa-color-white;
+        background-image: linear-gradient(to right, $ibexa-color-danger 0%, $ibexa-color-primary 100%);
+
+        $btn-hover-box-shadow: 0 22px 24px 0 rgba($ibexa-color-danger, 0.2);
 
         &:hover {
-            color: $ibexa-white;
-            background-color: $ibexa-color-primary-light;
+            box-shadow: $btn-hover-box-shadow;
         }
 
-        &:active {
-            background-color: $ibexa-color-primary-light;
-            box-shadow: inset 0 0 0 calculateRem(2px) $ibexa-color-primary;
+        &:hover:focus {
+            box-shadow: $btn-hover-box-shadow, $btn-focus-box-shadow;
+        }
+
+        &:disabled {
+            color: $ibexa-color-dark-400;
+            background-image: none;
+            background-color: $ibexa-color-light;
+            box-shadow: none;
+
+            .ez-icon {
+                fill: $ibexa-color-dark-400;
+            }
+        }
+    }
+
+    &--secondary {
+        color: $ibexa-color-primary;
+        background-color: $ibexa-color-white;
+        border: 1px solid $ibexa-color-primary-400;
+        padding: calculateRem(15px);
+
+        &:hover,
+        &:focus {
+            background-color: rgba($ibexa-color-primary, 0.2);
+        }
+
+        &:disabled {
+            color: $ibexa-color-dark-400;
+            border-color: $ibexa-color-dark-200;
+            background-color: $ibexa-color-light-300;
+
+            .ez-icon {
+                fill: $ibexa-color-dark-400;
+            }
+        }
+
+        .ez-icon {
+            fill: $ibexa-color-primary;
+        }
+    }
+
+    &--teriary {
+        // TODO: check colors
+        color: $ibexa-color-black-500;
+        background-color: $ibexa-color-white;
+        border: 1px solid $ibexa-color-black-100;
+        padding: calculateRem(15px) calculateRem(15px);
+
+        &:hover {
+            border-color: $ibexa-color-dark-500;
+        }
+
+        &:focus {
+            border-color: $ibexa-color-black-100;
+        }
+
+        &:disabled {
+            color: $ibexa-color-dark-300;
+            border-color: $ibexa-color-dark-100;
+            background-color: $ibexa-color-light-300;
+
+            .ez-icon {
+                fill: $ibexa-color-dark-300;
+            }
+        }
+
+        .ez-icon {
+            fill: $ibexa-color-black-500;
+        }
+    }
+
+    &--ghost {
+        color: $ibexa-color-black-500;
+        background-color: $ibexa-color-white;
+
+        &:hover {
+            color: $ibexa-color-primary;
+
+            .ez-icon {
+                fill: $ibexa-color-primary;
+            }
+        }
+
+        &:focus {
+            padding: calculateRem(15px) calculateRem(15px);
+            border: 1px solid $ibexa-color-primary;
+        }
+
+        &:disabled {
+            color: $ibexa-color-dark-300;
+
+            .ez-icon {
+                fill: $ibexa-color-dark-300;
+            }
+        }
+
+        .ez-icon {
+            fill: $ibexa-color-black-500;
         }
     }
 
@@ -75,6 +170,10 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+
+    .ez-icon {
+        margin-right: 12px;
     }
 }
 
