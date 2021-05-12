@@ -24,11 +24,11 @@
         $btn-hover-box-shadow: 0 22px 24px 0 rgba($ibexa-color-danger, 0.2);
 
         &:hover {
-            box-shadow: $btn-hover-box-shadow;
+            box-shadow: 0 0 0 transparent, $btn-hover-box-shadow;
         }
 
         &:hover:focus {
-            box-shadow: $btn-hover-box-shadow, $btn-focus-box-shadow;
+            box-shadow: $btn-focus-box-shadow, $btn-hover-box-shadow;
         }
 
         &:disabled {
