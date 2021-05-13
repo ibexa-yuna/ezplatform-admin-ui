@@ -1,7 +1,7 @@
 @import 'extra-actions';
 
 .ez-btn {
-    display: flex; // TODO: can we use flex in buttons???
+    display: inline-flex; // TODO: can we use flex in buttons???
     padding: calculateRem(16px);
     outline: none;
     border: none;
@@ -40,6 +40,10 @@
             .ez-icon {
                 fill: $ibexa-color-dark-400;
             }
+        }
+
+        .ez-icon {
+            fill: $ibexa-color-white;
         }
     }
 
@@ -172,7 +176,7 @@
         overflow: hidden;
     }
 
-    .ez-icon {
+    .ez-icon:not(:only-child) {
         margin-right: 12px;
     }
 }
@@ -257,16 +261,6 @@
 .btn.disabled,
 .btn[disabled] {
     opacity: 0.3;
-}
-
-.ez-btn--select-subtree {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    .ez-icon {
-        margin-right: calculateRem(8px);
-    }
 }
 
 .ez-modal--trash-with-asset {
