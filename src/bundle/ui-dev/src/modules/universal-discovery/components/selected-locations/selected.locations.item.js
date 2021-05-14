@@ -53,7 +53,7 @@ const SelectedLocationsItem = ({ location, permissions }) => {
                 })}
                 <button
                     type="button"
-                    className="c-selected-locations-item__remove-button btn btn-icon"
+                    className="c-selected-locations-item__remove-button btn ibexa-btn ibexa-btn--ghost"
                     onClick={removeFromSelection}
                     title={clearLabel}
                     data-tooltip-container-selector=".c-udw-tab">

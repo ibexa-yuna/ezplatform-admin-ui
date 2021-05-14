@@ -1,6 +1,6 @@
 @import 'extra-actions';
 
-.ez-btn {
+.ibexa-btn {
     display: inline-flex; // TODO: can we use flex in buttons???
     padding: calculateRem(16px);
     outline: none;
@@ -24,6 +24,7 @@
         $btn-hover-box-shadow: 0 22px 24px 0 rgba($ibexa-color-danger, 0.2);
 
         &:hover {
+            color: $ibexa-color-white;
             box-shadow: 0 0 0 transparent, $btn-hover-box-shadow;
         }
 
@@ -224,9 +225,9 @@
             margin: 0 auto calculateRem(5px);
         }
 
-        &.ez-btn--active-button {
+        &.ibexa-btn--active-button {
             &:hover {
-                @extend .ez-btn--active-button;
+                @extend .ibexa-btn--active-button;
             }
         }
     }
@@ -238,9 +239,9 @@
             background-color: lighten($ibexa-color-base-black, 7.5%);
         }
 
-        &.ez-btn--content-tree-expanded {
+        &.ibexa-btn--content-tree-expanded {
             &:hover {
-                @extend .ez-btn--content-tree-expanded;
+                @extend .ibexa-btn--content-tree-expanded;
             }
         }
     }
@@ -292,28 +293,28 @@
     }
 }
 
-.ez-btn--content-edit {
+.ibexa-btn--content-edit {
     background-color: transparent;
     cursor: pointer;
 }
 
-.ez-btn--cotf-create {
+.ibexa-btn--cotf-create {
     display: flex;
     align-items: center;
 }
 
-.ez-btn--content-tree-expanded {
+.ibexa-btn--content-tree-expanded {
     background: $ibexa-white;
     border-color: $ibexa-white;
     color: $ibexa-black;
 }
 
-.ez-btn--wide,
-.ez-btn.ez-btn--wide {
+.ibexa-btn--wide,
+.ibexa-btn.ibexa-btn--wide {
     padding: calculateRem(8px) calculateRem(48px);
 }
 
-.ez-btn--active-button {
+.ibexa-btn--active-button {
     background-color: $ibexa-white;
     color: $ibexa-color-primary;
     border-color: $ibexa-white;

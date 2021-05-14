@@ -59,9 +59,9 @@
                 <div class="form-inline">
                     <div class="ez-card__field-control mr-2">
                     {{ form_widget(form.fieldTypeSelection, {'attr': {'class': 'ez-field-selection'}}) }}
-                    {{ form_widget(form.addFieldDefinition, {'attr': {'class': 'btn btn-secondary'}}) }}
+                    {{ form_widget(form.addFieldDefinition, {'attr': {'class': 'btn ibexa-btn ibexa-btn--secondary'}}) }}
                     </div>
-                    {{ form_widget(form.removeFieldDefinition, {'attr': {'class': 'btn btn-icon'}}) }}
+                    {{ form_widget(form.removeFieldDefinition, {'attr': {'class': 'btn ibexa-btn ibexa-btn--ghost'}}) }}
                 </div>
             </div>
             <div class="card-body ez-card__body ez-card__body--incresed-margin">
@@ -71,6 +71,7 @@
 
                     <div class="card ez-card ez-card--toggle-group ez-card--collapsed">
                         <div id="field-definition-{{ value.identifier }}" class="ez-card__header ez-card__header--secondary">
+                        {# TODO: what here??? #}
                             <button class="ez-card__body-display-toggler btn">
                                 <svg class="ez-icon ez-icon--medium ez-icon--caret-down" aria-hidden="true">
                                     <use xlink:href="{{ ez_icon_path('caret-down') }}"></use>

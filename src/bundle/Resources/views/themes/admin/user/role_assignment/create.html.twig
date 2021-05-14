@@ -40,7 +40,7 @@
                             'content_name': '{{ content_name }}',
                             'content_id': '{{ content_id }}'
                         })|e('html_attr') }}"
-                        class="btn btn-secondary d-block"
+                        class="btn ibexa-btn ibexa-btn--secondary"
                         id="{{ form.users.vars.id }}__btn"
                         data-input-selector="#{{ form.users.vars.id }}"
                         data-selected-content-list-selector="#{{ form.users.vars.id }}-selected-content"
@@ -69,7 +69,7 @@
                             'content_name': '{{ content_name }}',
                             'content_id': '{{ content_id }}'
                         })|e('html_attr') }}"
-                        class="btn btn-secondary d-block"
+                        class="btn ibexa-btn ibexa-btn--secondary"
                         id="{{ form.groups.vars.id }}__btn"
                         data-input-selector="#{{ form.groups.vars.id }}"
                         data-selected-content-list-selector="#{{ form.groups.vars.id }}-selected-content"
@@ -112,8 +112,11 @@
                         {{ form_widget(form.limitation_type.location, {'label': 'limitation_type.subtree'|trans|desc('Subtree'), 'attr': {'class': 'ez-limitations__radio ez-input ez-input--radio', 'data-disable-selector': '#role_assignment_create_locations_select_content'}, 'label_attr': {'class': 'ez-limitations__label radio-inline'}}) }}
                         {{ form_widget(form.locations) }}
                         <div class="ez-limitations__item-subtree">
-                            <button id="role_assignment_create_locations_select_content" data-udw-config="{{ ez_udw_config('multiple', {}) }}" class="btn btn-secondary ez-btn--select-subtree"{% if not form.limitation_type.location.vars.checked %} disabled{% endif %}>
-                                <svg class="ez-icon ez-icon--select-subtree ez-icon--medium ez-icon--light">
+                            <button id="role_assignment_create_locations_select_content"
+                                    data-udw-config="{{ ez_udw_config('multiple', {}) }}"
+                                    class="btn ibexa-btn ibexa-btn--secondary ibexa-btn--select-subtree"
+                                    {% if not form.limitation_type.location.vars.checked %} disabled{% endif %}>
+                                <svg class="ez-icon ez-icon--small">
                                     <use xlink:href="{{ ez_icon_path('relations') }}"></use>
                                 </svg>
                                 {{ 'locations.select_subtree'|trans|desc('Select Subtree') }}

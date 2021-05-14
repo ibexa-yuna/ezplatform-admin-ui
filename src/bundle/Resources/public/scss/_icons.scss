@@ -93,7 +93,7 @@
     }
 }
 
-.ez-btn--extra-actions {
+.ibexa-btn--extra-actions {
     .ez-icon {
         pointer-events: none;
     }
@@ -138,19 +138,13 @@
     }
 }
 
-.ez-btn--select-subtree {
-    .ez-icon {
-        margin-right: calculateRem(8px);
-    }
-}
-
 .ez-alert--info {
     .ez-icon-warning {
         fill: $ibexa-color-primary;
     }
 }
 
-.ez-btn--content-tree-expanded {
+.ibexa-btn--content-tree-expanded {
     .ez-icon {
         fill: $ibexa-black;
     }
