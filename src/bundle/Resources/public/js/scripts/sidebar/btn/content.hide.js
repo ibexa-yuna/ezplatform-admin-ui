@@ -9,7 +9,7 @@
     }
 
     if (modal) {
-        modal.querySelector('.ibexa-btn-confirm').addEventListener('click', () => {
+        modal.querySelector('.ibexa-btn--confirm').addEventListener('click', () => {
             visiblity.value = 0;
             form.submit();
         });

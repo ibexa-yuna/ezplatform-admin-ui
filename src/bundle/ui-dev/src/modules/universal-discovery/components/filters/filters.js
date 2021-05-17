@@ -144,7 +144,7 @@ const Filters = ({ isCollapsed, search }) => {
                 </div>
             </div>
             <div className="ez-filters__btns">
-                <button type="submit" className="btn ibexa-btn ibexa-btn--primary ibexa-btn-apply" onClick={makeSearch} disabled={!isApplyButtonEnabled}>
+                <button type="submit" className="btn ibexa-btn ibexa-btn--primary ibexa-btn--apply" onClick={makeSearch} disabled={!isApplyButtonEnabled}>
                     {applyLabel}
                 </button>
                 <button className="btn ibexa-btn ibexa-btn--ghost" onClick={clearFilters}>

@@ -8,8 +8,8 @@
     const filterBtn = doc.querySelector('.ibexa-btn--filter');
     const filters = doc.querySelector('.ez-filters');
     const searchCriteriaTags = doc.querySelector('.ez-search-criteria-tags');
-    const clearBtn = filters.querySelector('.ibexa-btn-clear');
-    const applyBtn = filters.querySelector('.ibexa-btn-apply');
+    const clearBtn = filters.querySelector('.ibexa-btn--clear');
+    const applyBtn = filters.querySelector('.ibexa-btn--apply');
     const dateFields = doc.querySelectorAll('.ez-filters__range-select');
     const contentTypeSelector = doc.querySelector('.ez-content-type-selector');
     const contentTypeSelect = doc.querySelector('.ez-filters__item--content-type .ez-filters__select');
