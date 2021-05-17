@@ -106,7 +106,7 @@
 {% macro table_header_tools(form_add, form_remove, can_add) %}
     <button
             data-udw-config="{{ ez_udw_config('single', {}) }}"
-            class="btn ibexa-btn ibexa-btn--ghost btn--udw-add"
+            class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text btn--udw-add"
             title="{{ 'tab.locations.action.add'|trans|desc('Add Location') }}"
             {{ not can_add ? 'disabled' }}>
         <svg class="ez-icon ez-icon--small ez-icon-create">
@@ -118,7 +118,7 @@
     <button
             id="delete-locations"
             type="button"
-            class="btn ibexa-btn ibexa-btn--ghost"
+            class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
             disabled
             data-toggle="modal"
             data-target="#{{ modal_data_target }}"

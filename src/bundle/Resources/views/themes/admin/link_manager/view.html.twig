@@ -39,7 +39,7 @@
                     <td class="ez-table__cell ez-table__cell--has-action-btns">
                         <a href="{{ url.url }}" target="_blank">{{ url.url }}</a>
                         <a href="{{ path('ezplatform.link_manager.edit', { urlId: url.id }) }}"
-                           class="btn ibexa-btn ibexa-btn--ghost mx-2 float-right"
+                           class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text mx-2 float-right"
                            title="{{ 'url.action.edit'|trans|desc('Edit URL') }}">
                             <svg class="ez-icon ez-icon--small ez-icon-edit">
                                 <use xlink:href="{{ ez_icon_path('edit') }}"></use>
@@ -106,8 +106,7 @@
                         </td>
                         <td class="ez-table__cell ez-table__cell--has-action-btns">
                             {% if can_edit %}
-                            {# TODO: btn-link ??? #}
-                                <button class="btn ibexa-btn ibexa-btn--ghost mx-2 ibexa-btn--content-edit"
+                                <button class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text mx-2 ibexa-btn--content-edit"
                                         title="{{ 'url.action.item.edit'|trans|desc('Edit content') }}"
                                         data-content-id="{{ content.id }}"
                                         data-language-code="{{ content.mainLanguageCode }}">

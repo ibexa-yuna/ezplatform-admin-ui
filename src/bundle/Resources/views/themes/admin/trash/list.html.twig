@@ -56,7 +56,7 @@
                                     placeholder="{{ 'search.creator_input.placeholder'|trans|desc('Type creator\'s name') }}"
                                     {{ creatorExists ? 'disabled'  }}
                                 >
-                                <button class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--reset-creator">
+                                <button class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text ibexa-btn--reset-creator">
                                     <svg class="ez-icon ez-icon--small ez-icon--medium ez-icon--reset">
                                         <use xlink:href="{{ ez_icon_path('circle-close') }}"></use>
                                     </svg>
@@ -115,7 +115,7 @@
                             <button
                                 id="delete-trash-items"
                                 type="button"
-                                class="btn ibexa-btn ibexa-btn--ghost"
+                                class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                                 disabled
                                 data-toggle="modal"
                                 data-target="#{{ modal_data_target }}"

@@ -3,7 +3,7 @@
 <div class="ez-add-to-bookmarks {{ location_is_bookmarked ? 'ez-add-to-bookmarks--checked'}}" data-location-id="{{ location.id }}">
     <button
         type="button"
-        class="ez-add-to-bookmarks__icon-wrapper ez-add-to-bookmarks__icon-wrapper--add btn ibexa-btn ibexa-btn--ghost"
+        class="ez-add-to-bookmarks__icon-wrapper ez-add-to-bookmarks__icon-wrapper--add btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
         title="{{ 'location.bookmark.add'|trans|desc('Add to Bookmarks') }}">
         <svg class="ez-icon ez-icon--small">
             <use xlink:href="{{ ez_icon_path('bookmark') }}"></use>
@@ -11,7 +11,7 @@
     </button>
     <button
         type="button"
-        class="ez-add-to-bookmarks__icon-wrapper ez-add-to-bookmarks__icon-wrapper--remove btn ibexa-btn ibexa-btn--ghost"
+        class="ez-add-to-bookmarks__icon-wrapper ez-add-to-bookmarks__icon-wrapper--remove btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
         title="{{ 'location.bookmark.remove'|trans|desc('Remove from Bookmarks') }}">
         <svg class="ez-icon ez-icon--small">
             <use xlink:href="{{ ez_icon_path('bookmark-active') }}"></use>

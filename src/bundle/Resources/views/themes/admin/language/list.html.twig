@@ -31,7 +31,7 @@
                     <a
                         title="{{ 'language.new'|trans|desc('Create a new language') }}"
                         href="{{ path('ezplatform.language.create') }}"
-                        class="btn ibexa-btn ibexa-btn--ghost"
+                        class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                     >
                         <svg class="ez-icon ez-icon--small ez-icon-create">
                             <use xlink:href="{{ ez_icon_path('create') }}"></use>
@@ -41,7 +41,7 @@
                     <button
                         id="delete-languages"
                         type="button"
-                        class="btn ibexa-btn ibexa-btn--ghost"
+                        class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                         disabled
                         data-toggle="modal"
                         data-target="#{{ modal_data_target }}"
@@ -101,7 +101,7 @@
                             <a
                                 title="{{ 'language.edit'|trans|desc('Edit') }}"
                                 href="{{ path('ezplatform.language.edit', {'languageId': language.id}) }}"
-                                class="btn ibexa-btn ibexa-btn--ghost mx-2">
+                                class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text mx-2">
                                 <svg class="ez-icon ez-icon--small">
                                     <use xlink:href="{{ ez_icon_path('edit') }}"></use>
                                 </svg>

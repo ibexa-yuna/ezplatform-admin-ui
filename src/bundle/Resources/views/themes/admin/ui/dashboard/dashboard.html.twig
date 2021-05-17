@@ -13,7 +13,7 @@
                     <h1 class="py-3">{{ 'my.dashboard'|trans|desc('My dashboard') }}</h1>
                     <div class="ez-dashboard__create">
                         <button
-                            class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--cotf-create"
+                            class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text ibexa-btn--cotf-create"
                             data-udw-config="{{ ez_udw_config('create', {'type': 'content_create'}) }}"
                             {% if not can_create_content %}disabled{% endif %}
                         >

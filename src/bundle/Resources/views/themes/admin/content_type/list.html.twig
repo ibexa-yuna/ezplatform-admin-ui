@@ -12,7 +12,7 @@
                 <a
                     href="{{ path('ezplatform.content_type.add', {contentTypeGroupId: content_type_group.id}) }}"
                     title="{{ 'content_type.view.list.action.add'|trans|desc('Create a Content Type') }}"
-                    class="btn ibexa-btn ibexa-btn--ghost"
+                    class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                 >
                     <svg class="ez-icon ez-icon--small ez-icon-create">
                         <use xlink:href="{{ ez_icon_path('create') }}"></use>
@@ -24,7 +24,7 @@
                 <button
                     id="delete-content-types"
                     type="button"
-                    class="btn ibexa-btn ibexa-btn--ghost"
+                    class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                     disabled
                     data-toggle="modal"
                     data-target="#{{ modal_data_target }}"

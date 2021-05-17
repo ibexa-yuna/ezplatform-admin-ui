@@ -11,7 +11,7 @@
                     <a
                         title="{{ 'object_state.new'|trans|desc('Create a new Object state') }}"
                         href="{{ path('ezplatform.object_state.state.add', {'objectStateGroupId': object_state_group.id}) }}"
-                        class="btn ibexa-btn ibexa-btn--ghost"
+                        class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                     >
                         <svg class="ez-icon ez-icon--small ez-icon-create">
                             <use xlink:href="{{ ez_icon_path('create') }}"></use>
@@ -22,7 +22,7 @@
                     <button
                         id="delete-object-state"
                         type="button"
-                        class="btn ibexa-btn ibexa-btn--ghost"
+                        class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                         disabled
                         data-toggle="modal"
                         data-target="#{{ modal_data_target }}"
@@ -80,7 +80,7 @@
                                 <a
                                     title="{{ 'object_state.view.list.action.edit'|trans|desc('Edit') }}"
                                     href="{{ path('ezplatform.object_state.state.update', {'objectStateId': object_state.id}) }}"
-                                    class="btn ibexa-btn ibexa-btn--ghost mx-2">
+                                    class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text mx-2">
                                     <svg class="ez-icon ez-icon--small ez-icon-edit">
                                         <use xlink:href="{{ ez_icon_path('edit') }}"></use>
                                     </svg>

@@ -21,7 +21,7 @@ const TopMenu = ({ actionsDisabledMap }) => {
         <div className="c-top-menu">
             <span className="c-top-menu__cancel-btn-wrapper">
                 <button
-                    className="c-top-menu__cancel-btn btn ibexa-btn ibexa-btn--ghost"
+                    className="c-top-menu__cancel-btn btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                     type="button"
                     onClick={cancelUDW}
                     title={backTitle}

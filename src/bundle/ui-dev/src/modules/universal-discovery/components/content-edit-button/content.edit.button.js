@@ -106,7 +106,7 @@ const ContentEditButton = ({ version, location, isDisabled }) => {
     return (
         <div className="c-content-edit-button">
             <button
-                className="c-content-edit-button__btn btn ibexa-btn ibexa-btn--ghost"
+                className="c-content-edit-button__btn btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                 disabled={!version || isDisabled}
                 onClick={toggleTranslationSelectorVisibility}
                 data-tooltip-container-selector=".c-udw-tab"

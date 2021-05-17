@@ -10,7 +10,7 @@
                 <a
                     title="{{ 'policy.view.list.action.add'|trans|desc('Add a new Policy') }}"
                     href="{{ path('ezplatform.policy.create', {roleId: role.id}) }}"
-                    class="btn ibexa-btn ibexa-btn--ghost">
+                    class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text">
                     <svg class="ez-icon ez-icon--small ez-icon-create">
                         <use xlink:href="{{ ez_icon_path('create') }}"></use>
                     </svg>
@@ -19,7 +19,7 @@
                 <button
                     id="delete-policies"
                     type="button"
-                    class="btn ibexa-btn ibexa-btn--ghost"
+                    class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                     disabled
                     data-toggle="modal"
                     data-target="#{{ modal_data_target }}"
@@ -95,7 +95,7 @@
                         <a
                             title="{{ 'policy.view.list.panel.policies.action.edit'|trans|desc('Edit') }}"
                             href="{{ path('ezplatform.policy.update', { roleId: role.id, policyId: policy.id }) }}"
-                            class="btn ibexa-btn ibexa-btn--ghost mx-2{{ not is_editable[policy.id] ? ' disabled' : '' }}">
+                            class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text mx-2{{ not is_editable[policy.id] ? ' disabled' : '' }}">
                             <svg class="ez-icon ez-icon--small ez-icon-edit">
                                 <use xlink:href="{{ ez_icon_path('edit') }}"></use>
                             </svg>

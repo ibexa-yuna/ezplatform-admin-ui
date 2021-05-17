@@ -48,7 +48,7 @@ const SelectedLocations = () => {
             <button
                 ref={refTogglerButton}
                 type="button"
-                className="c-selected-locations__toggle-button btn ibexa-btn ibexa-btn--ghost"
+                className="c-selected-locations__toggle-button btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                 onClick={toggleExpanded}
                 title={togglerLabel}
                 data-tooltip-container-selector=".c-udw-tab">
@@ -68,7 +68,7 @@ const SelectedLocations = () => {
             <Fragment>
                 <button
                     type="button"
-                    className="c-selected-locations__confirm-button btn ibexa-btn ibexa-btn--ghost"
+                    className="c-selected-locations__confirm-button btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                     onClick={() => onConfirm()}
                     title={confirmSelectionLabel}
                     data-tooltip-container-selector=".c-udw-tab">
@@ -76,7 +76,7 @@ const SelectedLocations = () => {
                 </button>
                 <button
                     type="button"
-                    className="c-selected-locations__clear-selection-button btn ibexa-btn ibexa-btn--ghost"
+                    className="c-selected-locations__clear-selection-button btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text"
                     onClick={clearSelection}
                     title={clearAllLabel}
                     data-tooltip-container-selector=".c-udw-tab">
