@@ -1,17 +1,22 @@
 @import 'extra-actions';
 
 .ibexa-btn {
-    display: inline-flex; // TODO: can we use flex in buttons???
+    display: inline-grid;
+    grid-auto-flow: column dense;
+    grid-gap: 10px;
+    white-space: nowrap;
     padding: calculateRem(16px);
     outline: none;
     border: none;
     border-radius: $ibexa-border-radius;
     text-decoration: none;
     font-size: calculateRem(14px);
-    line-height: calculateRem(16px);
+    // line-height: calculateRem(16px);
     transition: all 0.2s $ibexa-admin-transition, border-width 0s, padding 0s;
 
-    $btn-focus-box-shadow: 0 0 0 3px rgba($ibexa-color-primary, 0.2);
+    $btn-focus-box-shadow: 0 0 0 calculateRem(3px) rgba($ibexa-color-primary, 0.2);
+    $btn-hover-box-shadow: 0 calculateRem(22px) calculateRem(24px) 0 rgba($ibexa-color-danger, 0.2);
+    $btn-hover-box-shadow-dark: 0 calculateRem(22px) calculateRem(24px) 0 rgba($ibexa-color-dark, 0.2);
 
     &:focus {
         box-shadow: $btn-focus-box-shadow;
@@ -19,9 +24,8 @@
 
     &--primary {
         color: $ibexa-color-white;
+        fill: $ibexa-color-white;
         background-image: linear-gradient(to right, $ibexa-color-danger 0%, $ibexa-color-primary 100%);
-
-        $btn-hover-box-shadow: 0 22px 24px 0 rgba($ibexa-color-danger, 0.2);
 
         &:hover {
             color: $ibexa-color-white;
@@ -34,24 +38,18 @@
 
         &:disabled {
             color: $ibexa-color-dark-400;
+            fill: $ibexa-color-dark-400;
             background-image: none;
             background-color: $ibexa-color-light;
             box-shadow: none;
-
-            .ez-icon {
-                fill: $ibexa-color-dark-400;
-            }
-        }
-
-        .ez-icon {
-            fill: $ibexa-color-white;
         }
     }
 
     &--secondary {
         color: $ibexa-color-primary;
+        fill: $ibexa-color-primary;
         background-color: $ibexa-color-white;
-        border: 1px solid $ibexa-color-primary-400;
+        border: calculateRem(1px) solid $ibexa-color-primary-400;
         padding: calculateRem(15px);
 
         &:hover,
@@ -61,24 +59,18 @@
 
         &:disabled {
             color: $ibexa-color-dark-400;
+            fill: $ibexa-color-dark-400;
             border-color: $ibexa-color-dark-200;
             background-color: $ibexa-color-light-300;
-
-            .ez-icon {
-                fill: $ibexa-color-dark-400;
-            }
-        }
-
-        .ez-icon {
-            fill: $ibexa-color-primary;
         }
     }
 
     &--teriary {
         // TODO: check colors
         color: $ibexa-color-black-500;
+        fill: $ibexa-color-black-500;
         background-color: $ibexa-color-white;
-        border: 1px solid $ibexa-color-black-100;
+        border: calculateRem(1px) solid $ibexa-color-black-100;
         padding: calculateRem(15px) calculateRem(15px);
 
         &:hover {
@@ -91,47 +83,60 @@
 
         &:disabled {
             color: $ibexa-color-dark-300;
+            fill: $ibexa-color-dark-300;
             border-color: $ibexa-color-dark-100;
             background-color: $ibexa-color-light-300;
-
-            .ez-icon {
-                fill: $ibexa-color-dark-300;
-            }
-        }
-
-        .ez-icon {
-            fill: $ibexa-color-black-500;
         }
     }
 
     &--ghost {
         color: $ibexa-color-black-500;
+        fill: $ibexa-color-black-500;
         background-color: $ibexa-color-white;
 
         &:hover {
             color: $ibexa-color-primary;
-
-            .ez-icon {
-                fill: $ibexa-color-primary;
-            }
+            fill: $ibexa-color-primary;
         }
 
         &:focus {
             padding: calculateRem(15px) calculateRem(15px);
-            border: 1px solid $ibexa-color-primary;
+            border: calculateRem(1px) solid $ibexa-color-primary;
         }
 
         &:disabled {
             color: $ibexa-color-dark-300;
+            fill: $ibexa-color-dark-300;
+        }
+    }
 
-            .ez-icon {
-                fill: $ibexa-color-dark-300;
-            }
+    &--dark {
+        color: $ibexa-color-white;
+        fill: $ibexa-color-white;
+        background-color: $ibexa-color-dark;
+
+        &:hover {
+            color: $ibexa-color-white;
+            fill: $ibexa-color-white;
+            box-shadow: 0 0 0 transparent, $btn-hover-box-shadow-dark;
         }
 
-        .ez-icon {
-            fill: $ibexa-color-black-500;
+        &:hover:focus {
+            box-shadow: $btn-focus-box-shadow, $btn-hover-box-shadow-dark;
         }
+
+        &:disabled {
+            color: $ibexa-color-dark-400;
+            fill: $ibexa-color-dark-400;
+            background-color: $ibexa-color-light;
+            box-shadow: none;
+        }
+    }
+
+    &--small {
+        padding-top: calculateRem(8px);
+        padding-bottom: calculateRem(8px);
+        height: calculateRem(32px);
     }
 
     &--base-dark {
@@ -177,9 +182,13 @@
         overflow: hidden;
     }
 
-    .ez-icon:not(:only-child) {
-        margin-right: 12px;
-    }
+    // .ez-icon:not(:only-child) {
+    //     margin-right: calculateRem(12px);
+    // }
+
+    // .ez-icon {
+    //     margin-right: calculateRem(12px);
+    // }
 }
 
 .btn-icon {
@@ -261,7 +270,7 @@
 
 .btn.disabled,
 .btn[disabled] {
-    opacity: 0.3;
+    opacity: 1;
 }
 
 .ez-modal--trash-with-asset {
