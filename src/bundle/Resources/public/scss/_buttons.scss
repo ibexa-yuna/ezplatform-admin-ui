@@ -18,7 +18,7 @@
     &--primary {
         color: $ibexa-color-white;
         fill: $ibexa-color-white;
-        background-image: linear-gradient(to right, $ibexa-color-danger 0%, $ibexa-color-primary 100%);
+        background-image: $ibexa-gradient-danger-primary;
 
         &:hover {
             color: $ibexa-color-white;
