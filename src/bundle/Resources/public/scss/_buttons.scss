@@ -1,9 +1,7 @@
 @import 'extra-actions';
 
 .ibexa-btn {
-    display: inline-grid;
-    grid-auto-flow: column dense;
-    grid-gap: 10px;
+    display: inline-flex;
     white-space: nowrap;
     padding: calculateRem(16px);
     outline: none;
@@ -11,15 +9,10 @@
     border-radius: $ibexa-border-radius;
     text-decoration: none;
     font-size: calculateRem(14px);
-    // line-height: calculateRem(16px);
     transition: all 0.2s $ibexa-admin-transition, border-width 0s, padding 0s;
 
-    $btn-focus-box-shadow: 0 0 0 calculateRem(3px) rgba($ibexa-color-primary, 0.2);
-    $btn-hover-box-shadow: 0 calculateRem(22px) calculateRem(24px) 0 rgba($ibexa-color-danger, 0.2);
-    $btn-hover-box-shadow-dark: 0 calculateRem(22px) calculateRem(24px) 0 rgba($ibexa-color-dark, 0.2);
-
     &:focus {
-        box-shadow: $btn-focus-box-shadow;
+        box-shadow: $ibexa-btn-focus-box-shadow;
     }
 
     &--primary {
@@ -29,11 +22,11 @@
 
         &:hover {
             color: $ibexa-color-white;
-            box-shadow: 0 0 0 transparent, $btn-hover-box-shadow;
+            box-shadow: 0 0 0 transparent, $ibexa-btn-hover-box-shadow;
         }
 
         &:hover:focus {
-            box-shadow: $btn-focus-box-shadow, $btn-hover-box-shadow;
+            box-shadow: $ibexa-btn-focus-box-shadow, $ibexa-btn-hover-box-shadow;
         }
 
         &:disabled {
@@ -49,12 +42,12 @@
         color: $ibexa-color-primary;
         fill: $ibexa-color-primary;
         background-color: $ibexa-color-white;
-        border: calculateRem(1px) solid $ibexa-color-primary-400;
+        border: calculateRem(1px) solid $ibexa-color-primary;
         padding: calculateRem(15px);
 
         &:hover,
         &:focus {
-            background-color: rgba($ibexa-color-primary, 0.2);
+            background-color: $ibexa-color-primary-200;
         }
 
         &:disabled {
@@ -66,33 +59,31 @@
     }
 
     &--teriary {
-        // TODO: check colors
-        color: $ibexa-color-black-500;
-        fill: $ibexa-color-black-500;
+        color: $ibexa-color-dark;
+        fill: $ibexa-color-dark;
         background-color: $ibexa-color-white;
-        border: calculateRem(1px) solid $ibexa-color-black-100;
+        border: calculateRem(1px) solid $ibexa-color-light;
         padding: calculateRem(15px) calculateRem(15px);
 
         &:hover {
-            border-color: $ibexa-color-dark-500;
+            border-color: $ibexa-color-dark;
         }
 
         &:focus {
-            border-color: $ibexa-color-black-100;
+            border-color: $ibexa-color-light;
         }
 
         &:disabled {
             color: $ibexa-color-dark-300;
             fill: $ibexa-color-dark-300;
-            border-color: $ibexa-color-dark-100;
+            border-color: $ibexa-color-light;
             background-color: $ibexa-color-light-300;
         }
     }
 
     &--ghost {
-        color: $ibexa-color-black-500;
-        fill: $ibexa-color-black-500;
-        background-color: $ibexa-color-white;
+        color: $ibexa-color-dark;
+        fill: $ibexa-color-dark;
 
         &:hover {
             color: $ibexa-color-primary;
@@ -100,8 +91,8 @@
         }
 
         &:focus {
-            padding: calculateRem(15px) calculateRem(15px);
             border: calculateRem(1px) solid $ibexa-color-primary;
+            padding: calculateRem(15px);
         }
 
         &:disabled {
@@ -118,11 +109,11 @@
         &:hover {
             color: $ibexa-color-white;
             fill: $ibexa-color-white;
-            box-shadow: 0 0 0 transparent, $btn-hover-box-shadow-dark;
+            box-shadow: 0 0 0 transparent, $ibexa-btn-hover-box-shadow-dark;
         }
 
         &:hover:focus {
-            box-shadow: $btn-focus-box-shadow, $btn-hover-box-shadow-dark;
+            box-shadow: $ibexa-btn-focus-box-shadow, $ibexa-btn-hover-box-shadow-dark;
         }
 
         &:disabled {
@@ -137,35 +128,37 @@
         padding-top: calculateRem(8px);
         padding-bottom: calculateRem(8px);
         height: calculateRem(32px);
-    }
 
-    &--base-dark {
-        color: $ibexa-color-base-dark;
-        background-color: transparent;
-        box-shadow: inset 0 0 0 calculateRem(1px) $ibexa-color-base-dark;
-
-        &:hover {
-            color: $ibexa-color-base-dark;
-            background-color: $ibexa-color-base-light;
+        &.ibexa-btn--secondary,
+        &.ibexa-btn--teriary {
+            padding-top: calculateRem(7px);
+            padding-bottom: calculateRem(7px);
         }
 
-        &:active {
-            background-color: $ibexa-color-base-dark;
-            box-shadow: inset 0 0 0 calculateRem(2px) $ibexa-color-base-dark;
-        }
-
-        .ez-icon {
-            fill: $ibexa-color-base-dark;
+        &.ibexa-btn--ghost {
+            &:focus {
+                padding-top: calculateRem(7px);
+                padding-bottom: calculateRem(7px);
+            }
         }
     }
 
-    &--no-border {
-        color: $ibexa-color-primary;
-    }
+    &--no-text {
+        &.ibexa-btn--small {
+            padding-left: calculateRem(8px);
+            padding-right: calculateRem(8px);
 
-    &--action-icon {
-        .ez-icon {
-            fill: $ibexa-color-base-dark;
+            &.ibexa-btn--secondary,
+            &.ibexa-btn--teriary {
+                padding-left: calculateRem(7px);
+                padding-right: calculateRem(7px);
+            }
+
+            &.ibexa-btn--ghost {
+                &:focus {
+                    padding: calculateRem(7px);
+                }
+            }
         }
     }
 
@@ -182,13 +175,15 @@
         overflow: hidden;
     }
 
-    // .ez-icon:not(:only-child) {
-    //     margin-right: calculateRem(12px);
-    // }
+    .ez-icon {
+        margin-right: calculateRem(12px);
+    }
 
-    // .ez-icon {
-    //     margin-right: calculateRem(12px);
-    // }
+    &--no-text {
+        .ez-icon {
+            margin-right: 0;
+        }
+    }
 }
 
 .btn-icon {
@@ -316,11 +311,6 @@
     background: $ibexa-white;
     border-color: $ibexa-white;
     color: $ibexa-black;
-}
-
-.ibexa-btn--wide,
-.ibexa-btn.ibexa-btn--wide {
-    padding: calculateRem(8px) calculateRem(48px);
 }
 
 .ibexa-btn--active-button {
