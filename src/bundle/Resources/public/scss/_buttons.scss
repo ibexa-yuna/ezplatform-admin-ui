@@ -9,7 +9,7 @@
     border-radius: $ibexa-border-radius;
     text-decoration: none;
     font-size: calculateRem(14px);
-    transition: all 0.2s $ibexa-admin-transition;
+    transition: all $ibexa-admin-transition-duration $ibexa-admin-transition;
 
     &:focus {
         box-shadow: $ibexa-btn-focus-box-shadow;
