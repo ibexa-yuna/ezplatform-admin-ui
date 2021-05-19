@@ -28,7 +28,7 @@
                 }) }}
                 {% include '@ezdesign/ui/table_header.html.twig' with {
                     header_text: 'bookmark.table.header'|trans|desc('Bookmarks') ~ ' (' ~ pager.count ~ ')',
-                    tools: form_widget(form_remove.remove, {'attr': {'class': 'btn ibexa-btn ibexa-btn--ghost', 'disabled': true}})
+                    tools: form_widget(form_remove.remove, {'attr': {'class': 'btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text', 'disabled': true}})
                 } %}
                 <div class="ez-scrollable-table-wrapper">
                     <table class="ez-table table table-hover">

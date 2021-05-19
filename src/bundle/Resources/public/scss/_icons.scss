@@ -54,38 +54,6 @@
     }
 }
 
-.btn-icon {
-    .ez-icon {
-        width: calculateRem(20px);
-        height: calculateRem(20px);
-        fill: $ibexa-color-primary;
-
-        &--secondary {
-            fill: $ibexa-black;
-        }
-
-        &--dark {
-            fill: $ibexa-black;
-        }
-
-        &--base-dark {
-            fill: $ibexa-color-base-dark;
-        }
-
-        &--copy {
-            fill: $ibexa-color-base-dark;
-        }
-    }
-
-    &:not([disabled]):hover {
-        .ez-icon {
-            &--secondary {
-                fill: $ibexa-color-primary;
-            }
-        }
-    }
-}
-
 .ez-side-menu,
 .ez-context-menu {
     .ez-icon {

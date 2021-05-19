@@ -172,10 +172,6 @@
     }
 }
 
-.btn-icon {
-    padding: 0;
-}
-
 .ez-side-menu,
 .ez-context-menu {
     .ez-sticky-container > .btn {
@@ -252,20 +248,6 @@
 .btn.disabled,
 .btn[disabled] {
     opacity: 1;
-}
-
-.ez-modal--trash-with-asset {
-    .modal-footer {
-        .btn-secondary {
-            background-color: $ibexa-color-base-dark;
-            border-color: $ibexa-color-base-dark;
-
-            &:hover {
-                background-color: $ibexa-color-base-dark;
-                border-color: $ibexa-color-base-dark;
-            }
-        }
-    }
 }
 
 .ez-content-view,

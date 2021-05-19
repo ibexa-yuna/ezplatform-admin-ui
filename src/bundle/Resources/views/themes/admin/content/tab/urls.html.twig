@@ -55,7 +55,7 @@
 {% macro table_header_tools(form_custom_url_remove, can_edit_custom_url) %}
     {% if can_edit_custom_url %}
         <button
-            class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text ibexa-btn--no-text ibexa-btn--prevented"
+            class="btn ibexa-btn ibexa-btn--ghost ibexa-btn--no-text ibexa-btn--prevented"
             data-toggle="modal"
             data-target="#ez-modal--custom-url-alias"
             title="{{ 'tab.urls.action.add'|trans|desc('Add a custom URL alias') }}">
