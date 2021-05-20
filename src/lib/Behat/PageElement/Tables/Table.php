@@ -7,23 +7,17 @@
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables;
 
 use Behat\Mink\Element\TraversableElement;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\Element;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\Pagination;
+use EzSystems\Behat\Browser\Context\BrowserContext;
 
-abstract class Table extends Element
+abstract class Table extends ItemsList
 {
-    public function __construct(UtilityContext $context, string $containerLocator)
+    public function __construct(BrowserContext $context, string $containerLocator)
     {
-        parent::__construct($context);
-        $this->fields = [
-            'list' => $containerLocator,
-            'tableCell' => $containerLocator . ' tr:nth-child(%d) td:nth-child(%d)',
-            'editButton' => $containerLocator . ' tr:nth-child(%s) .ez-icon-edit',
-            'listRow' => $containerLocator . ' tbody tr',
-            'horizontalHeaders' => $containerLocator . ' thead th',
-        ];
+        parent::__construct($context, $containerLocator);
+        $this->fields['tableCell'] = $containerLocator . ' tr:nth-child(%d) td:nth-child(%d)';
+        $this->fields['editButton'] = $containerLocator . ' tr:nth-child(%s) [data-original-title="Edit"]';
+        $this->fields['listRow'] = $containerLocator . ' tbody tr';
+        $this->fields['horizontalHeaders'] = $containerLocator . ' thead th';
     }
 
     abstract public function getTableCellValue(string $header, ?string $secondHeader = null): string;
@@ -55,7 +49,7 @@ abstract class Table extends Element
             return $cell->getText();
         }
 
-        throw new \Exception('Cell coordinates not valid - row %d, column %d', $row, $column);
+        throw new \Exception('Cell coordinates not valid: row %d, column %d', $row, $column);
     }
 
     protected function selectElement(string $name, string $selector): void
@@ -105,36 +99,5 @@ abstract class Table extends Element
         }
 
         return $elementsPositions;
-    }
-
-    /**
-     * Check if list contains list element with given name.
-     *
-     * @param string $name
-     *
-     * @return bool
-     */
-    public function isElementOnCurrentPage(string $name): bool
-    {
-        return $this->context->getElementByText($name, $this->fields['listElement']) !== null;
-    }
-
-    public function isElementInTable(string $contentName): bool
-    {
-        $pagination = ElementFactory::createElement($this->context, Pagination::ELEMENT_NAME);
-
-        while (true) {
-            if ($this->isElementOnCurrentPage($contentName)) {
-                return true;
-            }
-
-            if ($pagination->isNextButtonActive()) {
-                $pagination->clickNextButton();
-            } else {
-                break;
-            }
-        }
-
-        return false;
     }
 }

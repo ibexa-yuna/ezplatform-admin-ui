@@ -11,12 +11,27 @@ use EzSystems\EzPlatformAdminUi\Menu\Event\ConfigureMenuEvent;
 use JMS\TranslationBundle\Model\Message;
 use JMS\TranslationBundle\Translation\TranslationContainerInterface;
 use Knp\Menu\ItemInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class URLEditRightSidebarBuilder extends AbstractBuilder implements TranslationContainerInterface
 {
     /* Menu items */
     const ITEM__SAVE = 'url_edit__sidebar_right__save';
     const ITEM__CANCEL = 'url_edit__sidebar_right__cancel';
+
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
+    private $translator;
+
+    public function __construct(
+        MenuItemFactory $factory,
+        EventDispatcherInterface $eventDispatcher,
+        TranslatorInterface $translator)
+    {
+        parent::__construct($factory, $eventDispatcher);
+
+        $this->translator = $translator;
+    }
 
     protected function getConfigureEventName(): string
     {
@@ -45,7 +60,7 @@ class URLEditRightSidebarBuilder extends AbstractBuilder implements TranslationC
             self::ITEM__CANCEL => $this->createMenuItem(
                 self::ITEM__CANCEL,
                 [
-                    'route' => 'ezplatform.link_manager.list',
+                    'route' => 'ezplatform.url_management',
                     'extras' => ['icon' => 'circle-close'],
                 ]
             ),

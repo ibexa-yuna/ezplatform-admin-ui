@@ -7,10 +7,10 @@
 namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 
 use eZ\Publish\API\Repository\Values\Content\Location;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller as BaseController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-abstract class Controller extends BaseController
+abstract class Controller extends AbstractController
 {
     public function performAccessCheck()
     {
@@ -25,7 +25,8 @@ abstract class Controller extends BaseController
      */
     public function redirectToLocation(Location $location, string $uriFragment = ''): RedirectResponse
     {
-        return $this->redirectToRoute('_ezpublishLocation', [
+        return $this->redirectToRoute('_ez_content_view', [
+            'contentId' => $location->contentId,
             'locationId' => $location->id,
             '_fragment' => $uriFragment,
         ]);

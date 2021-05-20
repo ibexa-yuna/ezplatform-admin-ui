@@ -6,15 +6,16 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\AdminList;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\IconLinkedListTable;
 
 class ContentTypeGroupPage extends Page
 {
     /** @var string Name by which Page is recognised */
-    public const PAGE_NAME = 'Content Type Group';
+    public const PAGE_NAME = 'Content Type group';
     /** @var string Name of actual group */
     public $groupName;
 
@@ -23,13 +24,13 @@ class ContentTypeGroupPage extends Page
      */
     public $adminList;
 
-    public function __construct(UtilityContext $context, string $groupName)
+    public function __construct(BrowserContext $context, string $groupName)
     {
         parent::__construct($context);
         $this->siteAccess = 'admin';
         $this->route = '/contenttypegroup/';
         $this->groupName = $groupName;
-        $this->adminList = ElementFactory::createElement($this->context, AdminList::ELEMENT_NAME, sprintf('Content Types in %s', $this->groupName), IconLinkedListTable::ELEMENT_NAME);
+        $this->adminList = ElementFactory::createElement($this->context, AdminList::ELEMENT_NAME, sprintf('Content Types in \'%s\'', $this->groupName), IconLinkedListTable::ELEMENT_NAME);
         $this->pageTitle = $groupName;
         $this->pageTitleLocator = '.ez-header h1';
     }

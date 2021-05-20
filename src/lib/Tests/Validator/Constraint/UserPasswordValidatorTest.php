@@ -18,18 +18,18 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use eZ\Publish\API\Repository\Values\User\User as APIUser;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
+use EzSystems\EzPlatformUser\Validator\Constraints\UserPasswordValidator as BaseUserPasswordValidator;
 
-class UserPasswordValidatorTest extends TestCase
+final class UserPasswordValidatorTest extends TestCase
 {
     /**
-     * @var UserService|MockObject
+     * @var MockObject|UserService
      */
     private $userService;
 
     /**
-     * @var TokenStorageInterface|MockObject
+     * @var MockObject|TokenStorageInterface
      */
     private $tokenStorage;
 
@@ -43,12 +43,14 @@ class UserPasswordValidatorTest extends TestCase
      */
     private $validator;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->userService = $this->createMock(UserService::class);
         $this->tokenStorage = $this->createMock(TokenStorageInterface::class);
         $this->executionContext = $this->createMock(ExecutionContextInterface::class);
-        $this->validator = new UserPasswordValidator($this->userService, $this->tokenStorage);
+        $this->validator = new UserPasswordValidator(
+            new BaseUserPasswordValidator($this->userService, $this->tokenStorage)
+        );
         $this->validator->initialize($this->executionContext);
     }
 
@@ -61,7 +63,7 @@ class UserPasswordValidatorTest extends TestCase
     {
         $this->userService
             ->expects($this->never())
-            ->method('loadUserByCredentials');
+            ->method('checkUserCredentials');
         $this->tokenStorage
             ->expects($this->never())
             ->method('getToken');
@@ -84,15 +86,19 @@ class UserPasswordValidatorTest extends TestCase
     {
         $apiUser = $this->getMockForAbstractClass(APIUser::class, [], '', true, true, true, ['__get']);
         $apiUser->method('__get')->with($this->equalTo('login'))->willReturn('login');
+
         $user = $this->createMock(ReferenceUserInterface::class);
         $user->method('getAPIUser')->willReturn($apiUser);
+
         $token = $this->createMock(TokenInterface::class);
         $token->method('getUser')->willReturn($user);
+
         $this->tokenStorage->method('getToken')->willReturn($token);
         $this->userService
-            ->method('loadUserByCredentials')
-            ->with('login', 'password')
-            ->willReturn($apiUser);
+            ->method('checkUserCredentials')
+            ->with($apiUser, 'password')
+            ->willReturn(true);
+
         $this->executionContext
             ->expects($this->never())
             ->method('buildViolation');
@@ -104,16 +110,20 @@ class UserPasswordValidatorTest extends TestCase
     {
         $apiUser = $this->getMockForAbstractClass(APIUser::class, [], '', true, true, true, ['__get']);
         $apiUser->method('__get')->with($this->equalTo('login'))->willReturn('login');
+
         $user = $this->createMock(ReferenceUserInterface::class);
         $user->method('getAPIUser')->willReturn($apiUser);
+
         $token = $this->createMock(TokenInterface::class);
         $token->method('getUser')->willReturn($user);
+
         $this->tokenStorage->method('getToken')->willReturn($token);
+
         $this->userService
-            ->method('loadUserByCredentials')
-            ->with('login', 'password')
-            ->will($this->throwException(new class('Could not find user.') extends NotFoundException {
-            }));
+            ->method('checkUserCredentials')
+            ->with($apiUser, 'password')
+            ->willReturn(false);
+
         $constraint = new UserPassword();
         $constraintViolationBuilder = $this->createMock(ConstraintViolationBuilderInterface::class);
         $this->executionContext

@@ -16,8 +16,12 @@ use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use EzSystems\RepositoryForms\Validator\Constraints\Password as NewPassword;
+use EzSystems\EzPlatformAdminUi\Validator\Constraints\Password as NewPassword;
 
+/**
+ * @deprecated Since eZ Platform 3.0.2 class moved to EzPlatformUser Bundle. Use it instead.
+ * @see \EzSystems\EzPlatformUser\Form\Type\UserPasswordResetType.
+ */
 class UserPasswordResetType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -30,7 +34,7 @@ class UserPasswordResetType extends AbstractType
         $builder
             ->add('new_password', RepeatedType::class, [
                 'type' => PasswordType::class,
-                'invalid_message' => /** @Desc("The password fields must match.") */ 'ezplatform.reset_user_password.passwords_must_match',
+                'invalid_message' => /** @Desc("Passwords do not match.") */ 'ezplatform.reset_user_password.passwords_must_match',
                 'required' => true,
                 'first_options' => [
                     'label' => /** @Desc("New password") */ 'ezplatform.reset_user_password.new_password',

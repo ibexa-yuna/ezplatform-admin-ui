@@ -6,9 +6,10 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\AdminList;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\NavLinkTabs;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\SimpleTable;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\SystemInfoTable;
@@ -17,11 +18,6 @@ use PHPUnit\Framework\Assert;
 class SystemInfoPage extends Page
 {
     public const PAGE_NAME = 'System Information';
-
-    /**
-     * @var AdminList[]
-     */
-    public $adminLists;
 
     /**
      * @var NavLinkTabs
@@ -33,12 +29,9 @@ class SystemInfoPage extends Page
      */
     public $systemInfoTable;
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
-        $this->adminLists['Packages'] = ElementFactory::createElement($this->context, AdminList::ELEMENT_NAME, 'Packages', SimpleTable::ELEMENT_NAME, '.ez-main-container .tab-pane.active');
-        $this->adminLists['Bundles'] = ElementFactory::createElement($this->context, AdminList::ELEMENT_NAME, 'Bundles', SimpleTable::ELEMENT_NAME, '.ez-main-container .tab-pane.active');
-        $this->systemInfoTable = ElementFactory::createElement($context, SystemInfoTable::ELEMENT_NAME, '.ez-main-container .tab-pane.active .ez-table--list');
         $this->navLinkTabs = ElementFactory::createElement($context, NavLinkTabs::ELEMENT_NAME);
         $this->siteAccess = 'admin';
         $this->route = '/systeminfo';
@@ -49,18 +42,20 @@ class SystemInfoPage extends Page
     public function verifyElements(): void
     {
         $this->navLinkTabs->verifyVisibility();
-        $this->adminLists['Packages']->verifyVisibility();
+        $this->verifySystemInfoTable('Product');
     }
 
     public function verifySystemInfoTable(string $tabName): void
     {
-        $this->systemInfoTable->verifyHeader($tabName);
+        $systemInfoTable = ElementFactory::createElement($this->context, SystemInfoTable::ELEMENT_NAME, '.ez-main-container .active .ez-fieldgroup:nth-of-type(1)');
+        $systemInfoTable->verifyHeader($tabName);
     }
 
     public function verifySystemInfoRecords(string $tableName, array $records): void
     {
-        $this->adminLists[$tableName]->verifyVisibility();
-        $tableHash = $this->adminLists[$tableName]->table->getTableHash();
+        $tab = ElementFactory::createElement($this->context, AdminList::ELEMENT_NAME, $tableName, SimpleTable::ELEMENT_NAME, '.ez-main-container .tab-pane.active');
+        $tab->verifyVisibility();
+        $tableHash = $tab->table->getTableHash();
 
         foreach ($records as $desiredRecord) {
             $found = false;
@@ -71,7 +66,7 @@ class SystemInfoPage extends Page
                 }
             }
             if (!$found) {
-                Assert::fail(sprintf('Desired record [%s] not found in "%s" list.', $desiredRecord['Name'], $tableName));
+                Assert::fail(sprintf('Could not find requested record [%s] on the "%s" list.', $desiredRecord['Name'], $tableName));
             }
         }
     }

@@ -6,9 +6,10 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\AdminList;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\LinkedListTable;
 use PHPUnit\Framework\Assert;
 
@@ -22,7 +23,7 @@ class RolesPage extends Page
      */
     public $adminList;
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->adminList = ElementFactory::createElement($this->context, AdminList::ELEMENT_NAME, self::PAGE_NAME, LinkedListTable::ELEMENT_NAME);
@@ -35,6 +36,9 @@ class RolesPage extends Page
     public function verifyElements(): void
     {
         $this->adminList->verifyVisibility();
+        $this->context->waitUntil($this->defaultTimeout, function () {
+            return $this->adminList->table->getItemCount() > 0;
+        });
     }
 
     public function verifyItemAttribute(string $label, string $value, string $itemName): void

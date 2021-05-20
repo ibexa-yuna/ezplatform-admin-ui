@@ -1,55 +1,61 @@
-.ez-main-nav {    
+.ez-main-nav {
     .ez-user-menu {
         position: relative;
         cursor: pointer;
         z-index: 1050;
 
         &__name-wrapper {
-            padding: .5rem 2rem .5rem 0;
-
-            .ez-user-menu__name {
-                font-size: calculateRem(12px);
-            }
-
-            &:before,
-            &:after {
-                content: "";
-                height: 10px;
-                width: 2px;
-                position: absolute;
-                top: 50%;
-                right: 1rem;
-                background-color: $ez-black;
-            }
+            display: flex;
+            height: calculateRem(58px);
+            width: calculateRem(200px);
+            padding: calculateRem(8px) calculateRem(24px) calculateRem(8px) calculateRem(34px);
+            user-select: none;
+            transition: all $ibexa-admin-transition;
 
             &:before {
-                transform: translate(3px, -50%)  rotate(-135deg);
+                content: '';
+                position: absolute;
+                top: 50%;
+                right: calculateRem(11px);
+                width: 0;
+                height: 0;
+                border-left: calculateRem(5px) solid transparent;
+                border-right: calculateRem(5px) solid transparent;
+                border-top: calculateRem(5px) solid $ibexa-color-base-dark;
             }
 
-            &:after {
-                transform: translate(-3px, -50%)  rotate(135deg);
+            &--active {
+                background-color: $ibexa-white;
+                box-shadow: 0 calculateRem(2px) calculateRem(6px) rgba(0, 0, 0, 0.15);
+
+                &:before {
+                    transform: rotate(180deg);
+                }
             }
+
+            transition: background-color 0.3s $ibexa-admin-transition;
         }
 
-        &__avatar {
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+        &__name {
+            display: flex;
+            align-items: center;
+            text-align: right;
+            font-size: calculateRem(14px);
         }
 
         &__items {
+            width: 100%;
             display: block;
             position: absolute;
-            top: 100%;
+            padding-top: calculateRem(6px);
             right: 0;
-            background-color: $ez-white;
-            box-shadow: 0 2px 4px 0 rgba(0,0,0,.45);
-            height: auto;
+            background-color: $ibexa-white;
+            box-shadow: 0 calculateRem(5px) calculateRem(6px) rgba(0, 0, 0, 0.15);
             transform-origin: top center;
-            transition: all .2s $ez-admin-transition;
             white-space: nowrap;
 
             &--hidden {
+                padding-top: 0;
                 height: 0;
                 overflow: hidden;
             }
@@ -57,26 +63,43 @@
 
         &__item {
             width: 100%;
+            padding-left: calculateRem(28px);
+            padding-right: calculateRem(28px);
             cursor: pointer;
-            padding: 0 1.5rem;
+            font-size: calculateRem(14px);
+            color: $ibexa-color-font;
 
-            .nav-link {
-                color: $ez-black;
-                font-size: calculateRem(14px);
+            &--dark {
+                .nav-link {
+                    color: $ibexa-color-font;
+                    text-decoration: none;
+                }
             }
 
-            &:not(:last-child) {
-                border-bottom: 1px solid $ez-ground-base-dark;
+            .nav-link {
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            &:first-child {
+                padding-top: calculateRem(10px);
+            }
+
+            &:last-child {
+                margin: calculateRem(24px) auto calculateRem(16px) 0;
             }
 
             &:hover {
-                background-color: $ez-secondary-ground-pale;
-                cursor: pointer;
-
                 .nav-link {
-                    color: $ez-black;
+                    color: $ibexa-color-primary;
                 }
             }
+        }
+
+        &__item-label {
+            grid-area: label;
+            white-space: normal;
+            word-break: break-word;
         }
     }
 }

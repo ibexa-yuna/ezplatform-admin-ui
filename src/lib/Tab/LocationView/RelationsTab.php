@@ -19,7 +19,7 @@ use EzSystems\EzPlatformAdminUi\Tab\OrderedTabInterface;
 use EzSystems\EzPlatformAdminUi\UI\Dataset\DatasetFactory;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 class RelationsTab extends AbstractEventDispatchingTab implements OrderedTabInterface, ConditionalTabInterface
@@ -40,7 +40,7 @@ class RelationsTab extends AbstractEventDispatchingTab implements OrderedTabInte
 
     /**
      * @param \Twig\Environment $twig
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
+     * @param \Symfony\Contracts\Translation\TranslatorInterface $translator
      * @param \eZ\Publish\API\Repository\PermissionResolver $permissionResolver
      * @param \EzSystems\EzPlatformAdminUi\UI\Dataset\DatasetFactory $datasetFactory
      * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
@@ -161,9 +161,9 @@ class RelationsTab extends AbstractEventDispatchingTab implements OrderedTabInte
         }
 
         if (!empty($contentTypeIds)) {
-            $viewParameters['contentTypes'] = $this->contentTypeService->loadContentTypeList(array_unique($contentTypeIds));
+            $viewParameters['content_types'] = $this->contentTypeService->loadContentTypeList(array_unique($contentTypeIds));
         } else {
-            $viewParameters['contentTypes'] = [];
+            $viewParameters['content_types'] = [];
         }
 
         return array_replace($contextParameters, $viewParameters);

@@ -9,13 +9,14 @@ declare(strict_types=1);
 namespace EzSystems\EzPlatformAdminUi\Menu;
 
 use eZ\Publish\API\Repository\PermissionResolver;
-use eZ\Publish\Core\MVC\ConfigResolverInterface;
+use EzSystems\EzPlatformAdminUi\UniversalDiscovery\ConfigResolver;
 use EzSystems\EzPlatformAdminUi\Menu\Event\ConfigureMenuEvent;
 use EzSystems\EzPlatformAdminUiBundle\Templating\Twig\UniversalDiscoveryExtension;
 use JMS\TranslationBundle\Model\Message;
 use JMS\TranslationBundle\Translation\TranslationContainerInterface;
 use Knp\Menu\ItemInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * KnpMenuBundle Menu Builder service implementation for AdminUI left sidebar menu.
@@ -31,7 +32,7 @@ class LeftSidebarBuilder extends AbstractBuilder implements TranslationContainer
     const ITEM__TRASH = 'sidebar_left__trash';
     const ITEM__TREE = 'sidebar_left__tree';
 
-    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    /** @var \EzSystems\EzPlatformAdminUi\UniversalDiscovery\ConfigResolver */
     private $configResolver;
 
     /** @var \EzSystems\EzPlatformAdminUiBundle\Templating\Twig\UniversalDiscoveryExtension */
@@ -40,25 +41,23 @@ class LeftSidebarBuilder extends AbstractBuilder implements TranslationContainer
     /** @var \eZ\Publish\API\Repository\PermissionResolver */
     private $permissionResolver;
 
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Menu\MenuItemFactory $factory
-     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
-     * @param \eZ\Publish\Core\MVC\ConfigResolverInterface $configResolver
-     * @param \EzSystems\EzPlatformAdminUiBundle\Templating\Twig\UniversalDiscoveryExtension $udwExtension
-     * @param \eZ\Publish\API\Repository\PermissionResolver $permissionResolver
-     */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
+    private $translator;
+
     public function __construct(
         MenuItemFactory $factory,
         EventDispatcherInterface $eventDispatcher,
-        ConfigResolverInterface $configResolver,
+        ConfigResolver $configResolver,
         UniversalDiscoveryExtension $udwExtension,
-        PermissionResolver $permissionResolver
+        PermissionResolver $permissionResolver,
+        TranslatorInterface $translator
     ) {
         parent::__construct($factory, $eventDispatcher);
 
         $this->configResolver = $configResolver;
         $this->udwExtension = $udwExtension;
         $this->permissionResolver = $permissionResolver;
+        $this->translator = $translator;
     }
 
     /**
@@ -95,12 +94,10 @@ class LeftSidebarBuilder extends AbstractBuilder implements TranslationContainer
                     'attributes' => [
                         'type' => 'button',
                         'class' => 'btn--udw-browse',
-                        'data-udw-config' => $this->udwExtension->renderUniversalDiscoveryWidgetConfig('single', [
+                        'data-udw-config' => $this->udwExtension->renderUniversalDiscoveryWidgetConfig('browse', [
                             'type' => 'content_create',
                         ]),
-                        'data-starting-location-id' => $this->configResolver->getParameter(
-                            'universal_discovery_widget_module.default_location_id'
-                        ),
+                        'data-starting-location-id' => $this->configResolver->getConfig('default')['starting_location_id'],
                     ],
                 ]
             ),

@@ -14,6 +14,8 @@ use eZ\Publish\API\Repository\Values\Content\Language;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository\Values\ContentType\ContentTypeDraft;
 use eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
+use EzSystems\EzPlatformAdminUi\Form\Data\ContentType\ContentTypeCopyData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ContentType\ContentTypeEditData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ContentType\ContentTypesDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ContentType\Translation\TranslationAddData;
@@ -21,50 +23,45 @@ use EzSystems\EzPlatformAdminUi\Form\Data\ContentType\Translation\TranslationRem
 use EzSystems\EzPlatformAdminUi\Form\Factory\ContentTypeFormFactory;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use EzSystems\EzPlatformAdminUi\Tab\ContentType\TranslationsTab;
-use EzSystems\RepositoryForms\Data\Mapper\ContentTypeDraftMapper;
-use EzSystems\RepositoryForms\Form\ActionDispatcher\ActionDispatcherInterface;
-use EzSystems\RepositoryForms\Form\Type\ContentType\ContentTypeUpdateType;
+use EzSystems\EzPlatformAdminUi\Form\Data\FormMapper\ContentTypeDraftMapper;
+use EzSystems\EzPlatformContentForms\Form\ActionDispatcher\ActionDispatcherInterface;
+use EzSystems\EzPlatformAdminUi\Form\Type\ContentType\ContentTypeUpdateType;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use eZ\Publish\API\Repository\Exceptions\BadStateException;
 use eZ\Publish\API\Repository\Exceptions\NotFoundException;
+use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Translation\Exception\InvalidArgumentException as TranslationInvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use eZ\Publish\API\Repository\UserService;
 use eZ\Publish\Core\MVC\Symfony\Security\Authorization\Attribute;
 
 class ContentTypeController extends Controller
 {
-    /** @var \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface */
+    /** @var \EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface */
     private $notificationHandler;
 
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     private $translator;
 
     /** @var \eZ\Publish\API\Repository\ContentTypeService */
     private $contentTypeService;
 
-    /** @var \EzSystems\RepositoryForms\Form\ActionDispatcher\ActionDispatcherInterface */
+    /** @var \EzSystems\EzPlatformContentForms\Form\ActionDispatcher\ActionDispatcherInterface */
     private $contentTypeActionDispatcher;
-
-    /** @var array */
-    private $languages;
 
     /** @var \EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory */
     private $formFactory;
 
     /** @var \EzSystems\EzPlatformAdminUi\Form\SubmitHandler */
     private $submitHandler;
-
-    /** @var int */
-    private $defaultPaginationLimit;
 
     /** @var \eZ\Publish\API\Repository\UserService */
     private $userService;
@@ -75,35 +72,25 @@ class ContentTypeController extends Controller
     /** @var \EzSystems\EzPlatformAdminUi\Form\Factory\ContentTypeFormFactory */
     private $contentTypeFormFactory;
 
-    /** @var \EzSystems\RepositoryForms\Data\Mapper\ContentTypeDraftMapper */
+    /** @var \EzSystems\EzPlatformAdminUi\Form\Data\FormMapper\ContentTypeDraftMapper */
     private $contentTypeDraftMapper;
-
     /**
-     * @param \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface $notificationHandler
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
-     * @param \EzSystems\RepositoryForms\Form\ActionDispatcher\ActionDispatcherInterface $contentTypeActionDispatcher
-     * @param \EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory $formFactory
-     * @param \EzSystems\EzPlatformAdminUi\Form\SubmitHandler $submitHandler
-     * @param array $languages
-     * @param int $defaultPaginationLimit
-     * @param \eZ\Publish\API\Repository\UserService $userService
-     * @param \eZ\Publish\API\Repository\LanguageService $languageService
-     * @param \EzSystems\EzPlatformAdminUi\Form\Factory\ContentTypeFormFactory $contentTypeFormFactory
+     * @var \eZ\Publish\Core\MVC\ConfigResolverInterface
      */
+    private $configResolver;
+
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         TranslatorInterface $translator,
         ContentTypeService $contentTypeService,
         ActionDispatcherInterface $contentTypeActionDispatcher,
         FormFactory $formFactory,
         SubmitHandler $submitHandler,
-        array $languages,
-        int $defaultPaginationLimit,
         UserService $userService,
         LanguageService $languageService,
         ContentTypeFormFactory $contentTypeFormFactory,
-        ContentTypeDraftMapper $contentTypeDraftMapper
+        ContentTypeDraftMapper $contentTypeDraftMapper,
+        ConfigResolverInterface $configResolver
     ) {
         $this->notificationHandler = $notificationHandler;
         $this->translator = $translator;
@@ -111,12 +98,11 @@ class ContentTypeController extends Controller
         $this->contentTypeActionDispatcher = $contentTypeActionDispatcher;
         $this->formFactory = $formFactory;
         $this->submitHandler = $submitHandler;
-        $this->languages = $languages;
-        $this->defaultPaginationLimit = $defaultPaginationLimit;
         $this->userService = $userService;
         $this->languageService = $languageService;
         $this->contentTypeFormFactory = $contentTypeFormFactory;
         $this->contentTypeDraftMapper = $contentTypeDraftMapper;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -136,7 +122,7 @@ class ContentTypeController extends Controller
     public function listAction(ContentTypeGroup $group, string $routeName, int $page): Response
     {
         $deletableTypes = [];
-        $contentTypes = $this->contentTypeService->loadContentTypes($group, $this->languages);
+        $contentTypes = $this->contentTypeService->loadContentTypes($group, $this->configResolver->getParameter('languages'));
 
         usort($contentTypes, function (ContentType $contentType1, ContentType $contentType2) {
             return strnatcasecmp($contentType1->getName(), $contentType2->getName());
@@ -146,7 +132,7 @@ class ContentTypeController extends Controller
             new ArrayAdapter($contentTypes)
         );
 
-        $pagerfanta->setMaxPerPage($this->defaultPaginationLimit);
+        $pagerfanta->setMaxPerPage($this->configResolver->getParameter('pagination.content_type_limit'));
         $pagerfanta->setCurrentPage(min($page, $pagerfanta->getNbPages()));
 
         /** @var \eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup[] $contentTypeGroupList */
@@ -160,7 +146,10 @@ class ContentTypeController extends Controller
             $deletableTypes[$type->id] = !$this->contentTypeService->isContentTypeUsed($type);
         }
 
-        return $this->render('@ezdesign/admin/content_type/list.html.twig', [
+        $copyData = new ContentTypeCopyData(null, $group);
+        $contentTypeCopyForm = $this->contentTypeFormFactory->contentTypeCopy($copyData, null)->createView();
+
+        return $this->render('@ezdesign/content_type/list.html.twig', [
             'content_type_group' => $group,
             'pager' => $pagerfanta,
             'deletable' => $deletableTypes,
@@ -170,6 +159,7 @@ class ContentTypeController extends Controller
             'can_create' => $this->isGranted(new Attribute('class', 'create')),
             'can_update' => $this->isGranted(new Attribute('class', 'update')),
             'can_delete' => $this->isGranted(new Attribute('class', 'delete')),
+            'content_type_copy_form' => $contentTypeCopyForm,
         ]);
     }
 
@@ -185,7 +175,8 @@ class ContentTypeController extends Controller
     public function addAction(ContentTypeGroup $group): Response
     {
         $this->denyAccessUnlessGranted(new Attribute('class', 'create'));
-        $mainLanguageCode = reset($this->languages);
+        $languages = $this->configResolver->getParameter('languages');
+        $mainLanguageCode = reset($languages);
 
         $createStruct = $this->contentTypeService->newContentTypeCreateStruct('__new__' . md5((string)microtime(true)));
         $createStruct->mainLanguageCode = $mainLanguageCode;
@@ -195,12 +186,10 @@ class ContentTypeController extends Controller
             $contentTypeDraft = $this->contentTypeService->createContentType($createStruct, [$group]);
         } catch (NotFoundException $e) {
             $this->notificationHandler->error(
-                $this->translator->trans(
-                    /** @Desc("Cannot create Content Type. Could not find 'Language' with identifier '%languageCode%'") */
-                    'content_type.add.missing_language',
-                    ['%languageCode%' => $mainLanguageCode],
-                    'content_type'
-                )
+                /** @Desc("Cannot create Content Type. Could not find language with identifier '%languageCode%'") */
+                'content_type.add.missing_language',
+                ['%languageCode%' => $mainLanguageCode],
+                'content_type'
             );
 
             return $this->redirectToRoute('ezplatform.content_type_group.view', [
@@ -210,7 +199,7 @@ class ContentTypeController extends Controller
         $language = $this->languageService->loadLanguage($mainLanguageCode);
         $form = $this->createUpdateForm($group, $contentTypeDraft, $language);
 
-        return $this->render('@ezdesign/admin/content_type/create.html.twig', [
+        return $this->render('@ezdesign/content_type/create.html.twig', [
             'content_type_group' => $group,
             'content_type' => $contentTypeDraft,
             'form' => $form->createView(),
@@ -246,12 +235,10 @@ class ContentTypeController extends Controller
                 } catch (BadStateException $e) {
                     $userId = $contentType->modifierId;
                     $this->notificationHandler->error(
-                        $this->translator->trans(
-                            /** @Desc("Draft of the Content Type '%name%' already exists and is locked by '%userContentName%'") */
-                            'content_type.edit.error.already_exists',
-                            ['%name%' => $contentType->getName(), '%userContentName%' => $this->getUserNameById($userId)],
-                            'content_type'
-                        )
+                        /** @Desc("Draft of Content Type '%name%' already exists and is locked by '%userContentName%'") */
+                        'content_type.edit.error.already_exists',
+                        ['%name%' => $contentType->getName(), '%userContentName%' => $this->getUserNameById($userId)],
+                        'content_type'
                     );
 
                     return $this->redirectToRoute('ezplatform.content_type.view', [
@@ -306,12 +293,10 @@ class ContentTypeController extends Controller
                 } catch (BadStateException $e) {
                     $userId = $contentType->modifierId;
                     $this->notificationHandler->error(
-                        $this->translator->trans(
-                            /** @Desc("Draft of the Content Type '%name%' already exists and is locked by '%userContentName%'") */
-                            'content_type.edit.error.already_exists',
-                            ['%name%' => $contentType->getName(), '%userContentName%' => $this->getUserNameById($userId)],
-                            'content_type'
-                        )
+                        /** @Desc("Draft of Content Type '%name%' already exists and is locked by '%userContentName%'") */
+                        'content_type.edit.error.already_exists',
+                        ['%name%' => $contentType->getName(), '%userContentName%' => $this->getUserNameById($userId)],
+                        'content_type'
                     );
 
                     return $this->redirectToRoute('ezplatform.content_type.view', [
@@ -363,7 +348,7 @@ class ContentTypeController extends Controller
         if ($contentTypeDraft->modifierId !== $this->getUser()->getAPIUser()->getUserId()) {
             $this->notificationHandler->error(
                 $this->translator->trans(
-                    /** @Desc("Draft of the Content Type '%name%' already exists and is locked by '%userContentName%'") */
+                    /** @Desc("Draft of Content Type '%name%' already exists and is locked by '%userContentName%'") */
                     'content_type.edit.error.already_exists',
                     ['%name%' => $contentType->getName(), '%userContentName%' => $this->getUserNameById($contentTypeDraft->modifierId)],
                     'content_type'
@@ -402,6 +387,63 @@ class ContentTypeController extends Controller
 
         return $this->redirectToRoute('ezplatform.content_type.update', [
             'contentTypeId' => $contentTypeDraft->id,
+            'contentTypeGroupId' => $group->id,
+        ]);
+    }
+
+    /**
+     * @param \eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup $group
+     * @param \eZ\Publish\API\Repository\Values\ContentType\ContentType $contentType
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
+     */
+    public function copyAction(Request $request, ContentTypeGroup $group, ContentType $contentType): Response
+    {
+        $this->denyAccessUnlessGranted(new Attribute('class', 'create'));
+
+        $contentTypeService = $this->contentTypeService;
+        $notificationHandler = $this->notificationHandler;
+
+        $copyData = new ContentTypeCopyData($contentType, $group);
+
+        $form = $this->contentTypeFormFactory->contentTypeCopy($copyData);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $result = $this->submitHandler->handle($form, function (ContentTypeCopyData $data) use ($contentTypeService, $notificationHandler) {
+                $contentType = $data->getContentType();
+
+                try {
+                    $contentTypeService->copyContentType($contentType);
+
+                    $notificationHandler->success(
+                        /** @Desc("Content Type '%name%' copied.") */
+                        'content_type.copy.success',
+                        ['%name%' => $contentType->getName()],
+                        'content_type'
+                    );
+                } catch (UnauthorizedException $exception) {
+                    $notificationHandler->error(
+                        /** @Desc("Content Type '%name%' cannot be copied.") */
+                        'content_type.copy.error',
+                        ['%name%' => $contentType->getName()],
+                        'content_type'
+                    );
+                }
+
+                return $this->redirectToRoute('ezplatform.content_type_group.view', [
+                    'contentTypeGroupId' => $data->getContentTypeGroup()->id,
+                ]);
+            });
+
+            if ($result instanceof Response) {
+                return $result;
+            }
+        }
+
+        return $this->redirectToRoute('ezplatform.content_type_group.view', [
             'contentTypeGroupId' => $group->id,
         ]);
     }
@@ -451,12 +493,10 @@ class ContentTypeController extends Controller
                 }
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Content Type '%name%' updated.") */
-                        'content_type.update.success',
-                        ['%name%' => $contentTypeDraft->getName()],
-                        'content_type'
-                    )
+                    /** @Desc("Content Type '%name%' updated.") */
+                    'content_type.update.success',
+                    ['%name%' => $contentTypeDraft->getName()],
+                    'content_type'
                 );
 
                 if ('publishContentType' === $form->getClickedButton()->getName()) {
@@ -480,7 +520,7 @@ class ContentTypeController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/content_type/edit.html.twig', [
+        return $this->render('@ezdesign/content_type/edit.html.twig', [
             'content_type_group' => $group,
             'content_type' => $contentTypeDraft,
             'form' => $form->createView(),
@@ -508,12 +548,10 @@ class ContentTypeController extends Controller
                 $this->contentTypeService->deleteContentType($contentType);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Content Type '%name%' deleted.") */
-                        'content_type.delete.success',
-                        ['%name%' => $contentType->getName()],
-                        'content_type'
-                    )
+                    /** @Desc("Content Type '%name%' deleted.") */
+                    'content_type.delete.success',
+                    ['%name%' => $contentType->getName()],
+                    'content_type'
                 );
             });
 
@@ -555,12 +593,10 @@ class ContentTypeController extends Controller
                     $this->contentTypeService->deleteContentType($contentType);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Content Type '%name%' deleted.") */
-                            'content_type.delete.success',
-                            ['%name%' => $contentType->getName()],
-                            'content_type'
-                        )
+                        /** @Desc("Content Type '%name%' deleted.") */
+                        'content_type.delete.success',
+                        ['%name%' => $contentType->getName()],
+                        'content_type'
                     );
                 }
             });
@@ -604,7 +640,7 @@ class ContentTypeController extends Controller
         $canUpdate = $this->isGranted(new Attribute('class', 'update')) &&
             $this->isGranted(new Attribute('class', 'create'));
 
-        return $this->render('@ezdesign/admin/content_type/view.html.twig', [
+        return $this->render('@ezdesign/content_type/index.html.twig', [
             'content_type_group' => $group,
             'content_type' => $contentType,
             'field_definitions_by_group' => $fieldDefinitionsByGroup,
@@ -712,9 +748,10 @@ class ContentTypeController extends Controller
      */
     private function getDefaultLanguage(ContentTypeDraft $contentTypeDraft): Language
     {
-        $languageCode = reset($this->languages);
+        $languages = $this->configResolver->getParameter('languages');
+        $languageCode = reset($languages);
 
-        foreach ($this->languages as $prioritizedLanguage) {
+        foreach ($languages as $prioritizedLanguage) {
             if (isset($contentTypeDraft->names[$prioritizedLanguage])) {
                 $languageCode = $prioritizedLanguage;
                 break;

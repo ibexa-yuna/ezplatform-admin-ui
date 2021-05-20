@@ -13,6 +13,8 @@ use InvalidArgumentException;
 use JMS\TranslationBundle\Model\Message;
 use JMS\TranslationBundle\Translation\TranslationContainerInterface;
 use Knp\Menu\ItemInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * KnpMenuBundle Menu Builder service implementation for AdminUI Section Edit contextual sidebar menu.
@@ -24,6 +26,19 @@ class SectionEditRightSidebarBuilder extends AbstractBuilder implements Translat
     /* Menu items */
     const ITEM__SAVE = 'section_edit__sidebar_right__save';
     const ITEM__CANCEL = 'section_edit__sidebar_right__cancel';
+
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
+    private $translator;
+
+    public function __construct(
+        MenuItemFactory $factory,
+        EventDispatcherInterface $eventDispatcher,
+        TranslatorInterface $translator
+    ) {
+        parent::__construct($factory, $eventDispatcher);
+
+        $this->translator = $translator;
+    }
 
     /**
      * @return string
@@ -64,8 +79,8 @@ class SectionEditRightSidebarBuilder extends AbstractBuilder implements Translat
             self::ITEM__CANCEL => $this->createMenuItem(
                 self::ITEM__CANCEL,
                 [
-                    'route' => 'ezplatform.section.list',
                     'extras' => ['icon' => 'circle-close'],
+                    'route' => 'ezplatform.section.list',
                 ]
             ),
         ]);

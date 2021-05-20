@@ -6,8 +6,10 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\EzFieldElement;
+use EzSystems\Behat\API\ContentData\FieldTypeNameConverter;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Browser\Element\Element;
 
 class ContentField extends Element
 {
@@ -16,7 +18,7 @@ class ContentField extends Element
 
     public const FIELD_TYPE_CLASS_REGEX = '/ez[a-z]*-field/';
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->fields = [
@@ -27,7 +29,7 @@ class ContentField extends Element
         ];
     }
 
-    public function verifyFieldHasValue(string $label, array $value): void
+    public function verifyFieldHasValue(string $label, array $fieldData): void
     {
         $fieldIndex = $this->context->getElementPositionByText(sprintf('%s:', $label), $this->fields['fieldName']);
         $fieldLocator = sprintf(
@@ -36,14 +38,19 @@ class ContentField extends Element
             $this->fields['fieldValue']
         );
 
-        $fieldClass = $this->context->findElement(sprintf('%s %s', $fieldLocator, $this->fields['fieldValueContainer']))->getAttribute('class');
-        $fieldType = $this->getFieldType($fieldClass);
+        if (array_key_exists('fieldType', $fieldData)) {
+            $fieldType = $fieldData['fieldType'];
+        } else {
+            $fieldClass = $this->context->findElement(sprintf('%s %s', $fieldLocator, $this->fields['fieldValueContainer']))->getAttribute('class');
+            $fieldTypeIdentifier = $this->getFieldTypeIdentifier($fieldClass);
+            $fieldType = FieldTypeNameConverter::getFieldTypeNameByIdentifier($fieldTypeIdentifier);
+        }
 
-        $fieldElement = ElementFactory::createElement($this->context, EzFieldElement::getFieldNameByInternalName($fieldType), $fieldLocator, $label);
-        $fieldElement->verifyValueInItemView($value);
+        $fieldElement = ElementFactory::createElement($this->context, $fieldType, $fieldLocator, $label);
+        $fieldElement->verifyValueInItemView($fieldData);
     }
 
-    private function getFieldType(string $fieldClass): string
+    private function getFieldTypeIdentifier(string $fieldClass): string
     {
         if ($fieldClass === 'ez-scrollable-table-wrapper mb-0') {
             return 'ezuser';
@@ -53,12 +60,13 @@ class ContentField extends Element
             return 'ezmatrix';
         }
 
-        if (!$fieldClass) {
+        if ($fieldClass === '') {
             return 'ezboolean';
         }
 
         preg_match($this::FIELD_TYPE_CLASS_REGEX, $fieldClass, $matches);
+        $matchedValue = explode('-', $matches[0])[0];
 
-        return explode('-', $matches[0])[0];
+        return $matchedValue;
     }
 }

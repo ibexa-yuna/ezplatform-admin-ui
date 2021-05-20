@@ -7,11 +7,12 @@
 namespace EzSystems\EzPlatformAdminUiBundle\Tests\ParamConverter;
 
 use eZ\Publish\API\Repository\ContentTypeService;
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\Core\MVC\Symfony\Locale\UserLanguagePreferenceProviderInterface;
 use EzSystems\EzPlatformAdminUiBundle\ParamConverter\ContentTypeParamConverter;
 use Symfony\Component\HttpFoundation\Request;
-use PHPUnit_Framework_MockObject_MockObject as MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ContentTypeParamConverterTest extends AbstractParamConverterTest
@@ -25,7 +26,7 @@ class ContentTypeParamConverterTest extends AbstractParamConverterTest
     /** @var MockObject */
     protected $serviceMock;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->serviceMock = $this->createMock(ContentTypeService::class);
 
@@ -33,15 +34,20 @@ class ContentTypeParamConverterTest extends AbstractParamConverterTest
         $this->converter = new ContentTypeParamConverter($this->serviceMock, $userLanguagePreferenceProvider);
     }
 
-    public function testApplyId()
+    /**
+     * @dataProvider dataProvider
+     *
+     * @param mixed $contentTypeId The content type identifier fetched from the request
+     * @param int $contentTypeIdToLoad The content type identifier used to load the Content Type draft
+     */
+    public function testApplyId($contentTypeId, int $contentTypeIdLoad)
     {
-        $contentTypeId = 42;
         $valueObject = $this->createMock(ContentType::class);
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadContentType')
-            ->with($contentTypeId)
+            ->with($contentTypeIdLoad)
             ->willReturn($valueObject);
 
         $requestAttributes = [
@@ -51,8 +57,7 @@ class ContentTypeParamConverterTest extends AbstractParamConverterTest
         $request = new Request([], [], $requestAttributes);
         $config = $this->createConfiguration(self::SUPPORTED_CLASS, self::PARAMETER_NAME);
 
-        $this->converter->apply($request, $config);
-
+        $this->assertTrue($this->converter->apply($request, $config));
         $this->assertInstanceOf(self::SUPPORTED_CLASS, $request->attributes->get(self::PARAMETER_NAME));
     }
 
@@ -74,13 +79,13 @@ class ContentTypeParamConverterTest extends AbstractParamConverterTest
         $contentTypeId = 42;
 
         $this->expectException(NotFoundHttpException::class);
-        $this->expectExceptionMessage(sprintf('ContentType %s not found!', $contentTypeId));
+        $this->expectExceptionMessage(sprintf('Content Type %s not found.', $contentTypeId));
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadContentType')
             ->with($contentTypeId)
-            ->willReturn(null);
+            ->willThrowException($this->createMock(NotFoundException::class));
 
         $requestAttributes = [
             ContentTypeParamConverter::PARAMETER_CONTENT_TYPE_ID => $contentTypeId,
@@ -133,13 +138,13 @@ class ContentTypeParamConverterTest extends AbstractParamConverterTest
         $contentTypeIdentifier = 'test_identifier';
 
         $this->expectException(NotFoundHttpException::class);
-        $this->expectExceptionMessage(sprintf('ContentType %s not found!', $contentTypeIdentifier));
+        $this->expectExceptionMessage(sprintf('Content Type %s not found.', $contentTypeIdentifier));
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadContentTypeByIdentifier')
             ->with($contentTypeIdentifier)
-            ->willReturn(null);
+            ->willThrowException($this->createMock(NotFoundException::class));
 
         $requestAttributes = [
             ContentTypeParamConverter::PARAMETER_CONTENT_TYPE_IDENTIFIER => $contentTypeIdentifier,
@@ -149,5 +154,14 @@ class ContentTypeParamConverterTest extends AbstractParamConverterTest
         $config = $this->createConfiguration(self::SUPPORTED_CLASS, self::PARAMETER_NAME);
 
         $this->converter->apply($request, $config);
+    }
+
+    public function dataProvider(): array
+    {
+        return [
+            'integer' => [42, 42],
+            'number_as_string' => ['42', 42],
+            'string' => ['42k', 42],
+        ];
     }
 }

@@ -19,7 +19,7 @@ class RightMenuContext extends BusinessContext
      */
     public function clickEditActionBar(string $button): void
     {
-        $rightMenu = new RightMenu($this->utilityContext);
+        $rightMenu = new RightMenu($this->browserContext);
         $rightMenu->clickButton($button);
     }
 
@@ -28,7 +28,7 @@ class RightMenuContext extends BusinessContext
      */
     public function theButtonsAreDisabled(TableNode $buttons): void
     {
-        $rightMenu = new RightMenu($this->utilityContext);
+        $rightMenu = new RightMenu($this->browserContext);
         foreach ($buttons->getHash() as $button) {
             Assert::assertFalse($rightMenu->isButtonActive($button['buttonName']));
         }
@@ -39,7 +39,7 @@ class RightMenuContext extends BusinessContext
      */
     public function buttonIsNotVisible(string $buttonName): void
     {
-        $rightMenu = new RightMenu($this->utilityContext);
+        $rightMenu = new RightMenu($this->browserContext);
         Assert::assertFalse($rightMenu->isButtonVisible($buttonName));
     }
 }

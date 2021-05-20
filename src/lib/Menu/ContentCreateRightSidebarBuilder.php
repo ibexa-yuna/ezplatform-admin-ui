@@ -19,6 +19,7 @@ use JMS\TranslationBundle\Model\Message;
 use JMS\TranslationBundle\Translation\TranslationContainerInterface;
 use Knp\Menu\ItemInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * KnpMenuBundle Menu Builder service implementation for AdminUI Content Edit contextual sidebar menu.
@@ -48,21 +49,14 @@ class ContentCreateRightSidebarBuilder extends AbstractBuilder implements Transl
     /** @var \eZ\Publish\API\Repository\ContentTypeService */
     private $contentTypeService;
 
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Menu\MenuItemFactory $factory
-     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
-     * @param \eZ\Publish\API\Repository\PermissionResolver $permissionResolver
-     * @param \eZ\Publish\API\Repository\ContentService $contentService
-     * @param \eZ\Publish\API\Repository\LocationService $locationService
-     * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
-     */
     public function __construct(
         MenuItemFactory $factory,
         EventDispatcherInterface $eventDispatcher,
         PermissionResolver $permissionResolver,
         ContentService $contentService,
         LocationService $locationService,
-        ContentTypeService $contentTypeService
+        ContentTypeService $contentTypeService,
+        TranslatorInterface $translator
     ) {
         parent::__construct($factory, $eventDispatcher);
 
@@ -70,6 +64,7 @@ class ContentCreateRightSidebarBuilder extends AbstractBuilder implements Transl
         $this->contentService = $contentService;
         $this->locationService = $locationService;
         $this->contentTypeService = $contentTypeService;
+        $this->translator = $translator;
     }
 
     /**
@@ -92,7 +87,7 @@ class ContentCreateRightSidebarBuilder extends AbstractBuilder implements Transl
     public function createStructure(array $options): ItemInterface
     {
         /** @var \eZ\Publish\API\Repository\Values\Content\Location $parentLocation */
-        $parentLocation = $options['parentLocation'];
+        $parentLocation = $options['parent_location'];
         /** @var \eZ\Publish\API\Repository\Values\ContentType\ContentType $contentType */
         $contentType = $options['content_type'];
         $parentContentType = $parentLocation->getContent()->getContentType();
@@ -110,15 +105,15 @@ class ContentCreateRightSidebarBuilder extends AbstractBuilder implements Transl
 
         $publishAttributes = [
             'class' => self::BTN_TRIGGER_CLASS,
-            'data-click' => '#ezrepoforms_content_edit_publish',
+            'data-click' => '#ezplatform_content_forms_content_edit_publish',
         ];
         $createAttributes = [
             'class' => self::BTN_TRIGGER_CLASS,
-            'data-click' => '#ezrepoforms_content_edit_saveDraft',
+            'data-click' => '#ezplatform_content_forms_content_edit_saveDraft',
         ];
         $previewAttributes = [
             'class' => self::BTN_TRIGGER_CLASS,
-            'data-click' => '#ezrepoforms_content_edit_preview',
+            'data-click' => '#ezplatform_content_forms_content_edit_preview',
         ];
 
         $menu->setChildren([
@@ -163,7 +158,7 @@ class ContentCreateRightSidebarBuilder extends AbstractBuilder implements Transl
                 [
                     'attributes' => [
                         'class' => self::BTN_TRIGGER_CLASS,
-                        'data-click' => '#ezrepoforms_content_edit_cancel',
+                        'data-click' => '#ezplatform_content_forms_content_edit_cancel',
                     ],
                     'extras' => [
                         'icon' => 'circle-close',

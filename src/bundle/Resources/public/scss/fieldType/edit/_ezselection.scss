@@ -1,25 +1,21 @@
 .ez-field-edit--ezselection {
     .ez-data-source {
         position: relative;
-        color: $ez-color-base-dark;
-        font-weight: bold;
 
         .ez-custom-dropdown {
-            &__items {
-                border: none;
-                box-shadow: 0 calculateRem(2px) calculateRem(4px) 0 rgba(0, 0, 0, 0.45);
-                max-height: calculateRem(300px);
-                overflow-y: auto;
+            &__wrapper {
+                max-width: calculateRem(550px);
             }
 
-            &__item {
-                font-weight: 400;
+            &__selection-info {
+                width: 100%;
+            }
 
-                &--selected {
-                    font-weight: 400;
-                    background-color: $ez-secondary-ground;
-                    color: $ez-white;
-                }
+            &__items {
+                max-height: calculateRem(300px);
+                max-width: calculateRem(550px);
+                overflow-y: auto;
+                width: 100%;
             }
         }
     }

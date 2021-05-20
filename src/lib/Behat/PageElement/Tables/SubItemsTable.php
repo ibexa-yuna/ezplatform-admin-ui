@@ -7,8 +7,8 @@
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables;
 
 use Behat\Mink\Element\NodeElement;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Pagination;
 use PHPUnit\Framework\Assert;
 
@@ -16,16 +16,15 @@ class SubItemsTable extends Table
 {
     public const ELEMENT_NAME = 'Sub-items Table';
 
-    public function __construct(UtilityContext $context, $containerLocator)
+    public function __construct(BrowserContext $context, $containerLocator)
     {
         parent::__construct($context, $containerLocator);
-        $this->fields['tableHead'] = 'thead.c-table-view__head';
         $this->fields['horizontalHeaders'] = $this->fields['list'] . ' .c-table-view__cell--head';
         $this->fields['listElement'] = $this->fields['list'] . ' .c-table-view-item__link';
         $this->fields['nthListElement'] = $this->fields['list'] . ' tr:nth-child(%d) .c-table-view-item__link';
         $this->fields['listElementType'] = $this->fields['list'] . ' tr:nth-child(%d) .c-table-view-item__cell--content-type';
-        $this->fields['sortingOrderAscending'] = '.c-table-view__head--sort-asc';
-        $this->fields['sortingOrderDescending'] = '.c-table-view__head--sort-desc';
+        $this->fields['sortingOrderAscending'] = '.c-table-view__cell--sorted-asc';
+        $this->fields['sortingOrderDescending'] = '.c-table-view__cell--sorted-desc';
         $this->fields['editButton'] = $this->fields['list'] . ' .c-table-view-item__btn--edit';
         $this->fields['noItems'] = $this->fields['list'] . ' .c-no-items';
     }
@@ -48,15 +47,15 @@ class SubItemsTable extends Table
     {
         $this->context->getElementByText($columnName, $this->fields['horizontalHeaders'])->click();
 
-        $isSortedAscending = $this->context->isElementVisible(sprintf('%s%s', $this->fields['tableHead'], $this->fields['sortingOrderAscending']));
+        $isSortedAscending = $this->context->isElementVisible(sprintf('%s%s', $this->fields['horizontalHeaders'], $this->fields['sortingOrderAscending']));
 
         if ($ascending !== $isSortedAscending) {
             $this->context->getElementByText($columnName, $this->fields['horizontalHeaders'])->click();
         }
 
         $verificationSelector = $ascending ?
-                                sprintf('%s%s', $this->fields['tableHead'], $this->fields['sortingOrderAscending']) :
-                                sprintf('%s%s', $this->fields['tableHead'], $this->fields['sortingOrderDescending']);
+                                sprintf('%s%s', $this->fields['horizontalHeaders'], $this->fields['sortingOrderAscending']) :
+                                sprintf('%s%s', $this->fields['horizontalHeaders'], $this->fields['sortingOrderDescending']);
 
         $this->context->waitUntilElementIsVisible($verificationSelector);
     }
@@ -78,7 +77,7 @@ class SubItemsTable extends Table
             $isElementInTable = (bool) $elementPositionInTable;
         }
 
-        Assert::assertTrue($isElementInTable, sprintf('There\'s no subitem %s on Sub-item list', $name));
+        Assert::assertTrue($isElementInTable, sprintf('There is no sub-item %s on the Sub-item list', $name));
 
         $this->context->findElement(sprintf($this->fields['nthListElement'], $elementPositionInTable))->click();
     }
@@ -159,5 +158,10 @@ class SubItemsTable extends Table
         }
 
         return $tableHash;
+    }
+
+    public function canBeSorted(): bool
+    {
+        return true;
     }
 }

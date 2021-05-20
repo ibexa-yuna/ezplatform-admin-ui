@@ -1,3 +1,4 @@
+@commerceExcluded
 Feature: User management
   As an administrator
   In order to manage users on my site

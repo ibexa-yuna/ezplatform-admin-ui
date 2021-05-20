@@ -57,8 +57,9 @@ class MenuItemFactory implements FactoryInterface
         }
 
         $defaults = [
-            'route' => '_ezpublishLocation',
+            'route' => '_ez_content_view',
             'routeParameters' => [
+                'contentId' => $contentInfo->id,
                 'locationId' => $locationId,
             ],
         ];
@@ -66,7 +67,7 @@ class MenuItemFactory implements FactoryInterface
         return $this->createItem($name, array_merge_recursive($defaults, $options));
     }
 
-    public function createItem($name, array $options = [])
+    public function createItem($name, array $options = []): ItemInterface
     {
         $defaults = [
             'extras' => ['translation_domain' => 'menu'],

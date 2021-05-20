@@ -1,11 +1,9 @@
 (function(global, doc, eZ, React, ReactDOM) {
     const udwContainer = doc.getElementById('react-udw');
-    const limitationsRadio = [...doc.querySelectorAll('.ez-limitations__radio')];
-    const token = doc.querySelector('meta[name="CSRF-Token"]').content;
-    const siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
+    const limitationsRadio = doc.querySelectorAll('.ez-limitations__radio');
     const closeUDW = () => ReactDOM.unmountComponentAtNode(udwContainer);
     const selectSubtreeConfirm = (data) => {
-        const selectedItems = data.reduce((total, item) => total + `<li>${item.ContentInfo.Content.TranslatedName}</li>`, '');
+        const selectedItems = data.reduce((total, item) => `${total}<li>${item.ContentInfo.Content.TranslatedName}</li>`, '');
 
         doc.querySelector('#role_assignment_create_locations').value = data.map((item) => item.id).join();
         doc.querySelector('.ez-limitations__selected-subtree').innerHTML = selectedItems;
@@ -18,19 +16,12 @@
         const config = JSON.parse(event.currentTarget.dataset.udwConfig);
 
         ReactDOM.render(
-            React.createElement(
-                eZ.modules.UniversalDiscovery,
-                Object.assign(
-                    {
-                        onConfirm: selectSubtreeConfirm.bind(this),
-                        onCancel: closeUDW,
-                        multiple: true,
-                        startingLocationId: window.eZ.adminUiConfig.universalDiscoveryWidget.startingLocationId,
-                        restInfo: { token, siteaccess },
-                    },
-                    config
-                )
-            ),
+            React.createElement(eZ.modules.UniversalDiscovery, {
+                onConfirm: selectSubtreeConfirm.bind(this),
+                onCancel: closeUDW,
+                multiple: true,
+                ...config,
+            }),
             udwContainer
         );
     };
@@ -48,11 +39,11 @@
     doc.querySelector('.ez-btn--select-subtree').addEventListener('click', selectSubtree, false);
     limitationsRadio.forEach((radio) => radio.addEventListener('change', toggleDisabledState, false));
 
-    const addContentToInput = (selectBtn, newlySelectedItems) => {
+    const addContentToInput = (selectBtn, selectedItems) => {
         const input = doc.querySelector(selectBtn.dataset.inputSelector);
-        const newlySelectedContentIds = newlySelectedItems.map((item) => item.ContentInfo.Content._id).join(',');
+        const selectedContentIds = selectedItems.map((item) => item.ContentInfo.Content._id).join(',');
 
-        input.value = input.value ? `${input.value},${newlySelectedContentIds}` : newlySelectedContentIds;
+        input.value = selectedContentIds;
     };
     const removeContentFromInput = (selectBtn, removedContentId) => {
         const input = doc.querySelector(selectBtn.dataset.inputSelector);
@@ -60,12 +51,12 @@
 
         input.value = contentIdsWithoutRemoved.join(',');
     };
-    const addContentTags = (selectBtn, newlySelectedItems) => {
+    const addContentTags = (selectBtn, selectedItems) => {
         const tagsList = doc.querySelector(selectBtn.dataset.selectedContentListSelector);
         const tagTemplate = selectBtn.dataset.tagTemplate;
         const fragment = doc.createDocumentFragment();
 
-        newlySelectedItems.forEach((location) => {
+        selectedItems.forEach((location) => {
             const { _id: contentId, Name: contentName } = location.ContentInfo.Content;
             const container = doc.createElement('ul');
             const renderedItem = tagTemplate.replace('{{ content_id }}', contentId).replace('{{ content_name }}', contentName);
@@ -79,6 +70,7 @@
             fragment.append(listItemNode);
         });
 
+        tagsList.innerHTML = '';
         tagsList.append(fragment);
     };
     const handleTagRemove = (selectBtn, tag) => {
@@ -92,10 +84,11 @@
 
         removeTagBtn.addEventListener('click', () => handleTagRemove(selectBtn, tag), false);
     };
-    const handleUdwConfirm = (selectBtn, newlySelectedItems) => {
-        if (newlySelectedItems.length) {
-            addContentToInput(selectBtn, newlySelectedItems);
-            addContentTags(selectBtn, newlySelectedItems);
+    const handleUdwConfirm = (selectBtn, selectedItems) => {
+        if (selectedItems.length) {
+            addContentToInput(selectBtn, selectedItems);
+            addContentTags(selectBtn, selectedItems);
+            selectBtn.setAttribute('data-selected-locations', selectedItems.map((item) => item.id).join());
         }
 
         closeUDW();
@@ -104,30 +97,19 @@
         event.preventDefault();
 
         const selectBtn = event.currentTarget;
-        const input = doc.querySelector(selectBtn.dataset.inputSelector);
-        const selectedContentIds = input.value.split(',').map((idString) => parseInt(idString, 10));
+        const { selectedLocations } = selectBtn.dataset;
+        const selectedLocationsIds = selectedLocations ? selectedLocations.split(',') : [];
         const config = JSON.parse(selectBtn.dataset.udwConfig);
 
         ReactDOM.render(
-            React.createElement(
-                eZ.modules.UniversalDiscovery,
-                Object.assign(
-                    {
-                        onConfirm: handleUdwConfirm.bind(this, selectBtn),
-                        onCancel: () => ReactDOM.unmountComponentAtNode(udwContainer),
-                        startingLocationId: eZ.adminUiConfig.universalDiscoveryWidget.startingLocationId,
-                        title: selectBtn.dataset.universaldiscoveryTitle,
-                        multiple: true,
-                        restInfo: { token, siteaccess },
-                        canSelectContent: ({ item }, callback) => {
-                            const itemId = parseInt(item.ContentInfo.Content._id, 10);
-
-                            callback(!selectedContentIds.includes(itemId));
-                        },
-                    },
-                    config
-                )
-            ),
+            React.createElement(eZ.modules.UniversalDiscovery, {
+                onConfirm: handleUdwConfirm.bind(this, selectBtn),
+                onCancel: () => ReactDOM.unmountComponentAtNode(udwContainer),
+                title: selectBtn.dataset.universaldiscoveryTitle,
+                multiple: true,
+                selectedLocations: selectedLocationsIds,
+                ...config,
+            }),
             udwContainer
         );
     };
@@ -144,4 +126,4 @@
             attachTagEventHandlers(selectBtn, tag);
         });
     });
-})(window, document, window.eZ, window.React, window.ReactDOM);
+})(window, window.document, window.eZ, window.React, window.ReactDOM);

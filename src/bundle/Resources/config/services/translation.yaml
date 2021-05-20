@@ -1,0 +1,33 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    EzSystems\EzPlatformAdminUi\Translation\Extractor\JavaScriptFileVisitor:
+        tags:
+            - { name: jms_translation.file_visitor }
+
+    EzSystems\EzPlatformAdminUi\Translation\Extractor\PolicyTranslationExtractor:
+        arguments:
+            - '%ezpublish.api.role.policy_map%'
+        tags:
+            - { name: jms_translation.extractor, alias: ez_policy }
+
+    EzSystems\EzPlatformAdminUi\Translation\Extractor\SortingTranslationExtractor:
+        tags:
+            - { name: jms_translation.extractor, alias: ez_location_sorting }
+
+    EzSystems\EzPlatformAdminUi\Translation\Extractor\LimitationTranslationExtractor:
+        arguments:
+            - '%ezpublish.api.role.policy_map%'
+        tags:
+            - { name: jms_translation.extractor, alias: ez_policy_limitation }
+
+    EzSystems\EzPlatformAdminUi\Translation\Extractor\NotificationTranslationExtractor:
+        parent: jms_translation.extractor.file.default_php_extractor
+        autowire: false
+        autoconfigure: false
+        public: false
+        tags:
+            - { name: jms_translation.file_visitor }

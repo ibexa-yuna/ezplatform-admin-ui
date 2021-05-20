@@ -1,0 +1,73 @@
+services:
+    EzSystems\EzPlatformAdminUi\Tab\Dashboard\MyDraftsTab:
+        parent: EzSystems\EzPlatformAdminUi\Tab\AbstractTab
+        public: false
+        arguments:
+            $configResolver: '@ezpublish.config.resolver'
+        tags:
+            - { name: ezplatform.tab, group: dashboard-my }
+
+    EzSystems\EzPlatformAdminUi\Tab\Dashboard\MyContentTab:
+        parent: EzSystems\EzPlatformAdminUi\Tab\AbstractTab
+        public: false
+        arguments:
+            $contentSubtreeQueryType: '@EzSystems\EzPlatformAdminUi\QueryType\ContentSubtreeQueryType'
+        tags:
+            - { name: ezplatform.tab, group: dashboard-my }
+
+    EzSystems\EzPlatformAdminUi\Tab\Dashboard\MyMediaTab:
+        parent: EzSystems\EzPlatformAdminUi\Tab\AbstractTab
+        public: false
+        arguments:
+            $mediaSubtreeQueryType: '@EzSystems\EzPlatformAdminUi\QueryType\MediaSubtreeQueryType'
+        tags:
+            - { name: ezplatform.tab, group: dashboard-my }
+
+    EzSystems\EzPlatformAdminUi\Tab\Dashboard\EveryoneMediaTab:
+        parent: EzSystems\EzPlatformAdminUi\Tab\AbstractTab
+        public: false
+        arguments:
+            $mediaSubtreeQueryType: '@EzSystems\EzPlatformAdminUi\QueryType\MediaSubtreeQueryType'
+        tags:
+            - { name: ezplatform.tab, group: dashboard-everyone }
+
+    EzSystems\EzPlatformAdminUi\Tab\Dashboard\EveryoneContentTab:
+        parent: EzSystems\EzPlatformAdminUi\Tab\AbstractTab
+        public: false
+        arguments:
+            $contentSubtreeQueryType: '@EzSystems\EzPlatformAdminUi\QueryType\ContentSubtreeQueryType'
+        tags:
+            - { name: ezplatform.tab, group: dashboard-everyone }
+
+    EzSystems\EzPlatformAdminUi\Tab\Dashboard\PagerContentToDataMapper:
+        parent: EzSystems\EzPlatformAdminUi\Search\AbstractPagerContentToDataMapper
+        autowire: true
+        public: false
+
+    ezplatform.adminui.dashboard.me:
+        parent: EzSystems\EzPlatformAdminUi\Component\TwigComponent
+        arguments:
+            $template: '@@ezdesign/ui/dashboard/block/me.html.twig'
+        tags:
+            - { name: ezplatform.admin_ui.component, group: 'dashboard-blocks' }
+
+    ezplatform.adminui.dashboard.all:
+        parent: EzSystems\EzPlatformAdminUi\Component\TwigComponent
+        arguments:
+            $template: '@@ezdesign/ui/dashboard/block/all.html.twig'
+        tags:
+            - { name: ezplatform.admin_ui.component, group: 'dashboard-blocks' }
+
+    ezplatform.adminui.dashboard.my.tab_groups:
+        parent: EzSystems\EzPlatformAdminUi\Component\TabsComponent
+        arguments:
+            $groupIdentifier: 'dashboard-my'
+        tags:
+            - { name: ezplatform.admin_ui.component, group: 'dashboard-my-tab-groups' }
+
+    ezplatform.adminui.dashboard.all.tab_groups:
+        parent: EzSystems\EzPlatformAdminUi\Component\TabsComponent
+        arguments:
+            $groupIdentifier: 'dashboard-everyone'
+        tags:
+            - { name: ezplatform.admin_ui.component, group: 'dashboard-all-tab-groups' }

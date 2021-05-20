@@ -26,7 +26,6 @@ use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationCopyData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationCopySubtreeData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationMoveData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationSwapData;
-use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashContainerData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationAssignSubtreeData;
@@ -34,22 +33,21 @@ use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
 use EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\HasUniqueAssetRelation;
 use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationAssignSectionType;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use EzSystems\EzPlatformAdminUi\Tab\LocationView\DetailsTab;
 use EzSystems\EzPlatformAdminUi\Tab\LocationView\LocationsTab;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocationController extends Controller
 {
-    /** @var \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface */
+    /** @var \EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface */
     private $notificationHandler;
 
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     private $translator;
 
     /** @var \eZ\Publish\API\Repository\ContentService */
@@ -83,8 +81,8 @@ class LocationController extends Controller
     private $translationHelper;
 
     /**
-     * @param \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface $notificationHandler
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
+     * @param \EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface $notificationHandler
+     * @param \Symfony\Contracts\Translation\TranslatorInterface $translator
      * @param \eZ\Publish\API\Repository\LocationService $locationService
      * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
      * @param \eZ\Publish\API\Repository\ContentService $contentService
@@ -97,7 +95,7 @@ class LocationController extends Controller
      * @param \eZ\Publish\Core\Helper\TranslationHelper $translationHelper
      */
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         TranslatorInterface $translator,
         LocationService $locationService,
         ContentTypeService $contentTypeService,
@@ -146,22 +144,21 @@ class LocationController extends Controller
                 if (!$newParentLocation->getContent()->getContentType()->isContainer) {
                     throw new InvalidArgumentException(
                         '$newParentLocation',
-                        'Cannot move location to a parent that is not a container'
+                        'Cannot move the Location to a parent that is not a container'
                     );
                 }
 
                 $this->locationService->moveSubtree($location, $newParentLocation);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("'%name%' moved to '%location%'") */
-                        'location.move.success',
-                        ['%name%' => $location->getContentInfo()->name, '%location%' => $newParentLocation->getContentInfo()->name],
-                        'location'
-                    )
+                    /** @Desc("'%name%' moved to '%location%'") */
+                    'location.move.success',
+                    ['%name%' => $location->getContentInfo()->name, '%location%' => $newParentLocation->getContentInfo()->name],
+                    'location'
                 );
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $location->contentId,
                     'locationId' => $location->id,
                 ]));
             });
@@ -171,7 +168,8 @@ class LocationController extends Controller
             }
         }
 
-        return $this->redirect($this->generateUrl('_ezpublishLocation', [
+        return $this->redirect($this->generateUrl('_ez_content_view', [
+            'contentId' => $location->contentId,
             'locationId' => $location->id,
         ]));
     }
@@ -198,7 +196,7 @@ class LocationController extends Controller
                 if (!$newParentLocation->getContent()->getContentType()->isContainer) {
                     throw new InvalidArgumentException(
                         '$newParentLocation',
-                        'Cannot copy location to a parent that is not a container'
+                        'Cannot copy the Location to a parent that is not a container'
                     );
                 }
 
@@ -211,15 +209,14 @@ class LocationController extends Controller
                 $newLocation = $this->locationService->loadLocation($copiedContent->contentInfo->mainLocationId);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("'%name%' copied to '%location%'") */
-                        'location.copy.success',
-                        ['%name%' => $location->getContentInfo()->name, '%location%' => $newParentLocation->getContentInfo()->name],
-                        'location'
-                    )
+                    /** @Desc("'%name%' copied to '%location%'") */
+                    'location.copy.success',
+                    ['%name%' => $location->getContentInfo()->name, '%location%' => $newParentLocation->getContentInfo()->name],
+                    'location'
                 );
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $newLocation->contentId,
                     'locationId' => $newLocation->id,
                 ]));
             });
@@ -229,7 +226,8 @@ class LocationController extends Controller
             }
         }
 
-        return $this->redirect($this->generateUrl('_ezpublishLocation', [
+        return $this->redirect($this->generateUrl('_ez_content_view', [
+            'contentId' => $location->contentId,
             'locationId' => $location->id,
         ]));
     }
@@ -260,14 +258,13 @@ class LocationController extends Controller
                 $newLocation = $this->locationService->loadLocation($copiedContent->contentInfo->mainLocationId);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Subtree '%name%' copied to location '%location%'") */
-                        'location.copy_subtree.success', [
+                    /** @Desc("Subtree '%name%' copied to Location '%location%'") */
+                    'location.copy_subtree.success',
+                    [
                         '%name%' => $location->getContentInfo()->name,
                         '%location%' => $newParentLocation->getContentInfo()->name,
                     ],
-                        'location'
-                    )
+                    'location'
                 );
 
                 return $this->redirectToLocation($newLocation);
@@ -305,21 +302,20 @@ class LocationController extends Controller
 
                 if (!$contentType->isContainer && $childCount) {
                     throw new \InvalidArgumentException(
-                        'Cannot swap location that has sub items with a location that is not a container'
+                        'Cannot swap a Location that has sub-items with a Location that is not a container'
                     );
                 }
                 $this->locationService->swapLocation($currentLocation, $newLocation);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Location '%name%' swaped with location '%location%'") */
-                        'location.swap.success',
-                        ['%name%' => $currentLocation->getContentInfo()->name, '%location%' => $newLocation->getContentInfo()->name],
-                        'location'
-                    )
+                    /** @Desc("Location '%name%' swapped with Location '%location%'") */
+                    'location.swap.success',
+                    ['%name%' => $currentLocation->getContentInfo()->name, '%location%' => $newLocation->getContentInfo()->name],
+                    'location'
                 );
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $currentLocation->contentId,
                     'locationId' => $newLocation->id,
                     '_fragment' => LocationsTab::URI_FRAGMENT,
                 ]));
@@ -330,7 +326,8 @@ class LocationController extends Controller
             }
         }
 
-        return $this->redirect($this->generateUrl('_ezpublishLocation', [
+        return $this->redirect($this->generateUrl('_ez_content_view', [
+            'contentId' => $location->contentId,
             'locationId' => $location->id,
             '_fragment' => LocationsTab::URI_FRAGMENT,
         ]));
@@ -371,40 +368,7 @@ class LocationController extends Controller
     }
 
     /**
-     * @deprecated since 2.5, to be removed in 3.0.
-     *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function trashContainerAction(Request $request): Response
-    {
-        $form = $this->formFactory->trashContainerLocation(
-            new LocationTrashContainerData()
-        );
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) {
-            $result = $this->submitHandler->handle($form, function (LocationTrashContainerData $data) {
-                return $this->handleTrashLocationForm($data);
-            });
-
-            if ($result instanceof Response) {
-                return $result;
-            }
-        }
-
-        if (empty($form->getData()->getLocation())) {
-            throw new BadRequestHttpException();
-        }
-
-        // in case of error when processing form ($result === null) redirect to the same Location
-        return $this->redirectToLocation($form->getData()->getLocation());
-    }
-
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashData|\EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashContainerData $data
+     * @param \EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashData $data
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      *
@@ -466,7 +430,8 @@ class LocationController extends Controller
             )
         );
 
-        return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+        return new RedirectResponse($this->generateUrl('_ez_content_view', [
+            'contentId' => $parentLocation->contentId,
             'locationId' => $parentLocation->id,
         ]));
     }
@@ -497,16 +462,15 @@ class LocationController extends Controller
                     $this->trashService->trash($location);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Location '%name%' removed.") */
-                            'location.delete.success',
-                            ['%name%' => $location->getContentInfo()->name],
-                            'location'
-                        )
+                        /** @Desc("Location '%name%' removed.") */
+                        'location.delete.success',
+                        ['%name%' => $location->getContentInfo()->name],
+                        'location'
                     );
                 }
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $contentInfo->id,
                     'locationId' => $contentInfo->mainLocationId,
                     '_fragment' => LocationsTab::URI_FRAGMENT,
                 ]));
@@ -517,7 +481,8 @@ class LocationController extends Controller
             }
         }
 
-        return $this->redirect($this->generateUrl('_ezpublishLocation', [
+        return $this->redirect($this->generateUrl('_ez_content_view', [
+            'contentId' => $contentInfo->id,
             'locationId' => $contentInfo->mainLocationId,
             '_fragment' => LocationsTab::URI_FRAGMENT,
         ]));
@@ -548,16 +513,15 @@ class LocationController extends Controller
                     $this->locationService->createLocation($contentInfo, $locationCreateStruct);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Location '%name%' created.") */
-                            'location.create.success',
-                            ['%name%' => $newLocation->getContentInfo()->name],
-                            'location'
-                        )
+                        /** @Desc("Location '%name%' created.") */
+                        'location.create.success',
+                        ['%name%' => $newLocation->getContentInfo()->name],
+                        'location'
                     );
                 }
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $contentInfo->id,
                     'locationId' => $contentInfo->mainLocationId,
                     '_fragment' => LocationsTab::URI_FRAGMENT,
                 ]));
@@ -568,7 +532,8 @@ class LocationController extends Controller
             }
         }
 
-        return $this->redirect($this->generateUrl('_ezpublishLocation', [
+        return $this->redirect($this->generateUrl('_ez_content_view', [
+            'contentId' => $contentInfo->id,
             'locationId' => $contentInfo->mainLocationId,
             '_fragment' => LocationsTab::URI_FRAGMENT,
         ]));
@@ -607,7 +572,7 @@ class LocationController extends Controller
                 } else {
                     $this->locationService->unhideLocation($location);
                     $message = $this->translator->trans(
-                        /** @Desc("Location '%name%' unhidden.") */
+                        /** @Desc("Location '%name%' revealed.") */
                         'location.update_success.success.unhidden',
                         ['%name%' => $contentName],
                         'location'
@@ -650,18 +615,17 @@ class LocationController extends Controller
                 $this->locationService->updateLocation($location, $locationUpdateStruct);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Location '%name%' updated.") */
-                        'location.update.success',
-                        ['%name%' => $location->getContentInfo()->name],
-                        'location'
-                    )
+                    /** @Desc("Location '%name%' updated.") */
+                    'location.update.success',
+                    ['%name%' => $location->getContentInfo()->name],
+                    'location'
                 );
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
-                        'locationId' => $location->getContentInfo()->mainLocationId,
-                        '_fragment' => DetailsTab::URI_FRAGMENT,
-                    ]));
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $location->contentId,
+                    'locationId' => $location->getContentInfo()->mainLocationId,
+                    '_fragment' => DetailsTab::URI_FRAGMENT,
+                ]));
             });
 
             if ($result instanceof Response) {
@@ -669,8 +633,11 @@ class LocationController extends Controller
             }
         }
 
-        return $this->redirect($this->generateUrl('_ezpublishLocation', [
-            'locationId' => $location->getContentInfo()->mainLocationId,
+        $contentInfo = $location->getContentInfo();
+
+        return $this->redirect($this->generateUrl('_ez_content_view', [
+            'contentId' => $contentInfo->id,
+            'locationId' => $contentInfo->mainLocationId,
             '_fragment' => DetailsTab::URI_FRAGMENT,
         ]));
     }
@@ -695,12 +662,10 @@ class LocationController extends Controller
                 $this->sectionService->assignSectionToSubtree($location, $section);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Section '%name%' has been assigned to subtree") */
-                        'location.assign_section.success',
-                        ['%name%' => $section->name],
-                        'location'
-                    )
+                    /** @Desc("Subtree assigned to Section '%name%'") */
+                    'location.assign_section.success',
+                    ['%name%' => $section->name],
+                    'location'
                 );
 
                 return $this->redirectToLocation($location, DetailsTab::URI_FRAGMENT);

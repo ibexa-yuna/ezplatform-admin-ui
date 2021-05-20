@@ -13,10 +13,10 @@ use eZ\Publish\Core\MVC\Symfony\Locale\UserLanguagePreferenceProviderInterface;
 use EzSystems\EzPlatformAdminUi\Specification\SiteAccess\IsAdmin;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RequestLocaleListener implements EventSubscriberInterface
 {
@@ -26,7 +26,7 @@ class RequestLocaleListener implements EventSubscriberInterface
     /** @var array */
     private $availableTranslations;
 
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     private $translator;
 
     /** @var \eZ\Publish\Core\MVC\Symfony\Locale\UserLanguagePreferenceProviderInterface */
@@ -38,7 +38,7 @@ class RequestLocaleListener implements EventSubscriberInterface
     /**
      * @param array $siteAccessGroups
      * @param array $availableTranslations
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
+     * @param \Symfony\Contracts\Translation\TranslatorInterface $translator
      * @param \eZ\Publish\Core\MVC\Symfony\Locale\UserLanguagePreferenceProviderInterface $userLanguagePreferenceProvider
      * @param \eZ\Publish\Core\MVC\ConfigResolverInterface $configResolver
      */
@@ -67,11 +67,11 @@ class RequestLocaleListener implements EventSubscriberInterface
     }
 
     /**
-     * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+     * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
      *
      * @throws \EzSystems\EzPlatformAdminUi\Exception\InvalidArgumentException
      */
-    public function onKernelRequest(GetResponseEvent $event): void
+    public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
 

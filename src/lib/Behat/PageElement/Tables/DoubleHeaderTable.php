@@ -6,18 +6,18 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
 
 class DoubleHeaderTable extends Table
 {
     /** @var string Name by which Element is recognised */
     public const ELEMENT_NAME = 'Double Header Table';
 
-    public function __construct(UtilityContext $context, $containerLocator)
+    public function __construct(BrowserContext $context, $containerLocator)
     {
         parent::__construct($context, $containerLocator);
-        $this->fields['horizontalHeaders'] = $this->fields['list'] . ' .ez-table__header + .table thead th';
-        $this->fields['insideHeaders'] = $this->fields['list'] . ' thead+ tbody th';
+        $this->fields['horizontalHeaders'] = $this->fields['list'] . ' .ez-table-header + .table thead th';
+        $this->fields['insideHeaders'] = $this->fields['list'] . ' tbody tr td.ez-table__cell[scope]';
     }
 
     public function getTableCellValue(string $header, ?string $secondHeader = null): string

@@ -6,9 +6,10 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\ContentUpdateForm;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\RightMenu;
 use PHPUnit\Framework\Assert;
 
@@ -27,14 +28,14 @@ class ContentUpdateItemPage extends Page
      */
     public $rightMenu;
 
-    public function __construct(UtilityContext $context, string $contentItemName)
+    public function __construct(BrowserContext $context, string $contentItemName)
     {
         parent::__construct($context);
         $this->siteAccess = 'admin';
         $this->route = '/content';
         $this->contentUpdateForm = ElementFactory::createElement($this->context, ContentUpdateForm::ELEMENT_NAME);
         $this->rightMenu = ElementFactory::createElement($this->context, RightMenu::ELEMENT_NAME);
-        $this->pageTitleLocator = '.ez-content-edit-container h1';
+        $this->pageTitleLocator = '.ez-content-edit-page-title__title';
         $this->pageTitle = $contentItemName;
     }
 
@@ -46,6 +47,10 @@ class ContentUpdateItemPage extends Page
 
     public function verifyTitle(): void
     {
+        if ($this->pageTitle === '') {
+            return;
+        }
+
         Assert::assertStringEndsWith(
             $this->pageTitle,
             $this->getPageTitle(),

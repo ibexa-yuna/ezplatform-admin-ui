@@ -1,4 +1,4 @@
-(function(global) {
+(function(global, doc, eZ) {
     const SELECTOR_FIELD = '.ez-field-edit--ezmedia';
     const SELECTOR_PREVIEW = '.ez-field-edit__preview';
     const SELECTOR_MEDIA = '.ez-field-edit-preview__media';
@@ -9,34 +9,13 @@
     const CLASS_MEDIA_WRAPPER_LOADING = 'ez-field-edit-preview__media-wrapper--loading';
     const SELECTOR_FILESIZE_NOTICE = '.ez-data-source__message--filesize';
 
-    class EzMediaValidator extends global.eZ.BaseFileFieldValidator {
+    class EzMediaValidator extends eZ.BaseFileFieldValidator {
         validateFileSize(event) {
-            event.currentTarget.dispatchEvent(new CustomEvent('invalidFileSize'));
+            event.currentTarget.dispatchEvent(new CustomEvent('ez-invalid-file-size'));
 
             return {
                 isError: false,
             };
-        }
-
-        /**
-         * Updates the state of checkbox indicator.
-         *
-         * @method updateState
-         * @param {Event} event
-         * @memberof EzMediaValidator
-         */
-        updateState(event) {
-            const checkbox = event.currentTarget.querySelector('input[type="checkbox"]');
-
-            if (!checkbox) {
-                return;
-            }
-
-            const label = event.currentTarget.querySelector('.ez-data-source__label');
-            const methodName = checkbox.checked ? 'remove' : 'add';
-
-            label.classList[methodName]('is-checked');
-            checkbox.checked = !checkbox.checked;
         }
 
         /**
@@ -58,9 +37,9 @@
             const result = { isError };
 
             if (isEmpty) {
-                result.errorMessage = global.eZ.errors.emptyField.replace('{fieldName}', label);
+                result.errorMessage = eZ.errors.emptyField.replace('{fieldName}', label);
             } else if (!isInteger) {
-                result.errorMessage = global.eZ.errors.isNotInteger.replace('{fieldName}', label);
+                result.errorMessage = eZ.errors.isNotInteger.replace('{fieldName}', label);
             }
 
             if (!input.closest('.ez-field-edit__preview').hasAttribute('hidden')) {
@@ -71,7 +50,7 @@
         }
     }
 
-    class EzMediaPreviewField extends global.eZ.BasePreviewField {
+    class EzMediaPreviewField extends eZ.BasePreviewField {
         /**
          * Loads dropped file preview
          *
@@ -158,7 +137,7 @@
         }
     }
 
-    [...document.querySelectorAll(SELECTOR_FIELD)].forEach((fieldContainer) => {
+    doc.querySelectorAll(SELECTOR_FIELD).forEach((fieldContainer) => {
         const validator = new EzMediaValidator({
             classInvalid: 'is-invalid',
             fieldContainer,
@@ -171,14 +150,8 @@
                 },
                 {
                     isValueValidator: false,
-                    selector: `${SELECTOR_INFO_WRAPPER}`,
-                    eventName: 'click',
-                    callback: 'updateState',
-                },
-                {
-                    isValueValidator: false,
                     selector: SELECTOR_INPUT_FILE,
-                    eventName: 'invalidFileSize',
+                    eventName: 'ez-invalid-file-size',
                     callback: 'showFileSizeError',
                     errorNodeSelectors: [SELECTOR_FILESIZE_NOTICE],
                 },
@@ -198,6 +171,6 @@
 
         previewField.init();
 
-        global.eZ.fieldTypeValidators = global.eZ.fieldTypeValidators ? [...global.eZ.fieldTypeValidators, validator] : [validator];
+        eZ.addConfig('fieldTypeValidators', [validator], true);
     });
-})(window);
+})(window, window.document, window.eZ);

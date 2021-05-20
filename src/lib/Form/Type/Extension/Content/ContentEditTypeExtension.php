@@ -8,10 +8,12 @@ declare(strict_types=1);
 
 namespace EzSystems\EzPlatformAdminUi\Form\Type\Extension\Content;
 
-use EzSystems\RepositoryForms\Form\Type\Content\ContentEditType;
+use EzSystems\EzPlatformContentForms\Form\Type\Content\ContentEditType;
 use Symfony\Component\Form\AbstractTypeExtension;
+use Symfony\Component\Form\Event\PostSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
 
 /**
  * Extends Content Edit form with additional fields.
@@ -24,18 +26,26 @@ class ContentEditTypeExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add(/** @Desc("Preview") */'preview', SubmitType::class, [
-            'label' => 'preview',
-            'attr' => ['hidden' => true],
+        $builder->add('preview', SubmitType::class, [
+            'label' => /** @Desc("Preview") */ 'preview',
+            'attr' => [
+                'hidden' => true,
+                'formnovalidate' => 'formnovalidate',
+            ],
             'translation_domain' => 'content_preview',
         ]);
+
+        $builder->addEventListener(FormEvents::POST_SUBMIT, static function (PostSubmitEvent $event): void {
+            $form = $event->getForm();
+
+            if ($form->get('preview')->isClicked()) {
+                $event->stopPropagation();
+            }
+        }, 900);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getExtendedType(): string
+    public static function getExtendedTypes(): iterable
     {
-        return ContentEditType::class;
+        return [ContentEditType::class];
     }
 }

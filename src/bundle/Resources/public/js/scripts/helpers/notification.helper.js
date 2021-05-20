@@ -1,10 +1,8 @@
-(function(global, doc) {
-    const eZ = (global.eZ = global.eZ || {});
-
+(function(global, doc, eZ) {
     const NOTIFICATION_INFO_LABEL = 'info';
     const NOTIFICATION_SUCCESS_LABEL = 'success';
     const NOTIFICATION_WARNING_LABEL = 'warning';
-    const NOTIFICATION_ERROR_LABEL = 'danger';
+    const NOTIFICATION_ERROR_LABEL = 'error';
 
     /**
      * Dispatches notification event
@@ -35,7 +33,7 @@
             message,
             label: NOTIFICATION_INFO_LABEL,
             onShow,
-            rawPlaceholdersMap
+            rawPlaceholdersMap,
         });
 
     /**
@@ -51,7 +49,7 @@
             message,
             label: NOTIFICATION_SUCCESS_LABEL,
             onShow,
-            rawPlaceholdersMap
+            rawPlaceholdersMap,
         });
 
     /**
@@ -67,22 +65,8 @@
             message,
             label: NOTIFICATION_WARNING_LABEL,
             onShow,
-            rawPlaceholdersMap
+            rawPlaceholdersMap,
         });
-
-    /**
-     * Dispatches danger notification event
-     *
-     * @function showDangerNotification
-     * @param {String} message
-     */
-    const showDangerNotification = (message) => {
-        console.warn('[DEPRECATED] showDangerNotification is deprecated');
-        console.warn('[DEPRECATED] it will be removed from ezplatform-admin-ui 2.0');
-        console.warn('[DEPRECATED] use showErrorNotification instead');
-
-        showErrorNotification(message);
-    };
 
     /**
      * Dispatches error notification event
@@ -100,17 +84,15 @@
             message,
             label: NOTIFICATION_ERROR_LABEL,
             onShow,
-            rawPlaceholdersMap
+            rawPlaceholdersMap,
         });
     };
 
-    eZ.helpers = eZ.helpers || {};
-    eZ.helpers.notification = {
+    eZ.addConfig('helpers.notification', {
         showNotification,
         showInfoNotification,
         showSuccessNotification,
         showWarningNotification,
-        showDangerNotification,
         showErrorNotification,
-    };
-})(window, document);
+    });
+})(window, window.document, window.eZ);

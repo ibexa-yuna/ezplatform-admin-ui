@@ -9,17 +9,17 @@ declare(strict_types=1);
 namespace EzSystems\EzPlatformAdminUiBundle\Templating\Twig;
 
 use EzSystems\EzPlatformAdminUi\UI\Config\Aggregator;
+use EzSystems\EzPlatformAdminUi\UI\Config\ConfigWrapper;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Proxy\LazyLoadingInterface;
 use Twig\Environment;
-use Twig_Extension;
-use Twig_Extension_GlobalsInterface;
-use EzSystems\EzPlatformAdminUi\UI\Config\ConfigWrapper;
+use Twig\Extension\AbstractExtension;
+use Twig\Extension\GlobalsInterface;
 
 /**
- * Exports `admin_ui_config` providing UI Config as a global Twig variable.
+ * Exports `ez_admin_ui_config` providing UI Config as a global Twig variable.
  */
-class UiConfigExtension extends Twig_Extension implements Twig_Extension_GlobalsInterface
+class UiConfigExtension extends AbstractExtension implements GlobalsInterface
 {
     /** @var \Twig\Environment */
     protected $twig;
@@ -43,7 +43,7 @@ class UiConfigExtension extends Twig_Extension implements Twig_Extension_Globals
     public function getGlobals(): array
     {
         return [
-            'admin_ui_config' => $this->createConfigWrapper(),
+            'ez_admin_ui_config' => $this->createConfigWrapper(),
         ];
     }
 

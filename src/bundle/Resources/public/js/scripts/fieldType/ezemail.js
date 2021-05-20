@@ -1,7 +1,8 @@
-(function (global) {
+(function(global, doc, eZ) {
     const SELECTOR_FIELD = '.ez-field-edit--ezemail';
+    const SELECTOR_ERROR_NODE = '.ez-data-source';
 
-    class EzEmailValidator extends global.eZ.BaseFieldValidator {
+    class EzEmailValidator extends eZ.BaseFieldValidator {
         /**
          * Validates the input
          *
@@ -13,16 +14,16 @@
         validateInput(event) {
             const input = event.currentTarget;
             const isRequired = input.required;
-            const isEmpty =  !input.value.trim();
-            const isValid = global.eZ.errors.emailRegexp.test(input.value);
+            const isEmpty = !input.value.trim();
+            const isValid = eZ.errors.emailRegexp.test(input.value);
             const isError = (isRequired && isEmpty) || (!isEmpty && !isValid);
             const label = input.closest(SELECTOR_FIELD).querySelector('.ez-field-edit__label').innerHTML;
             const result = { isError };
 
             if (isRequired && isEmpty) {
-                result.errorMessage = global.eZ.errors.emptyField.replace('{fieldName}', label);
+                result.errorMessage = eZ.errors.emptyField.replace('{fieldName}', label);
             } else if (!isEmpty && !isValid) {
-                result.errorMessage = global.eZ.errors.invalidEmail;
+                result.errorMessage = eZ.errors.invalidEmail;
             }
 
             return result;
@@ -37,14 +38,12 @@
                 selector: '.ez-field-edit--ezemail input',
                 eventName: 'blur',
                 callback: 'validateInput',
-                errorNodeSelectors: ['.ez-field-edit__label-wrapper'],
+                errorNodeSelectors: [SELECTOR_ERROR_NODE],
             },
         ],
     });
 
     validator.init();
 
-    global.eZ.fieldTypeValidators = global.eZ.fieldTypeValidators ?
-        [...global.eZ.fieldTypeValidators, validator] :
-        [validator];
-})(window);
+    eZ.addConfig('fieldTypeValidators', [validator], true);
+})(window, window.document, window.eZ);

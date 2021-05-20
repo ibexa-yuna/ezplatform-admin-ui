@@ -1,9 +1,10 @@
 .ez-extra-actions {
     $block: '.ez-extra-actions';
+    @include container-box-shadow-left;
 
-    border-radius: calculateRem(8px);
-    border: calculateRem(6px) solid $ez-color-secondary;
-    width: calculateRem(300px);
+    background-color: $ibexa-white;
+    padding: calculateRem(16px);
+    width: calculateRem(400px);
 
     &__action {
         display: block;
@@ -14,11 +15,11 @@
         border-radius: calculateRem(4px);
         padding: 0 calculateRem(16px);
         line-height: calculateRem(45px);
-        background: $ez-white;
-        color: $ez-color-secondary;
+        background: $ibexa-white;
+        color: $ibexa-color-primary;
         text-decoration: none;
         cursor: pointer;
-        transition: all 0.2s $ez-admin-transition;
+        transition: all 0.2s $ibexa-admin-transition;
 
         &:hover,
         &:focus,
@@ -28,12 +29,12 @@
 
         &:hover,
         &:focus {
-            background: $ez-secondary-ground-pale;
+            background: $ibexa-color-base;
         }
 
         &:active {
-            background: $ez-secondary-ground;
-            color: $ez-white;
+            background: $ibexa-color-primary;
+            color: $ibexa-white;
         }
     }
 
@@ -42,17 +43,15 @@
     }
 
     &__header {
-        line-height: calculateRem(45px);
-        color: $ez-white;
-        padding: 0 calculateRem(8px);
-        font-weight: 700;
+        font-size: calculateRem(16px);
+        color: $ibexa-color-primary;
+        margin-bottom: calculateRem(30px);
+        padding: calculateRem(8px) calculateRem(8px) calculateRem(24px);
+        font-weight: bold;
+        border-bottom: calculateRem(1px) solid $ibexa-color-base;
     }
 
     &__content {
-        background: $ez-ground-base-dark;
-        max-height: calculateRem(300px);
-        overflow: auto;
-
         .form-group {
             margin-bottom: 0;
         }
@@ -60,15 +59,6 @@
 
     &--edit-user,
     &--edit {
-        #{$block}__content {
-            padding: calculateRem(8px);
-        }
-
-        #{$block}__form-values {
-            max-height: calculateRem(150px);
-            overflow: auto;
-        }
-
         .form-check {
             display: block;
             background: none;
@@ -78,26 +68,24 @@
             border-radius: calculateRem(4px);
             padding: 0 calculateRem(16px);
             line-height: calculateRem(45px);
-            background: $ez-white;
+            background: $ibexa-white;
             text-decoration: none;
             cursor: pointer;
-            transition: all 0.2s $ez-admin-transition;
-            margin-bottom: 0;
+            transition: all 0.2s $ibexa-admin-transition;
+            margin-bottom: calculateRem(10px);
             font-size: calculateRem(15px);
+            box-shadow: 0 calculateRem(2px) calculateRem(4px) 0 rgba($ibexa-black, 0.1);
 
             &:hover,
             &:focus {
-                background: $ez-secondary-ground-pale;
+                background: $ibexa-color-base;
+                font-weight: 700;
                 text-decoration: none;
             }
 
             &:active {
-                background: $ez-secondary-ground;
-                color: $ez-white;
-            }
-
-            &:not(:last-child) {
-                margin-bottom: calculateRem(8px);
+                background: $ibexa-color-primary;
+                color: $ibexa-white;
             }
 
             &-label {
@@ -114,16 +102,15 @@
     }
 
     &__section-header {
-        background: $ez-ground-base-dark;
-        padding: calculateRem(4px) 0 calculateRem(4px) calculateRem(8px);
-        font-size: calculateRem(15px);
-        font-weight: 700;
+        margin: 0 calculateRem(8px) calculateRem(12px);
+        color: $ibexa-color-base-dark;
+        font-size: calculateRem(16px);
     }
 
     &__section-content {
-        background: $ez-white;
-        padding: 1rem calculateRem(8px);
-        font-size: calculateRem(15px);
+        margin-bottom: calculateRem(32px);
+        background: $ibexa-white;
+        font-size: calculateRem(16px);
 
         select {
             display: inline-block;
@@ -133,7 +120,8 @@
 
     &--create {
         #{$block}__content {
-            max-height: initial;
+            max-height: calc(100% - #{calculateRem(60px)});
+            overflow: auto;
         }
 
         #{$block}__section-content--content-type {
@@ -142,65 +130,50 @@
 
         .form-check {
             cursor: pointer;
-            background: $ez-white;
-            transition: all 0.2s $ez-admin-transition;
+            transition: all 0.2s $ibexa-admin-transition;
             margin-bottom: 0;
             padding-left: 0;
 
+            &:active,
             &:hover,
             &:focus {
-                background: $ez-secondary-ground-pale;
-            }
-
-            &:active {
-                background: $ez-secondary-ground;
-                color: $ez-white;
-            }
-
-            &-label {
-                margin: 0;
-                display: block;
-                padding-left: calculateRem(40px);
-            }
-
-            &-input[type='radio'] {
-                display: none;
+                color: $ibexa-color-primary;
             }
         }
 
-        button {
-            &[type='submit'] {
-                display: none;
+        .form-check-label {
+            display: block;
+            margin: 0 0 0 calculateRem(42px);
+        }
+
+        .form-check-input[type='radio'] {
+            display: none;
+        }
+
+        .form-group {
+            button.btn {
+                &[type='submit'] {
+                    display: none;
+                }
             }
         }
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        height: calculateRem(40px);
-        width: calculateRem(10px);
-        top: calculateRem(30px);
-        right: calculateRem(-6px);
-        transform: translate(100%, -50%);
-        z-index: 0;
-        background: $ez-color-secondary;
     }
 }
 
 .ez-extra-actions-container {
     .ez-extra-actions {
         position: absolute;
+        top: 0;
+        bottom: 0;
         left: 0;
         z-index: 2;
-        opacity: 1;
-        transform: translate(calc(-100% - #{calculateRem(10px)}), 0) scaleX(1);
+        transform: translate(calc(-100%), 0) scaleX(1);
         transform-origin: right center;
-        transition: all 0.2s $ez-admin-transition;
+        transition: $ibexa-admin-widget-open-transition;
 
         &--hidden {
-            opacity: 0;
-            transform: translate(calc(-100% - #{calculateRem(15px)}), 0) scaleX(0);
+            transform: translate(calc(-100%), 0) scaleX(0);
+            transition: $ibexa-admin-widget-close-transition;
         }
     }
 }

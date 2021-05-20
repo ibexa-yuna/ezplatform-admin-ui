@@ -6,12 +6,14 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\EzEnvironmentConstants;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\PageObjectFactory;
+use EzSystems\Behat\Browser\Page\Page;
+use EzSystems\Behat\Core\Environment\EnvironmentConstants;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\ContentField;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\ContentTypePicker;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\RightMenu;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\SubItemsList;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\UpperMenu;
 use PHPUnit\Framework\Assert;
@@ -33,17 +35,17 @@ class ContentItemPage extends Page
     /** @var string */
     public $contentTypeLocator;
 
-    public function __construct(UtilityContext $context, string $contentName)
+    public function __construct(BrowserContext $context, ?string $contentName)
     {
         parent::__construct($context);
         $this->siteAccess = 'admin';
-        $this->route = '/content/location';
-        $this->rightMenu = ElementFactory::createElement($context, RightMenu::ELEMENT_NAME);
-        $this->subItemList = ElementFactory::createElement($context, SubItemsList::ELEMENT_NAME);
-        $this->contentField = ElementFactory::createElement($context, ContentField::ELEMENT_NAME);
+        $this->route = '/view/content';
         $this->pageTitle = $contentName;
         $this->pageTitleLocator = '.ez-page-title h1';
         $this->contentTypeLocator = '.ez-page-title h4';
+        $this->rightMenu = ElementFactory::createElement($context, RightMenu::ELEMENT_NAME);
+        $this->subItemList = ElementFactory::createElement($context, SubItemsList::ELEMENT_NAME, $this->hasGridViewEnabledByDefault());
+        $this->contentField = ElementFactory::createElement($context, ContentField::ELEMENT_NAME);
     }
 
     /**
@@ -64,7 +66,7 @@ class ContentItemPage extends Page
 
         ElementFactory::createElement($this->context, ContentTypePicker::ELEMENT_NAME)->select($contentTypeName);
 
-        $contentUpdatePage = PageObjectFactory::createPage($this->context, ContentUpdateItemPage::PAGE_NAME, $contentTypeName);
+        $contentUpdatePage = PageObjectFactory::createPage($this->context, ContentUpdateItemPage::PAGE_NAME, '');
         $contentUpdatePage->verifyIsLoaded();
 
         return $contentUpdatePage;
@@ -99,9 +101,14 @@ class ContentItemPage extends Page
 
     public function goToSubItem(string $contentName, string $contentType): void
     {
+        $parentContentPage = PageObjectFactory::createPage($this->context, self::PAGE_NAME, null);
+
+        if ($parentContentPage->subItemList->canBeSorted()) {
+            $parentContentPage->subItemList->sortBy('Modified', false);
+        }
+        $parentContentPage->subItemList->table->clickListElement($contentName, $contentType);
+
         $contentPage = PageObjectFactory::createPage($this->context, self::PAGE_NAME, $contentName);
-        $contentPage->subItemList->sortBy('Modified', false);
-        $contentPage->subItemList->table->clickListElement($contentName, $contentType);
         $contentPage->verifyIsLoaded();
         $contentPage->verifyContentType($contentType);
     }
@@ -109,7 +116,7 @@ class ContentItemPage extends Page
     public function navigateToPath(string $path): void
     {
         $pathArray = explode('/', $path);
-        $menuTab = $pathArray[0] === EzEnvironmentConstants::get('ROOT_CONTENT_NAME') ? 'Content structure' : $pathArray[0];
+        $menuTab = $pathArray[0] === EnvironmentConstants::get('ROOT_CONTENT_NAME') ? 'Content structure' : $pathArray[0];
 
         $upperMenu = ElementFactory::createElement($this->context, UpperMenu::ELEMENT_NAME);
         $upperMenu->goToTab('Content');
@@ -123,6 +130,13 @@ class ContentItemPage extends Page
                 $contentPage->subItemList->table->clickListElement($pathArray[$i]);
             }
         }
+    }
+
+    private function hasGridViewEnabledByDefault(): bool
+    {
+        $pageTitle = $this->pageTitle ?? $this->getPageTitle();
+
+        return $pageTitle === 'Media';
     }
 
     protected function handleMissingContentType(string $contentTypeName): void

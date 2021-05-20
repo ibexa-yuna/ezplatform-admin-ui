@@ -6,7 +6,8 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Element\Element;
 
 /** Element that describes upper menu (Content, Admin, Page and theirs children) */
 class UpperMenu extends Element
@@ -14,14 +15,14 @@ class UpperMenu extends Element
     /** @var string Name by which Element is recognised */
     public const ELEMENT_NAME = 'Upper Menu';
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->fields = [
             'menuButton' => '.ez-main-nav .nav-link',
             'submenuButton' => '.ez-main-sub-nav .nav-link',
             'dashboardLink' => '.navbar-brand',
-            'pendingNotificationsCount' => '.ez-user-menu__avatar-wrapper.n-pending-notifications',
+            'pendingNotificationsCount' => '.ez-user-menu__name-wrapper .n-pending-notifications',
             'userSettingsToggle' => '.ez-user-menu__name-wrapper',
             'userSettingsItem' => '.ez-user-menu__item',
         ];

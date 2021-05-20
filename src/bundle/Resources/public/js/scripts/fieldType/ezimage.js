@@ -1,12 +1,13 @@
-(function(global) {
+(function(global, doc, eZ) {
     const SELECTOR_FIELD = '.ez-field-edit--ezimage';
     const SELECTOR_INPUT_FILE = 'input[type="file"]';
     const SELECTOR_LABEL_WRAPPER = '.ez-field-edit__label-wrapper';
     const SELECTOR_ALT_WRAPPER = '.ez-field-edit-preview__image-alt';
     const SELECTOR_INPUT_ALT = '.ez-field-edit-preview__image-alt .ez-data-source__input';
+    const EVENT_CANCEL_ERROR = 'ez-cancel-errors';
     const SELECTOR_FILESIZE_NOTICE = '.ez-data-source__message--filesize';
-
-    class EzImageFilePreviewField extends global.eZ.BasePreviewField {
+    
+    class EzImageFilePreviewField extends eZ.BasePreviewField {
         /**
          * Gets a temporary image URL
          *
@@ -44,13 +45,22 @@
             sizeContainer.title = fileSize;
 
             preview.querySelector('.ez-field-edit-preview__action--preview').href = URL.createObjectURL(files[0]);
-            this.fieldContainer.querySelector(SELECTOR_INPUT_ALT).dispatchEvent(new CustomEvent('cancelErrors'));
+            this.fieldContainer.querySelector(SELECTOR_INPUT_ALT).dispatchEvent(new CustomEvent(EVENT_CANCEL_ERROR));
         }
     }
 
-    class EzImageFieldValidator extends global.eZ.BaseFileFieldValidator {
+    class EzImageFieldValidator extends eZ.BaseFileFieldValidator {
+        toggleInvalidState(isError, config, input) {
+            super.toggleInvalidState(isError, config, input);
+
+            const container = this.getFieldTypeContainer(input.closest(this.fieldSelector));
+            const method = !!container.querySelector(`.${this.classInvalid}`) ? 'add' : 'remove';
+
+            container.classList[method](this.classInvalid);
+        }
+
         validateFileSize(event) {
-            event.currentTarget.dispatchEvent(new CustomEvent('invalidFileSize'));
+            event.currentTarget.dispatchEvent(new CustomEvent('ez-invalid-file-size'));
 
             return {
                 isError: false,
@@ -73,14 +83,14 @@
             const result = { isError };
 
             if (isEmpty) {
-                result.errorMessage = global.eZ.errors.emptyField.replace('{fieldName}', label);
+                result.errorMessage = eZ.errors.emptyField.replace('{fieldName}', label);
             }
 
             return result;
         }
     }
 
-    [...document.querySelectorAll(SELECTOR_FIELD)].forEach((fieldContainer) => {
+    doc.querySelectorAll(SELECTOR_FIELD).forEach((fieldContainer) => {
         const validator = new EzImageFieldValidator({
             classInvalid: 'is-invalid',
             fieldContainer,
@@ -101,14 +111,14 @@
                 {
                     isValueValidator: false,
                     selector: `${SELECTOR_INPUT_FILE}`,
-                    eventName: 'invalidFileSize',
+                    eventName: 'ez-invalid-file-size',
                     callback: 'showFileSizeError',
                     errorNodeSelectors: [SELECTOR_FILESIZE_NOTICE],
                 },
                 {
                     isValueValidator: false,
                     selector: SELECTOR_INPUT_ALT,
-                    eventName: 'cancelErrors',
+                    eventName: EVENT_CANCEL_ERROR,
                     callback: 'cancelErrors',
                     invalidStateSelectors: ['.ez-data-source__field--alternativeText'],
                     errorNodeSelectors: [`${SELECTOR_ALT_WRAPPER} .ez-data-source__label-wrapper`],
@@ -123,6 +133,6 @@
 
         previewField.init();
 
-        global.eZ.fieldTypeValidators = global.eZ.fieldTypeValidators ? [...global.eZ.fieldTypeValidators, validator] : [validator];
+        eZ.addConfig('fieldTypeValidators', [validator], true);
     });
-})(window);
+})(window, window.document, window.eZ);

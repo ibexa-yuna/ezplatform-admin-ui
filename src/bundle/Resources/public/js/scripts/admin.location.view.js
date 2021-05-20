@@ -1,4 +1,4 @@
-(function(global, doc, $, React, ReactDOM, eZ, Routing, Translator) {
+(function(global, doc, localStorage, $, React, ReactDOM, eZ, Routing, Translator) {
     const SELECTOR_MODAL_BULK_ACTION_FAIL = '#bulk-action-failed-modal';
     const listContainers = doc.querySelectorAll('.ez-sil');
     const mfuContainer = doc.querySelector('#ez-mfu');
@@ -8,10 +8,11 @@
     const sortField = sortContainer.getAttribute('data-sort-field');
     const sortOrder = sortContainer.getAttribute('data-sort-order');
     const mfuAttrs = {
-        adminUiConfig: Object.assign({}, eZ.adminUiConfig, {
+        adminUiConfig: {
+            ...eZ.adminUiConfig,
             token,
             siteaccess,
-        }),
+        },
         parentInfo: {
             contentTypeIdentifier: mfuContainer.dataset.parentContentTypeIdentifier,
             contentTypeId: parseInt(mfuContainer.dataset.parentContentTypeId, 10),
@@ -34,25 +35,33 @@
             submitVersionEditForm();
             $('#version-draft-conflict-modal').modal('hide');
         };
+        const attachModalListeners = (wrapper) => {
+            const addDraftButton = wrapper.querySelector('.ez-btn--add-draft');
+
+            if (addDraftButton) {
+                addDraftButton.addEventListener('click', addDraft, false);
+            }
+
+            wrapper
+                .querySelectorAll('.ez-btn--prevented')
+                .forEach((btn) => btn.addEventListener('click', (event) => event.preventDefault(), false));
+
+            $('#version-draft-conflict-modal')
+                .modal('show')
+                .on('shown.bs.modal', () => eZ.helpers.tooltips.parse());
+        };
         const showModal = (modalHtml) => {
             const wrapper = doc.querySelector('.ez-modal-wrapper');
 
             wrapper.innerHTML = modalHtml;
-            const addDraftButton = wrapper.querySelector('.ez-btn--add-draft');
-            if (addDraftButton) {
-                addDraftButton.addEventListener('click', addDraft, false);
-            }
-            [...wrapper.querySelectorAll('.ez-btn--prevented')].forEach((btn) =>
-                btn.addEventListener('click', (event) => event.preventDefault(), false)
-            );
-            $('#version-draft-conflict-modal').modal('show');
+            attachModalListeners(wrapper);
         };
         const checkEditPermissionLink = Routing.generate('ezplatform.content.check_edit_permission', {
             contentId,
             languageCode: content.mainLanguageCode,
         });
         const errorMessage = Translator.trans(
-            /*@Desc("You don't have permission to edit the content")*/ 'content.edit.permission.error',
+            /*@Desc("You don't have permission to edit this Content item")*/ 'content.edit.permission.error',
             {},
             'content'
         );
@@ -78,7 +87,7 @@
             })
             .catch(eZ.helpers.notification.showErrorNotification);
     };
-    const generateLink = (locationId) => Routing.generate('_ezpublishLocation', { locationId });
+    const generateLink = (locationId, contentId) => Routing.generate('_ez_content_view', { contentId, locationId });
     const setModalTableTitle = (title) => {
         const modalTableTitleNode = doc.querySelector(`${SELECTOR_MODAL_BULK_ACTION_FAIL} .ez-table-header__headline`);
 
@@ -118,8 +127,17 @@
 
         $(SELECTOR_MODAL_BULK_ACTION_FAIL).modal('show');
     };
+    const getLocationActiveView = (parentLocationId) => {
+        const mediaLocationId = eZ.adminUiConfig.locations.media;
+        const defaultActiveView = parentLocationId === mediaLocationId ? 'grid' : 'table';
+        const activeView = localStorage.getItem(`ez-subitems-active-view-location-${parentLocationId}`);
+
+        return activeView || defaultActiveView;
+    };
 
     listContainers.forEach((container) => {
+        const parentLocationId = parseInt(container.dataset.location, 10);
+        const activeView = getLocationActiveView(parentLocationId);
         const subItemsList = JSON.parse(container.dataset.items).SubitemsList;
         const items = subItemsList.SubitemsRow.map((item) => ({
             content: item.Content,
@@ -132,6 +150,7 @@
             return total;
         }, {});
         const udwConfigBulkMoveItems = JSON.parse(container.dataset.udwConfigBulkMoveItems);
+        const udwConfigBulkAddLocation = JSON.parse(container.dataset.udwConfigBulkAddLocation);
         const mfuContentTypesMap = Object.values(eZ.adminUiConfig.contentTypes).reduce((contentTypeDataMap, contentTypeGroup) => {
             for (const contentTypeData of contentTypeGroup) {
                 contentTypeDataMap[contentTypeData.href] = contentTypeData;
@@ -144,26 +163,39 @@
             React.createElement(eZ.modules.SubItems, {
                 handleEditItem,
                 generateLink,
-                parentLocationId: parseInt(container.dataset.location, 10),
+                activeView,
+                parentLocationId,
                 sortClauses: { [sortField]: sortOrder },
                 restInfo: { token, siteaccess },
                 extraActions: [
                     {
                         component: eZ.modules.MultiFileUpload,
-                        attrs: Object.assign({}, mfuAttrs, {
+                        attrs: {
+                            ...mfuAttrs,
                             onPopupClose: (itemsUploaded) => itemsUploaded.length && global.location.reload(true),
                             contentCreatePermissionsConfig: JSON.parse(container.dataset.mfuCreatePermissionsConfig),
                             contentTypesMap: mfuContentTypesMap,
-                        }),
+                        },
                     },
                 ],
                 items,
                 contentTypesMap,
                 totalCount: subItemsList.ChildrenCount,
                 udwConfigBulkMoveItems,
+                udwConfigBulkAddLocation,
                 showBulkActionFailedModal,
             }),
             container
         );
     });
-})(window, window.document, window.jQuery, window.React, window.ReactDOM, window.eZ, window.Routing, window.Translator);
+})(
+    window,
+    window.document,
+    window.localStorage,
+    window.jQuery,
+    window.React,
+    window.ReactDOM,
+    window.eZ,
+    window.Routing,
+    window.Translator
+);

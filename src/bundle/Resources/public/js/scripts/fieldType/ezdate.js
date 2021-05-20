@@ -1,9 +1,9 @@
 (function(global, doc, eZ, flatpickr) {
     const SELECTOR_FIELD = '.ez-field-edit--ezdate';
     const SELECTOR_INPUT = '.ez-data-source__input:not(.flatpickr-input)';
-    const SELECTOR_LABEL_WRAPPER = '.ez-field-edit__label-wrapper';
     const SELECTOR_FLATPICKR_INPUT = '.flatpickr-input';
     const EVENT_VALUE_CHANGED = 'valueChanged';
+    const SELECTOR_ERROR_NODE = '.ez-data-source';
 
     class EzDateValidator extends eZ.BaseFieldValidator {
         /**
@@ -42,14 +42,14 @@
                 selector: `${SELECTOR_FIELD} ${SELECTOR_INPUT}`,
                 eventName: EVENT_VALUE_CHANGED,
                 callback: 'validateInput',
-                errorNodeSelectors: [SELECTOR_LABEL_WRAPPER],
+                errorNodeSelectors: [SELECTOR_ERROR_NODE],
                 invalidStateSelectors: [SELECTOR_FLATPICKR_INPUT],
             },
             {
                 selector: `${SELECTOR_FIELD} ${SELECTOR_FLATPICKR_INPUT}`,
                 eventName: 'blur',
                 callback: 'validateInput',
-                errorNodeSelectors: [SELECTOR_LABEL_WRAPPER],
+                errorNodeSelectors: [SELECTOR_ERROR_NODE],
                 invalidStateSelectors: [SELECTOR_FLATPICKR_INPUT],
             },
         ],
@@ -57,9 +57,9 @@
 
     validator.init();
 
-    eZ.fieldTypeValidators = eZ.fieldTypeValidators ? [...eZ.fieldTypeValidators, validator] : [validator];
+    eZ.addConfig('fieldTypeValidators', [validator], true);
 
-    const dateFields = [...doc.querySelectorAll(SELECTOR_FIELD)];
+    const dateFields = doc.querySelectorAll(SELECTOR_FIELD);
     const dateConfig = {
         formatDate: (date) => eZ.helpers.timezone.formatFullDateTime(date, null, eZ.adminUiConfig.dateFormat.fullDate),
     };
@@ -100,19 +100,17 @@
             if (actionType === 'create') {
                 defaultDate.setTime(new Date().getTime());
             } else if (actionType === 'edit') {
-                defaultDate.setTime(defaultDate.getTime() + defaultDate.getTimezoneOffset() * 60 * 1000);
+                defaultDate.setTime(defaultDate.getTime());
             }
 
             updateInputValue(sourceInput, [defaultDate]);
         }
 
-        const flatpickrInstance = flatpickr(
-            flatPickrInput,
-            Object.assign({}, dateConfig, {
-                onChange: updateInputValue.bind(null, sourceInput),
-                defaultDate,
-            })
-        );
+        const flatpickrInstance = flatpickr(flatPickrInput, {
+            ...dateConfig,
+            onChange: updateInputValue.bind(null, sourceInput),
+            defaultDate,
+        });
 
         btnClear.addEventListener('click', clearValue.bind(null, sourceInput, flatpickrInstance), false);
 

@@ -6,7 +6,9 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Browser\Element\Element;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\Table;
 use PHPUnit\Framework\Assert;
 
@@ -22,7 +24,7 @@ class AdminList extends Element
     /** @var Table */
     public $table;
 
-    public function __construct(UtilityContext $context, string $listHeader, string $tableName, ?string $containerLocator = 'section')
+    public function __construct(BrowserContext $context, string $listHeader, string $tableName, ?string $containerLocator = 'section')
     {
         parent::__construct($context);
         $containerLocator = !$containerLocator ? 'section' : $containerLocator;
@@ -31,8 +33,8 @@ class AdminList extends Element
             'list' => $containerLocator,
             'listHeader' => '.ez-table-header .ez-table-header__headline, header .ez-table__headline, header h5',
             'plusButton' => '.ez-icon-create',
-            'trashButton' => '.ez-icon-trash,button[title^="Delete"]',
-            'mainAssignButton' => '.ez-table-header [title^=Assign]',
+            'trashButton' => '.ez-icon-trash,button[data-original-title^="Delete"]',
+            'mainAssignButton' => '.ez-table-header [data-original-title^=Assign]',
             'paginationNextButton' => '.ez-pagination a.page-link[rel="next"]',
         ];
         $this->listContainer = $this->context->findElement($containerLocator);
@@ -45,6 +47,8 @@ class AdminList extends Element
         if ($actualHeader === null) {
             Assert::fail(sprintf('Table header "%s" not found on page', $this->listHeader));
         }
+
+        $this->table->verifyVisibility();
     }
 
     public function clickPlusButton(): void
@@ -68,20 +72,6 @@ class AdminList extends Element
 
     public function isElementOnTheList(string $listElementName): bool
     {
-        $pagination = ElementFactory::createElement($this->context, Pagination::ELEMENT_NAME);
-
-        while (true) {
-            if ($this->table->isElementOnCurrentPage($listElementName)) {
-                return true;
-            }
-
-            if ($pagination->isNextButtonActive()) {
-                $pagination->clickNextButton();
-            } else {
-                break;
-            }
-        }
-
-        return false;
+        return $this->table->isElementInTable($listElementName);
     }
 }

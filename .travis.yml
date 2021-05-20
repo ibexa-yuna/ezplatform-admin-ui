@@ -1,13 +1,13 @@
 dist: trusty
 language: php
 php:
-  - 7.1
+  - 7.3
 
 env:
   global:
     - EZPLATFORM_REPO="https://github.com/ezsystems/ezplatform.git"
-    - SYMFONY_ENV=behat
-    - SYMFONY_DEBUG=1
+    - APP_ENV=behat
+    - APP_DEBUG=1
 
 cache:
   directories:
@@ -31,7 +31,7 @@ matrix:
     - name: "Admin-UI tests on Clean P"
       env:
         - COMPOSE_FILE="doc/docker/base-dev.yml:doc/docker/selenium.yml"
-        - BEHAT_OPTS="--profile=adminui --suite=adminui"
+        - BEHAT_OPTS="--profile=adminui --suite=adminui --tags=~@broken"
     - name: "Admin UI tests using different personas"
       env:
         - COMPOSE_FILE="doc/docker/base-dev.yml:doc/docker/selenium.yml"

@@ -10,28 +10,25 @@ namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 
 use eZ\Publish\API\Repository\ContentTypeService;
 use eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use EzSystems\EzPlatformAdminUi\Form\Data\ContentTypeGroup\ContentTypeGroupCreateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ContentTypeGroup\ContentTypeGroupDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ContentTypeGroup\ContentTypeGroupsDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ContentTypeGroup\ContentTypeGroupUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatorInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\Authorization\Attribute;
 
 class ContentTypeGroupController extends Controller
 {
-    /** @var \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface */
+    /** @var \EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface */
     private $notificationHandler;
-
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
-    private $translator;
 
     /** @var \eZ\Publish\API\Repository\ContentTypeService */
     private $contentTypeService;
@@ -42,37 +39,21 @@ class ContentTypeGroupController extends Controller
     /** @var \EzSystems\EzPlatformAdminUi\Form\SubmitHandler */
     private $submitHandler;
 
-    /** @var array */
-    private $languages;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /** @var int */
-    private $defaultPaginationLimit;
-
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface $notificationHandler
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
-     * @param \EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory $formFactory
-     * @param \EzSystems\EzPlatformAdminUi\Form\SubmitHandler $submitHandler
-     * @param array $languages
-     * @param int $defaultPaginationLimit
-     */
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
-        TranslatorInterface $translator,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         ContentTypeService $contentTypeService,
         FormFactory $formFactory,
         SubmitHandler $submitHandler,
-        array $languages,
-        int $defaultPaginationLimit
+        ConfigResolverInterface $configResolver
     ) {
         $this->notificationHandler = $notificationHandler;
-        $this->translator = $translator;
         $this->contentTypeService = $contentTypeService;
         $this->formFactory = $formFactory;
         $this->submitHandler = $submitHandler;
-        $this->languages = $languages;
-        $this->defaultPaginationLimit = $defaultPaginationLimit;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -91,7 +72,7 @@ class ContentTypeGroupController extends Controller
             new ArrayAdapter($this->contentTypeService->loadContentTypeGroups())
         );
 
-        $pagerfanta->setMaxPerPage($this->defaultPaginationLimit);
+        $pagerfanta->setMaxPerPage($this->configResolver->getParameter('pagination.content_type_group_limit'));
         $pagerfanta->setCurrentPage(min($page, $pagerfanta->getNbPages()));
 
         /** @var \eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup[] $contentTypeGroupList */
@@ -107,7 +88,7 @@ class ContentTypeGroupController extends Controller
             $count[$contentTypeGroup->id] = $contentTypesCount;
         }
 
-        return $this->render('@ezdesign/admin/content_type_group/list.html.twig', [
+        return $this->render('@ezdesign/content_type/content_type_group/list.html.twig', [
             'pager' => $pagerfanta,
             'form_content_type_groups_delete' => $deleteContentTypeGroupsForm->createView(),
             'deletable' => $deletableContentTypeGroup,
@@ -139,12 +120,10 @@ class ContentTypeGroupController extends Controller
                 $group = $this->contentTypeService->createContentTypeGroup($createStruct);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Content type group '%name%' created.") */
-                        'content_type_group.create.success',
-                        ['%name%' => $data->getIdentifier()],
-                        'content_type'
-                    )
+                    /** @Desc("Created Content Type group '%name%'.") */
+                    'content_type_group.create.success',
+                    ['%name%' => $data->getIdentifier()],
+                    'content_type'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.content_type_group.view', [
@@ -157,7 +136,7 @@ class ContentTypeGroupController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/content_type_group/create.html.twig', [
+        return $this->render('@ezdesign/content_type/content_type_group/create.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -185,12 +164,10 @@ class ContentTypeGroupController extends Controller
                 $this->contentTypeService->updateContentTypeGroup($group, $updateStruct);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Content type group '%name%' updated.") */
-                        'content_type_group.update.success',
-                        ['%name%' => $group->identifier],
-                        'content_type'
-                    )
+                    /** @Desc("Updated Content Type group '%name%'.") */
+                    'content_type_group.update.success',
+                    ['%name%' => $group->identifier],
+                    'content_type'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.content_type_group.view', [
@@ -203,7 +180,7 @@ class ContentTypeGroupController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/content_type_group/edit.html.twig', [
+        return $this->render('@ezdesign/content_type/content_type_group/edit.html.twig', [
             'content_type_group' => $group,
             'form' => $form->createView(),
         ]);
@@ -229,12 +206,10 @@ class ContentTypeGroupController extends Controller
                 $this->contentTypeService->deleteContentTypeGroup($group);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Content type group '%name%' deleted.") */
-                        'content_type_group.delete.success',
-                        ['%name%' => $group->identifier],
-                        'content_type'
-                    )
+                    /** @Desc("Deleted Content Type group '%name%'.") */
+                    'content_type_group.delete.success',
+                    ['%name%' => $group->identifier],
+                    'content_type'
                 );
             });
 
@@ -268,12 +243,10 @@ class ContentTypeGroupController extends Controller
                     $this->contentTypeService->deleteContentTypeGroup($group);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Content type group '%name%' deleted.") */
-                            'content_type_group.delete.success',
-                            ['%name%' => $group->identifier],
-                            'content_type'
-                        )
+                        /** @Desc("Deleted Content Type group '%name%'.") */
+                        'content_type_group.delete.success',
+                        ['%name%' => $group->identifier],
+                        'content_type'
                     );
                 }
             });
@@ -295,7 +268,7 @@ class ContentTypeGroupController extends Controller
      */
     public function viewAction(Request $request, ContentTypeGroup $group, int $page = 1): Response
     {
-        return $this->render('@ezdesign/admin/content_type_group/view.html.twig', [
+        return $this->render('@ezdesign/content_type/content_type_group/index.html.twig', [
             'content_type_group' => $group,
             'page' => $page,
             'route_name' => $request->get('_route'),

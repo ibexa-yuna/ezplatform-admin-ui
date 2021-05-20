@@ -7,7 +7,6 @@
 namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 
 use eZ\Publish\API\Repository\ContentService;
-use eZ\Publish\API\Repository\ContentTypeService;
 use eZ\Publish\API\Repository\Exceptions as ApiException;
 use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
 use eZ\Publish\API\Repository\LocationService;
@@ -15,10 +14,14 @@ use eZ\Publish\API\Repository\PermissionResolver;
 use eZ\Publish\API\Repository\UserService;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\Location;
+use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository\Values\User\Limitation;
 use eZ\Publish\Core\Base\Exceptions\BadStateException;
 use eZ\Publish\Core\Helper\TranslationHelper;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\SPI\Limitation\Target;
+use EzSystems\EzPlatformAdminUi\Event\ContentProxyCreateEvent;
+use EzSystems\EzPlatformAdminUi\Event\Options;
 use EzSystems\EzPlatformAdminUi\Exception\InvalidArgumentException as AdminInvalidArgumentException;
 use EzSystems\EzPlatformAdminUi\Form\Data\Content\ContentVisibilityUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Content\Draft\ContentCreateData;
@@ -31,8 +34,9 @@ use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
 use EzSystems\EzPlatformAdminUi\Form\Type\Content\ContentVisibilityUpdateType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Content\Translation\MainTranslationUpdateType;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use EzSystems\EzPlatformAdminUi\Permission\LookupLimitationsTransformer;
+use EzSystems\EzPlatformAdminUi\Siteaccess\SiteAccessNameGeneratorInterface;
 use EzSystems\EzPlatformAdminUi\Siteaccess\SiteaccessResolverInterface;
 use EzSystems\EzPlatformAdminUi\Specification\ContentIsUser;
 use EzSystems\EzPlatformAdminUi\Specification\ContentType\ContentTypeIsUser;
@@ -42,13 +46,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
-use Symfony\Component\Translation\TranslatorInterface;
 use eZ\Publish\API\Repository\Exceptions\InvalidArgumentException as APIRepositoryInvalidArgumentException;
 use Symfony\Component\Translation\Exception\InvalidArgumentException as TranslationInvalidArgumentException;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ContentController extends Controller
 {
-    /** @var NotificationHandlerInterface */
+    /** @var TranslatableNotificationHandlerInterface */
     private $notificationHandler;
 
     /** @var ContentService */
@@ -59,9 +63,6 @@ class ContentController extends Controller
 
     /** @var SubmitHandler */
     private $submitHandler;
-
-    /** @var TranslatorInterface */
-    private $translator;
 
     /** @var ContentMainLocationUpdateMapper */
     private $contentMainLocationUpdateMapper;
@@ -84,33 +85,20 @@ class ContentController extends Controller
     /** @var \eZ\Publish\Core\Helper\TranslationHelper */
     private $translationHelper;
 
-    /** @var array */
-    private $userContentTypeIdentifier;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /** @var \eZ\Publish\API\Repository\ContentTypeService */
-    private $contentTypeService;
+    /** @var \EzSystems\EzPlatformAdminUi\Siteaccess\SiteAccessNameGeneratorInterface */
+    private $siteAccessNameGenerator;
 
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface $notificationHandler
-     * @param \eZ\Publish\API\Repository\ContentService $contentService
-     * @param \EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory $formFactory
-     * @param \EzSystems\EzPlatformAdminUi\Form\SubmitHandler $submitHandler
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param \EzSystems\EzPlatformAdminUi\Form\DataMapper\ContentMainLocationUpdateMapper $contentMetadataUpdateMapper
-     * @param \EzSystems\EzPlatformAdminUi\Siteaccess\SiteaccessResolverInterface $siteaccessResolver
-     * @param \eZ\Publish\API\Repository\LocationService $locationService
-     * @param \eZ\Publish\API\Repository\UserService $userService
-     * @param \eZ\Publish\API\Repository\PermissionResolver $permissionResolver
-     * @param \EzSystems\EzPlatformAdminUi\Permission\LookupLimitationsTransformer $lookupLimitationsTransformer
-     * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
-     * @param array $userContentTypeIdentifier
-     */
+    /** @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface */
+    private $eventDispatcher;
+
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         ContentService $contentService,
         FormFactory $formFactory,
         SubmitHandler $submitHandler,
-        TranslatorInterface $translator,
         ContentMainLocationUpdateMapper $contentMetadataUpdateMapper,
         SiteaccessResolverInterface $siteaccessResolver,
         LocationService $locationService,
@@ -118,23 +106,24 @@ class ContentController extends Controller
         PermissionResolver $permissionResolver,
         LookupLimitationsTransformer $lookupLimitationsTransformer,
         TranslationHelper $translationHelper,
-        ContentTypeService $contentTypeService,
-        array $userContentTypeIdentifier
+        ConfigResolverInterface $configResolver,
+        SiteAccessNameGeneratorInterface $siteAccessNameGenerator,
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->notificationHandler = $notificationHandler;
         $this->contentService = $contentService;
         $this->formFactory = $formFactory;
         $this->submitHandler = $submitHandler;
-        $this->translator = $translator;
         $this->contentMainLocationUpdateMapper = $contentMetadataUpdateMapper;
         $this->siteaccessResolver = $siteaccessResolver;
         $this->locationService = $locationService;
         $this->userService = $userService;
-        $this->userContentTypeIdentifier = $userContentTypeIdentifier;
         $this->permissionResolver = $permissionResolver;
         $this->translationHelper = $translationHelper;
         $this->lookupLimitationsTransformer = $lookupLimitationsTransformer;
-        $this->contentTypeService = $contentTypeService;
+        $this->configResolver = $configResolver;
+        $this->siteAccessNameGenerator = $siteAccessNameGenerator;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -160,17 +149,17 @@ class ContentController extends Controller
                 $language = $data->getLanguage();
                 $parentLocation = $data->getParentLocation();
 
-                if ((new ContentTypeIsUser($this->userContentTypeIdentifier))->isSatisfiedBy($contentType)) {
-                    return $this->redirectToRoute('ez_user_create', [
+                if ((new ContentTypeIsUser($this->configResolver->getParameter('user_content_type_identifier')))->isSatisfiedBy($contentType)) {
+                    return $this->redirectToRoute('ezplatform.user.create', [
                         'contentTypeIdentifier' => $contentType->identifier,
                         'language' => $language->languageCode,
                         'parentLocationId' => $parentLocation->id,
                     ]);
                 }
 
-                return $this->redirectToRoute('ez_content_create_no_draft', [
+                return $this->redirectToRoute('ezplatform.content.create.proxy', [
                     'contentTypeIdentifier' => $contentType->identifier,
-                    'language' => $language->languageCode,
+                    'languageCode' => $language->languageCode,
                     'parentLocationId' => $parentLocation->id,
                 ]);
             });
@@ -181,6 +170,33 @@ class ContentController extends Controller
         }
 
         return $this->redirect($this->generateUrl('ezplatform.dashboard'));
+    }
+
+    public function proxyCreateAction(
+        ContentType $contentType,
+        string $languageCode,
+        int $parentLocationId
+    ): Response {
+        /** @var \EzSystems\EzPlatformAdminUi\Event\ContentProxyCreateEvent $event */
+        $event = $this->eventDispatcher->dispatch(
+            new ContentProxyCreateEvent(
+                $contentType,
+                $languageCode,
+                $parentLocationId,
+                new Options()
+            )
+        );
+
+        if ($event->hasResponse()) {
+            return $event->getResponse();
+        }
+
+        // Fallback to "nodraft"
+        return $this->redirectToRoute('ezplatform.content.create_no_draft', [
+            'contentTypeIdentifier' => $contentType->identifier,
+            'language' => $languageCode,
+            'parentLocationId' => $parentLocationId,
+        ]);
     }
 
     /**
@@ -212,7 +228,7 @@ class ContentController extends Controller
                 $versionNo = $versionInfo->versionNo;
 
                 if ((new ContentIsUser($this->userService))->isSatisfiedBy($content)) {
-                    return $this->redirectToRoute('ez_user_update', [
+                    return $this->redirectToRoute('ezplatform.user.update', [
                         'contentId' => $contentInfo->id,
                         'versionNo' => $versionNo,
                         'language' => $language->languageCode,
@@ -224,16 +240,14 @@ class ContentController extends Controller
                     $versionNo = $contentDraft->getVersionInfo()->versionNo;
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("New Version Draft for '%name%' created.") */
-                            'content.create_draft.success',
-                            ['%name%' => $this->translationHelper->getTranslatedContentName($content)],
-                            'content'
-                        )
+                        /** @Desc("Created a new draft for '%name%'.") */
+                        'content.create_draft.success',
+                        ['%name%' => $this->translationHelper->getTranslatedContentName($content)],
+                        'content'
                     );
                 }
 
-                return $this->redirectToRoute('ez_content_draft_edit', [
+                return $this->redirectToRoute('ezplatform.content.draft.edit', [
                     'contentId' => $contentInfo->id,
                     'versionNo' => $versionNo,
                     'language' => $language->languageCode,
@@ -253,7 +267,8 @@ class ContentController extends Controller
         $contentInfo = $data->getContentInfo();
 
         if (null !== $contentInfo) {
-            return $this->redirectToRoute('_ezpublishLocation', [
+            return $this->redirectToRoute('_ez_content_view', [
+                'contentId' => $contentInfo->id,
                 'locationId' => $contentInfo->mainLocationId,
             ]);
         }
@@ -287,15 +302,14 @@ class ContentController extends Controller
                 $this->contentService->updateContentMetadata($contentInfo, $contentMetadataUpdateStruct);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Main location for '%name%' updated.") */
-                        'content.main_location_update.success',
-                        ['%name%' => $contentInfo->name],
-                        'content'
-                    )
+                    /** @Desc("Main Location for '%name%' updated.") */
+                    'content.main_location_update.success',
+                    ['%name%' => $contentInfo->name],
+                    'content'
                 );
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $contentInfo->id,
                     'locationId' => $contentInfo->mainLocationId,
                     '_fragment' => 'ez-tab-location-view-locations',
                 ]));
@@ -311,7 +325,8 @@ class ContentController extends Controller
         $contentInfo = $data->getContentInfo();
 
         if (null !== $contentInfo) {
-            return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+            return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                'contentId' => $contentInfo->id,
                 'locationId' => $contentInfo->mainLocationId,
                 '_fragment' => 'ez-tab-location-view-locations',
             ]));
@@ -350,21 +365,26 @@ class ContentController extends Controller
             $location = $this->locationService->loadLocation($content->contentInfo->mainLocationId);
         }
 
-        $siteaccesses = $this->siteaccessResolver->getSiteaccessesForLocation($location, $versionNo, $languageCode);
+        $siteAccesses = $this->siteaccessResolver->getSiteAccessesListForLocation($location, $versionNo, $languageCode);
 
-        if (empty($siteaccesses)) {
+        if (empty($siteAccesses)) {
             throw new BadStateException(
                 'siteaccess',
-                'There is no siteaccesses available for particular content'
+                'There is no SiteAccess available for this Content item'
             );
+        }
+
+        $siteAccessesList = [];
+        foreach ($siteAccesses as $siteAccess) {
+            $siteAccessesList[$siteAccess->name] = $this->siteAccessNameGenerator->generate($siteAccess);
         }
 
         return $this->render('@ezdesign/content/content_preview.html.twig', [
             'location' => $location,
             'content' => $content,
             'language_code' => $languageCode,
-            'siteaccesses' => $siteaccesses,
-            'versionNo' => $versionNo ?? $content->getVersionInfo()->versionNo,
+            'siteaccesses' => $siteAccessesList,
+            'version_no' => $versionNo ?? $content->getVersionInfo()->versionNo,
         ]);
     }
 
@@ -386,15 +406,14 @@ class ContentController extends Controller
                 $contentMetadataUpdateStruct = $mapper->reverseMap($data);
                 $this->contentService->updateContentMetadata($contentInfo, $contentMetadataUpdateStruct);
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Main language for '%name%' updated.") */
-                        'content.main_language_update.success',
-                        ['%name%' => $this->translationHelper->getTranslatedContentName($content)],
-                        'content'
-                    )
+                    /** @Desc("Main language for '%name%' updated.") */
+                    'content.main_language_update.success',
+                    ['%name%' => $this->translationHelper->getTranslatedContentName($content)],
+                    'content'
                 );
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $contentInfo->id,
                     'locationId' => $contentInfo->mainLocationId,
                     '_fragment' => 'ez-tab-location-view-translations',
                 ]));
@@ -407,7 +426,8 @@ class ContentController extends Controller
         $data = $form->getData();
         $contentInfo = $data->getContentInfo();
         if (null !== $contentInfo) {
-            return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+            return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                'contentId' => $contentInfo->id,
                 'locationId' => $contentInfo->mainLocationId,
                 '_fragment' => 'ez-tab-location-view-translations',
             ]));
@@ -436,23 +456,19 @@ class ContentController extends Controller
 
                 if ($contentInfo->isHidden && $desiredVisibility === false) {
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Content '%name%' was already hidden.") */
-                            'content.hide.already_hidden',
-                            ['%name%' => $contentName],
-                            'content'
-                        )
+                        /** @Desc("Content item '%name%' is already hidden.") */
+                        'content.hide.already_hidden',
+                        ['%name%' => $contentName],
+                        'content'
                     );
                 }
 
                 if (!$contentInfo->isHidden && $desiredVisibility === true) {
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Content '%name%' was already visible.") */
-                            'content.reveal.already_visible',
-                            ['%name%' => $contentName],
-                            'content'
-                        )
+                        /** @Desc("Content item '%name%' is already visible.") */
+                        'content.reveal.already_visible',
+                        ['%name%' => $contentName],
+                        'content'
                     );
                 }
 
@@ -460,12 +476,10 @@ class ContentController extends Controller
                     $this->contentService->hideContent($contentInfo);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Content '%name%' has been hidden.") */
-                            'content.hide.success',
-                            ['%name%' => $contentName],
-                            'content'
-                        )
+                        /** @Desc("Content item '%name%' hidden.") */
+                        'content.hide.success',
+                        ['%name%' => $contentName],
+                        'content'
                     );
                 }
 
@@ -473,12 +487,10 @@ class ContentController extends Controller
                     $this->contentService->revealContent($contentInfo);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Content '%name%' has been revealed.") */
-                            'content.reveal.success',
-                            ['%name%' => $contentName],
-                            'content'
-                        )
+                        /** @Desc("Content item '%name%' revealed.") */
+                        'content.reveal.success',
+                        ['%name%' => $contentName],
+                        'content'
                     );
                 }
 

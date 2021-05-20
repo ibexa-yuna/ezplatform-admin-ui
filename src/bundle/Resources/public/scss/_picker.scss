@@ -1,6 +1,10 @@
 .ez-picker {
     position: relative;
 
+    &__input[readonly][disabled] {
+        cursor: not-allowed;
+    }
+
     &__btn--clear-input {
         position: absolute;
         z-index: 2;
@@ -19,14 +23,13 @@
         outline: none;
 
         .ez-icon {
-            fill: $ez-ground-base-dark;
-            transition: fill 0.3s $ez-admin-transition;
+            transition: fill 0.3s $ibexa-admin-transition;
         }
 
         &:hover,
         &:focus {
             .ez-icon {
-                fill: $ez-color-base-pale;
+                fill: $ibexa-color-base-dark;
             }
         }
     }

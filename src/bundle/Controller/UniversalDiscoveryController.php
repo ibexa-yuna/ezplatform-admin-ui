@@ -8,108 +8,113 @@ declare(strict_types=1);
 
 namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 
-use eZ\Publish\API\Repository\LocationService;
-use eZ\Publish\API\Repository\SearchService;
-use eZ\Publish\API\Repository\Values\Content\LocationQuery;
+use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\Query;
-use eZ\Publish\API\Repository\Values\Content\Search\SearchHit;
-use eZ\Publish\API\Repository\Values\ValueObject;
-use eZ\Publish\Core\REST\Common\Output\Visitor;
+use EzSystems\EzPlatformAdminUi\UniversalDiscovery\Provider;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class UniversalDiscoveryController extends Controller
 {
-    /** @var \eZ\Publish\API\Repository\LocationService */
-    protected $locationService;
+    /** @var \EzSystems\EzPlatformAdminUi\UniversalDiscovery\Provider */
+    private $provider;
 
-    /** @var \eZ\Publish\API\Repository\SearchService */
-    protected $searchService;
-
-    /** @var \eZ\Publish\Core\REST\Common\Output\Visitor */
-    protected $visitor;
-
-    /**
-     * @param \eZ\Publish\API\Repository\LocationService $locationService
-     * @param \eZ\Publish\API\Repository\SearchService $searchService
-     * @param \eZ\Publish\Core\REST\Common\Output\Visitor $visitor
-     */
     public function __construct(
-        LocationService $locationService,
-        SearchService $searchService,
-        Visitor $visitor
+        Provider $provider
     ) {
-        $this->searchService = $searchService;
-        $this->locationService = $locationService;
-        $this->visitor = $visitor;
+        $this->provider = $provider;
     }
 
-    /**
-     * @param int $startingLocationId
-     * @param int $locationId
-     * @param int $limit
-     *
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
-     */
-    public function preselectedLocationDataAction(int $startingLocationId, int $locationId, int $limit = 50): JsonResponse
+    public function locationsAction(Request $request)
     {
-        $location = $this->locationService->loadLocation($locationId);
+        return new JsonResponse(
+            $this->provider->getLocations(
+                explode(
+                    ',',
+                    $request->query->get('locationIds', '')
+                )
+            )
+        );
+    }
 
-        $subitemsLocationIds = array_unique([
-            $startingLocationId,
-            $location->parentLocationId,
-            $location->id,
+    public function locationAction(
+        Request $request,
+        int $locationId
+    ): JsonResponse {
+        $offset = $request->query->getInt('offset', 0);
+        $limit = $request->query->getInt('limit', 25);
+        $sortClauseName = $request->query->getAlpha('sortClause', Provider::SORT_CLAUSE_DATE_PUBLISHED);
+        $sortOrder = $request->query->getAlpha('sortOrder', Query::SORT_ASC);
+
+        $sortClause = $this->provider->getSortClause($sortClauseName, $sortOrder);
+
+        return new JsonResponse(
+            $this->provider->getLocationData($locationId, $offset, $limit, $sortClause)
+        );
+    }
+
+    public function locationGridViewAction(
+        Request $request,
+        int $locationId
+    ): JsonResponse {
+        $offset = $request->query->getInt('offset', 0);
+        $limit = $request->query->getInt('limit', 25);
+        $sortClauseName = $request->query->getAlpha('sortClause', Provider::SORT_CLAUSE_DATE_PUBLISHED);
+        $sortOrder = $request->query->getAlpha('sortOrder', Query::SORT_ASC);
+
+        $sortClause = $this->provider->getSortClause($sortClauseName, $sortOrder);
+
+        return new JsonResponse(
+            $this->provider->getLocationGridViewData($locationId, $offset, $limit, $sortClause)
+        );
+    }
+
+    public function accordionAction(
+        Request $request,
+        int $locationId
+    ): JsonResponse {
+        $limit = $request->query->getInt('limit', 25);
+        $sortClauseName = $request->query->getAlpha('sortClause', Provider::SORT_CLAUSE_DATE_PUBLISHED);
+        $sortOrder = $request->query->getAlpha('sortOrder', Query::SORT_ASC);
+        $rootLocationId = $request->query->getInt('rootLocationId', Provider::ROOT_LOCATION_ID);
+
+        $sortClause = $this->provider->getSortClause($sortClauseName, $sortOrder);
+        $breadcrumbLocations = $this->provider->getBreadcrumbLocations($locationId);
+
+        $columns = $this->provider->getColumns($locationId, $limit, $sortClause, false, $rootLocationId);
+
+        return new JsonResponse([
+            'breadcrumb' => array_map(
+                function (Location $location) {
+                    return $this->provider->getRestFormat($location);
+                },
+                $breadcrumbLocations
+            ),
+            'columns' => $columns,
         ]);
-
-        $relativeLocationPath = array_slice(
-            $location->path,
-            array_search($startingLocationId, $location->path)
-        );
-
-        $locations = $this->searchService->findLocations(
-            new LocationQuery([
-                'filter' => new Query\Criterion\LocationId($relativeLocationPath),
-            ])
-        );
-
-        $result = [];
-
-        foreach ($locations->searchHits as $location) {
-            $result['locations'][$location->valueObject->id] = $this->getRestFormat($location->valueObject);
-        }
-
-        foreach ($subitemsLocationIds as $id) {
-            $subitems = $this->searchService->findLocations(
-                new LocationQuery([
-                    'filter' => new Query\Criterion\ParentLocationId($id),
-                    'limit' => $limit,
-                ])
-            );
-
-            $result['subitems'][$id] = [
-                'totalCount' => $subitems->totalCount,
-                'locations' => array_map(function (SearchHit $searchHit) {
-                    return $this->getRestFormat($searchHit->valueObject);
-                }, $subitems->searchHits),
-            ];
-        }
-
-        return new JsonResponse($result);
     }
 
-    /**
-     * @param \eZ\Publish\API\Repository\Values\ValueObject $valueObject
-     *
-     * @return array
-     */
-    protected function getRestFormat(ValueObject $valueObject): array
-    {
-        return json_decode(
-            $this->visitor->visit($valueObject)->getContent(),
-            true
-        );
+    public function accordionGridViewAction(
+        Request $request,
+        int $locationId
+    ): JsonResponse {
+        $limit = $request->query->getInt('limit', 25);
+        $sortClauseName = $request->query->getAlpha('sortClause', Provider::SORT_CLAUSE_DATE_PUBLISHED);
+        $sortOrder = $request->query->getAlpha('sortOrder', Query::SORT_ASC);
+        $rootLocationId = $request->query->getInt('rootLocationId', Provider::ROOT_LOCATION_ID);
+
+        $sortClause = $this->provider->getSortClause($sortClauseName, $sortOrder);
+
+        $columns = $this->provider->getColumns($locationId, $limit, $sortClause, true, $rootLocationId);
+
+        return new JsonResponse([
+            'breadcrumb' => array_map(
+                function (Location $location) {
+                    return $this->provider->getRestFormat($location);
+                },
+                $this->provider->getBreadcrumbLocations($locationId)
+            ),
+            'columns' => $columns,
+        ]);
     }
 }

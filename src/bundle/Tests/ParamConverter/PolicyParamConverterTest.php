@@ -6,13 +6,14 @@
  */
 namespace EzSystems\EzPlatformAdminUiBundle\Tests\ParamConverter;
 
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\RoleService;
 use eZ\Publish\API\Repository\Values\User\Policy;
 use eZ\Publish\Core\Repository\Values\User\Policy as UserPolicy;
 use eZ\Publish\API\Repository\Values\User\Role;
 use EzSystems\EzPlatformAdminUiBundle\ParamConverter\PolicyParamConverter;
 use Symfony\Component\HttpFoundation\Request;
-use PHPUnit_Framework_MockObject_MockObject as MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PolicyParamConverterTest extends AbstractParamConverterTest
@@ -26,26 +27,32 @@ class PolicyParamConverterTest extends AbstractParamConverterTest
     /** @var MockObject */
     protected $serviceMock;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->serviceMock = $this->createMock(RoleService::class);
 
         $this->converter = new PolicyParamConverter($this->serviceMock);
     }
 
-    public function testApply()
+    /**
+     * @dataProvider dataProvider
+     *
+     * @param mixed $policyId The policy identifier fetched from the request
+     * @param mixed $roleId The role identifier fetched from the request
+     * @param int $roleIdToLoad The role identifier used to load the role
+     */
+    public function testApply($policyId, $roleId, int $roleIdToLoad)
     {
-        $roleId = 42;
-        $policyId = 53;
+        $matchingPolicyId = 53;
         $valueObject = $this->createMock(Role::class);
         $valueObject->expects(self::once())
             ->method('getPolicies')
-            ->willReturn([new UserPolicy(['id' => $policyId])]);
+            ->willReturn([new UserPolicy(['id' => $matchingPolicyId]), new UserPolicy(['id' => 444])]);
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadRole')
-            ->with($roleId)
+            ->with($roleIdToLoad)
             ->willReturn($valueObject);
 
         $requestAttributes = [
@@ -56,9 +63,10 @@ class PolicyParamConverterTest extends AbstractParamConverterTest
         $request = new Request([], [], $requestAttributes);
         $config = $this->createConfiguration(self::SUPPORTED_CLASS, self::PARAMETER_NAME);
 
-        $this->converter->apply($request, $config);
-
-        $this->assertInstanceOf(self::SUPPORTED_CLASS, $request->attributes->get(self::PARAMETER_NAME));
+        $this->assertTrue($this->converter->apply($request, $config));
+        $policy = $request->attributes->get(self::PARAMETER_NAME);
+        $this->assertInstanceOf(self::SUPPORTED_CLASS, $policy);
+        $this->assertSame($matchingPolicyId, $policy->id);
     }
 
     /**
@@ -87,13 +95,13 @@ class PolicyParamConverterTest extends AbstractParamConverterTest
         $policyId = 53;
 
         $this->expectException(NotFoundHttpException::class);
-        $this->expectExceptionMessage(sprintf('Role %s not found!', $roleId));
+        $this->expectExceptionMessage(sprintf('Role %s not found.', $roleId));
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadRole')
             ->with($roleId)
-            ->willReturn(null);
+            ->willThrowException($this->createMock(NotFoundException::class));
 
         $requestAttributes = [
             PolicyParamConverter::PARAMETER_ROLE_ID => $roleId,
@@ -112,7 +120,7 @@ class PolicyParamConverterTest extends AbstractParamConverterTest
         $policyId = 53;
 
         $this->expectException(NotFoundHttpException::class);
-        $this->expectExceptionMessage(sprintf('Policy %s not found!', $policyId));
+        $this->expectExceptionMessage(sprintf('Policy %s not found.', $policyId));
 
         $valueObject = $this->createMock(Role::class);
         $valueObject->expects(self::once())
@@ -144,6 +152,15 @@ class PolicyParamConverterTest extends AbstractParamConverterTest
         return [
             'empty_role_id' => [null, 53],
             'empty_policy_id' => [42, null],
+        ];
+    }
+
+    public function dataProvider(): array
+    {
+        return [
+            'integer' => [53, 42, 42],
+            'number_as_string' => ['53', '42', 42],
+            'string' => ['53k', '42k', 42],
         ];
     }
 }

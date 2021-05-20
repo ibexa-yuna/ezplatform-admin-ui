@@ -1,8 +1,34 @@
-(function(global, doc) {
+(function(global, doc, eZ, React, ReactDOM) {
     const SELECTOR_FIELD = '.ez-field-edit--ezrichtext';
     const SELECTOR_INPUT = '.ez-data-source__richtext';
+    const SELECTOR_ERROR_NODE = '.ez-field-edit__label-wrapper';
+    const selectContent = (config) => {
+        const udwContainer = document.querySelector('#react-udw');
+        const confirmHandler = (items) => {
+            if (typeof config.onConfirm === 'function') {
+                config.onConfirm(items);
+            }
 
-    class EzRichTextValidator extends global.eZ.BaseFieldValidator {
+            ReactDOM.unmountComponentAtNode(udwContainer);
+        };
+        const cancelHandler = () => {
+            if (typeof config.onCancel === 'function') {
+                config.onCancel();
+            }
+
+            ReactDOM.unmountComponentAtNode(udwContainer);
+        };
+        const mergedConfig = Object.assign({}, config, {
+            onConfirm: confirmHandler,
+            onCancel: cancelHandler,
+        });
+
+        ReactDOM.render(React.createElement(eZ.modules.UniversalDiscovery, mergedConfig), udwContainer);
+    };
+
+    eZ.addConfig('richText.alloyEditor.callbacks.selectContent', selectContent);
+
+    class EzRichTextValidator extends eZ.BaseFieldValidator {
         constructor(config) {
             super(config);
 
@@ -25,15 +51,15 @@
             const result = { isError };
 
             if (isError) {
-                result.errorMessage = global.eZ.errors.emptyField.replace('{fieldName}', label);
+                result.errorMessage = eZ.errors.emptyField.replace('{fieldName}', label);
             }
 
             return result;
         }
     }
 
-    [...doc.querySelectorAll(`${SELECTOR_FIELD} ${SELECTOR_INPUT}`)].forEach((container) => {
-        const richtext = new global.eZ.BaseRichText();
+    doc.querySelectorAll(`${SELECTOR_FIELD} ${SELECTOR_INPUT}`).forEach((container) => {
+        const richtext = new eZ.BaseRichText();
         const alloyEditor = richtext.init(container);
 
         const validator = new EzRichTextValidator({
@@ -45,19 +71,19 @@
                     selector: SELECTOR_INPUT,
                     eventName: 'input',
                     callback: 'validateInput',
-                    errorNodeSelectors: ['.ez-field-edit__label-wrapper'],
+                    errorNodeSelectors: [SELECTOR_ERROR_NODE],
                 },
                 {
                     selector: SELECTOR_INPUT,
                     eventName: 'blur',
                     callback: 'validateInput',
-                    errorNodeSelectors: ['.ez-field-edit__label-wrapper'],
+                    errorNodeSelectors: [SELECTOR_ERROR_NODE],
                 },
             ],
         });
 
         validator.init();
 
-        global.eZ.fieldTypeValidators = global.eZ.fieldTypeValidators ? [...global.eZ.fieldTypeValidators, validator] : [validator];
+        eZ.addConfig('fieldTypeValidators', [validator], true);
     });
-})(window, document);
+})(window, window.document, window.eZ, window.React, window.ReactDOM);

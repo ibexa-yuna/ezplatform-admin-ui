@@ -1,50 +1,53 @@
 .ez-pagination {
-    font-size: $ez-pagination-font-size;
+    @include pagination-main-container();
+    padding: calculateRem(24px) calculateRem(16px);
 
     &__text {
-        font-size: .75rem;
+        @include pagination-info();
     }
 
-    &__btn {
-        font-size: 1rem;
-    }
+    &__btns {
+        margin: 0;
+        font-size: calculateRem(14px);
 
-    &__spacing {
-        margin-top: -2rem;
-    }
-}
+        .page-item {
+            position: relative;
+            margin: 0 calculateRem(2px);
+        }
 
-.page-item {
-    &:first-child:not(.disabled), &:last-child:not(.disabled) {
         .page-link {
-            background-color: $ez-color-secondary;
+            @include pagination-link();
+        }
+
+        .page-item.prev {
+            @include pagination-prev-btn();
+
+            .page-link {
+                padding-left: calculateRem(20px);
+            }
+        }
+
+        .page-item.next {
+            @include pagination-next-btn();
+
+            .page-link {
+                padding-right: calculateRem(20px);
+            }
+        }
+
+        .page-item.prev,
+        .page-item.next {
+            &.disabled {
+                .page-link {
+                    color: $ibexa-color-font-pale;
+                    cursor: not-allowed;
+                }
+            }
+
+            .page-link {
+                width: initial;
+                border-radius: 0;
+            }
         }
     }
-
-    &:first-child, &:last-child {
-        .page-link {
-            border-radius: $ez-pagination-border-radius;
-            color: $ez-white;
-        }
-    }
-
-    &.active .page-link {
-        z-index: 0;
-        font-weight: bold;
-    }
-}
-
-.page-item.prev, .page-item.next {
-    &.disabled .page-link {
-        color: $ez-white;
-        background-color: $ez-color-secondary;
-        border: $ez-color-secondary;
-        opacity: .3;
-        cursor: not-allowed;
-    }
-}
-
-.page-link {
-    margin: $ez-pagination-margin;
-    border-radius: $ez-pagination-page-link-radius;
 }

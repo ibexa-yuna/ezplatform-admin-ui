@@ -7,9 +7,11 @@
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
 use Behat\Mink\Element\NodeElement;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\API\ContentData\FieldTypeNameConverter;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Browser\Element\Element;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\DefaultFieldElement;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\EzFieldElement;
 use PHPUnit\Framework\Assert;
 
 /** Element that describes structures in all update forms */
@@ -20,17 +22,17 @@ class AdminUpdateForm extends Element
 
     private const NEW_FIELD_TITLE_PATTERN = 'New FieldDefinition (%s)';
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->fields = [
             'formElement' => '.form-group',
             'mainFormSection' => 'form',
             'richTextSelector' => '.ez-data-source__richtext',
-            'fieldTypesList' => '#ezrepoforms_contenttype_update_fieldTypeSelection',
-            'addFieldDefinition' => 'ezrepoforms_contenttype_update_addFieldDefinition',
-            'fieldDefinitionContainer' => '.ez-card--fieldtype-container:nth-child(%s)',
-            'fieldDefinitionName' => '.ez-card--fieldtype-container .ez-card__header .form-check-label',
+            'fieldTypesList' => '#ezplatform_content_forms_contenttype_update_fieldTypeSelection',
+            'addFieldDefinition' => 'ezplatform_content_forms_contenttype_update_addFieldDefinition',
+            'fieldDefinitionContainer' => '.ez-card--toggle-group:nth-child(%s)',
+            'fieldDefinitionName' => '.ez-card--toggle-group .ez-card__header .form-check-label',
             'fieldBody' => 'ez-card__body',
             'fieldCollapsed' => 'ez-card--collapsed',
             'fieldDefinitionToggler' => '.ez-card__body-display-toggler',
@@ -55,7 +57,7 @@ class AdminUpdateForm extends Element
      */
     public function fillFieldWithValue(string $fieldName, $value, ?string $containerName = null): void
     {
-        $newContainerName = (!$containerName) ? $containerName : sprintf($this::NEW_FIELD_TITLE_PATTERN, EzFieldElement::getFieldInternalNameByName($containerName));
+        $newContainerName = (!$containerName) ? $containerName : sprintf(self::NEW_FIELD_TITLE_PATTERN, FieldTypeNameConverter::getFieldTypeIdentifierByName($containerName));
         $fieldElement = $this->getField($fieldName, $newContainerName);
         $fieldElement->setValue($value);
     }
@@ -114,7 +116,7 @@ class AdminUpdateForm extends Element
      */
     public function verifyNewFieldDefinitionFormExists(string $fieldName): void
     {
-        $form = $this->context->getElementByText(sprintf($this::NEW_FIELD_TITLE_PATTERN, EzFieldElement::getFieldInternalNameByName($fieldName)), $this->fields['fieldDefinitionName']);
+        $form = $this->context->getElementByText(sprintf(self::NEW_FIELD_TITLE_PATTERN, FieldTypeNameConverter::getFieldTypeIdentifierByName($fieldName)), $this->fields['fieldDefinitionName']);
         if ($form === null) {
             throw new \Exception('Field definition not added to the form.');
         }
@@ -141,7 +143,7 @@ class AdminUpdateForm extends Element
      */
     public function expandFieldDefinition(string $fieldName): void
     {
-        $container = $this->context->findElement($this->getFieldDefinitionContainerLocator(sprintf($this::NEW_FIELD_TITLE_PATTERN, EzFieldElement::getFieldInternalNameByName($fieldName))));
+        $container = $this->context->findElement($this->getFieldDefinitionContainerLocator(sprintf($this::NEW_FIELD_TITLE_PATTERN, FieldTypeNameConverter::getFieldTypeIdentifierByName($fieldName))));
         Assert::assertNotNull($container, sprintf('Definition for field %s not found', $fieldName));
 
         if (strpos($container->getAttribute('class'), $this->fields['fieldCollapsed']) !== false) {

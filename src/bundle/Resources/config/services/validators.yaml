@@ -1,0 +1,50 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    EzSystems\EzPlatformAdminUi\Validator\Constraints\:
+        resource: "../../../lib/Validator/Constraints"
+
+    EzSystems\EzPlatformAdminUi\Validator\Constraints\UserPasswordValidator:
+        tags:
+            - { name: validator.constraint_validator }
+
+    EzSystems\EzPlatformAdminUi\Validator\Constraints\LocationIsWithinCopySubtreeLimitValidator:
+        arguments:
+            $configResolver: '@ezpublish.config.resolver'
+
+    EzSystems\EzPlatformAdminUi\Validator\Constraints\UniqueContentTypeIdentifierValidator:
+        arguments: ["@ezpublish.api.service.content_type"]
+        tags:
+            - { name: validator.constraint_validator, alias: ezplatform.content_forms.validator.unique_content_type_identifier }
+
+    ezplatform.content_forms.validator.field_type.abstract:
+        class: EzSystems\EzPlatformAdminUi\Validator\Constraints\FieldTypeValidator
+        arguments: ["@ezpublish.api.service.field_type"]
+        abstract: true
+        autoconfigure: false
+
+    EzSystems\EzPlatformAdminUi\Validator\Constraints\ValidatorConfigurationValidator:
+        parent: ezplatform.content_forms.validator.field_type.abstract
+        autowire: true
+        autoconfigure: false
+        public: false
+        tags:
+            - { name: validator.constraint_validator, alias: ezplatform.content_forms.validator.validator_configuration }
+
+    EzSystems\EzPlatformAdminUi\Validator\Constraints\FieldSettingsValidator:
+        parent: ezplatform.content_forms.validator.field_type.abstract
+        autowire: true
+        autoconfigure: false
+        public: false
+        tags:
+            - { name: validator.constraint_validator, alias: ezplatform.content_forms.validator.field_settings }
+
+    EzSystems\EzPlatformAdminUi\Validator\Constraints\UniqueURLValidator:
+        arguments:
+            - '@ezpublish.api.service.url'
+        tags:
+            - { name: validator.constraint_validator, alias: ezplatform.content_forms.validator.unique_url }
+

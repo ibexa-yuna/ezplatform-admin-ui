@@ -6,9 +6,10 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Dialog;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\TrashTable;
 use PHPUnit\Framework\Assert;
 
@@ -29,7 +30,7 @@ class TrashPage extends Page
      */
     public $trashTable;
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->siteAccess = 'admin';
@@ -51,12 +52,12 @@ class TrashPage extends Page
     public function verifyIfItemInTrash(string $itemType, string $itemName, bool $elementShouldExist): void
     {
         $isElementInTrash = !$this->isTrashEmpty() &&
-            ($this->trashTable->isElementInTable($itemName) && $this->trashTable->getTableCellValue('Type', $itemName) == $itemType);
+            ($this->trashTable->isElementInTable($itemName) && $this->trashTable->getTableCellValue('Content type', $itemName) == $itemType);
         $elementShouldExistString = $elementShouldExist ? 'n\'t' : '';
 
         Assert::assertTrue(
             ($isElementInTrash == $elementShouldExist),
-            sprintf('Item %s %s is%s in trash', $itemType, $itemName, $elementShouldExistString)
+            sprintf('Item %s %s is%s in Trash', $itemType, $itemName, $elementShouldExistString)
         );
     }
 

@@ -2,6 +2,9 @@
     const SELECTOR_LOCATION_LIMITATION_BTN = '.ez-pick-location-limitation-button';
     const SELECTOR_EZ_TAG = '.ez-tag';
     const IDS_SEPARATOR = ',';
+    const SELECTOR_CUSTOM_DROPDOWN_CONTAINER = '.ez-update-policy__action-wrapper';
+    const SELECTOR_SOURCE_INPUT = '.ez-update-policy__source-input';
+    const SELECTOR_ITEMS = '.ez-custom-dropdown__items';
     const token = doc.querySelector('meta[name="CSRF-Token"]').content;
     const siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
     const udwContainer = doc.getElementById('react-udw');
@@ -25,7 +28,7 @@
             credentials: 'same-origin',
         });
         const errorMessage = Translator.trans(
-            /*@Desc("Failed to fetch content names")*/ 'limitation.pick.error',
+            /*@Desc("Could not fetch content names")*/ 'limitation.pick.error',
             {},
             'universal_discovery_widget'
         );
@@ -52,7 +55,6 @@
                         identifier: `udw-locations-by-path-string-${pathArray.join('-')}`,
                         public: false,
                         LocationQuery: {
-                            Criteria: {},
                             FacetBuilders: {},
                             SortClauses: { SectionIdentifier: 'ascending' },
                             Filter: { LocationIdCriterion: pathArray.join(IDS_SEPARATOR) },
@@ -72,11 +74,11 @@
 
         return searchHitList.map((searchHit) => searchHit.value.Location.ContentInfo.Content.TranslatedName).join(' / ');
     };
-    const addLocationsToInput = (limitationBtn, newlySelectedItems) => {
+    const addLocationsToInput = (limitationBtn, selectedItems) => {
         const input = doc.querySelector(limitationBtn.dataset.locationInputSelector);
-        const newlySelectedLocationsIds = newlySelectedItems.map((item) => item.id).join(IDS_SEPARATOR);
+        const selectedLocationsIds = selectedItems.map((item) => item.id).join(IDS_SEPARATOR);
 
-        input.value = input.value ? `${input.value}${IDS_SEPARATOR}${newlySelectedLocationsIds}` : newlySelectedLocationsIds;
+        input.value = selectedLocationsIds;
     };
     const removeLocationFromInput = (locationInputSelector, removedLocationId) => {
         const input = doc.querySelector(locationInputSelector);
@@ -84,12 +86,12 @@
 
         input.value = locationsIdsWithoutRemoved.join(IDS_SEPARATOR);
     };
-    const addLocationsTags = (limitationBtn, newlySelectedItems) => {
+    const addLocationsTags = (limitationBtn, selectedItems) => {
         const tagsList = doc.querySelector(limitationBtn.dataset.selectedLocationListSelector);
         const tagTemplate = limitationBtn.dataset.valueTemplate;
         const fragment = doc.createDocumentFragment();
 
-        newlySelectedItems.forEach((location) => {
+        selectedItems.forEach((location) => {
             const locationId = location.id;
             const container = doc.createElement('ul');
             const renderedItem = tagTemplate.replace('{{ location_id }}', locationId);
@@ -103,12 +105,13 @@
             fragment.append(listItemNode);
         });
 
+        tagsList.innerHTML = '';
         tagsList.append(fragment);
 
-        setTagsBreadcrumbs(tagsList, newlySelectedItems);
+        setTagsBreadcrumbs(tagsList, selectedItems);
     };
-    const setTagsBreadcrumbs = (tagsList, newlySelectedItems) => {
-        const pathArraysWithoutRoot = newlySelectedItems.map(getLocationPathArray);
+    const setTagsBreadcrumbs = (tagsList, selectedItems) => {
+        const pathArraysWithoutRoot = selectedItems.map(getLocationPathArray);
 
         findLocationsByIdList(pathArraysWithoutRoot, (response) => {
             const { operations } = response.BulkOperationResponse;
@@ -145,10 +148,10 @@
         removeTagBtn.addEventListener('click', () => handleTagRemove(limitationBtn, tag), false);
     };
     const closeUDW = () => ReactDOM.unmountComponentAtNode(udwContainer);
-    const handleUdwConfirm = (limitationBtn, newlySelectedItems) => {
-        if (newlySelectedItems.length) {
-            addLocationsToInput(limitationBtn, newlySelectedItems);
-            addLocationsTags(limitationBtn, newlySelectedItems);
+    const handleUdwConfirm = (limitationBtn, selectedItems) => {
+        if (selectedItems.length) {
+            addLocationsToInput(limitationBtn, selectedItems);
+            addLocationsTags(limitationBtn, selectedItems);
         }
 
         closeUDW();
@@ -158,30 +161,22 @@
 
         const limitationBtn = event.currentTarget;
         const input = doc.querySelector(limitationBtn.dataset.locationInputSelector);
-        const selectedLocationsIds = input.value.split(IDS_SEPARATOR).map((idString) => parseInt(idString, 10));
+        const selectedLocationsIds = input.value
+            .split(IDS_SEPARATOR)
+            .filter((idString) => !!idString)
+            .map((idString) => parseInt(idString, 10));
         const config = JSON.parse(event.currentTarget.dataset.udwConfig);
-        const title = Translator.trans(/*@Desc("Choose locations")*/ 'subtree_limitation.title', {}, 'universal_discovery_widget');
+        const title = Translator.trans(/*@Desc("Choose Locations")*/ 'subtree_limitation.title', {}, 'universal_discovery_widget');
 
         ReactDOM.render(
-            React.createElement(
-                eZ.modules.UniversalDiscovery,
-                Object.assign(
-                    {
-                        onConfirm: handleUdwConfirm.bind(this, event.target),
-                        onCancel: closeUDW,
-                        title,
-                        startingLocationId: eZ.adminUiConfig.universalDiscoveryWidget.startingLocationId,
-                        multiple: true,
-                        restInfo: { token, siteaccess },
-                        canSelectContent: ({ item }, callback) => {
-                            const itemId = parseInt(item.id, 10);
-
-                            callback(!selectedLocationsIds.includes(itemId));
-                        },
-                    },
-                    config
-                )
-            ),
+            React.createElement(eZ.modules.UniversalDiscovery, {
+                onConfirm: handleUdwConfirm.bind(this, event.target),
+                onCancel: closeUDW,
+                title,
+                multiple: true,
+                selectedLocations: selectedLocationsIds,
+                ...config,
+            }),
             udwContainer
         );
     };
@@ -193,4 +188,15 @@
         tags.forEach(attachTagEventHandlers.bind(null, limitationBtn));
         limitationBtn.addEventListener('click', openUDW, false);
     });
-})(window, document, window.eZ, window.React, window.ReactDOM, window.Translator);
+
+    doc.querySelectorAll(SELECTOR_CUSTOM_DROPDOWN_CONTAINER).forEach((container) => {
+        const sourceInput = container.querySelector(SELECTOR_SOURCE_INPUT);
+        const dropdown = new eZ.core.CustomDropdown({
+            container,
+            sourceInput,
+            itemsContainer: container.querySelector(SELECTOR_ITEMS)
+        });
+
+        dropdown.init();
+    });
+})(window, window.document, window.eZ, window.React, window.ReactDOM, window.Translator);

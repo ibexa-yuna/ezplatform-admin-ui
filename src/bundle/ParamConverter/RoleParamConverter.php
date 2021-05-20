@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace EzSystems\EzPlatformAdminUiBundle\ParamConverter;
 
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\RoleService;
 use eZ\Publish\API\Repository\Values\User\Role;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -43,9 +44,10 @@ class RoleParamConverter implements ParamConverterInterface
 
         $id = (int)$request->get(self::PARAMETER_ROLE_ID);
 
-        $role = $this->roleService->loadRole($id);
-        if (!$role) {
-            throw new NotFoundHttpException("Role $id not found!");
+        try {
+            $role = $this->roleService->loadRole($id);
+        } catch (NotFoundException $e) {
+            throw new NotFoundHttpException("Role $id not found.");
         }
 
         $request->attributes->set($configuration->getName(), $role);

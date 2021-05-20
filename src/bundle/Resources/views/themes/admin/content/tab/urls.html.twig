@@ -1,0 +1,86 @@
+{% trans_default_domain 'content_url' %}
+{% import _self as tab %}
+{% include '@ezdesign/ui/table_header.html.twig' with {
+    header_text: 'tab.urls.custom_url_aliases'|trans({'%contentName%' : ez_content_name(content)})|desc('Custom URL aliases for %contentName%'),
+    tools: tab.table_header_tools(form_custom_url_remove, can_edit_custom_url)
+} %}
+
+{{  include('@ezdesign/content/tab/url/custom_urls_table.html.twig', {
+        'custom_urls_pager': custom_urls_pager,
+        'form_custom_url_remove': form_custom_url_remove,
+        'can_edit_custom_url': can_edit_custom_url,
+}) }}
+
+{% if custom_urls_pager.haveToPaginate %}
+    {% include '@ezdesign/ui/pagination.html.twig' with {
+        'pager': custom_urls_pager,
+        'paginaton_params': {
+            'routeName': custom_urls_pagination_params.route_name,
+            'routeParams': custom_urls_pagination_params.route_params|merge({
+                '_fragment': constant('EzSystems\\EzPlatformAdminUi\\Tab\\LocationView\\UrlsTab::URI_FRAGMENT'),
+                'page[system_url]': system_urls_pagination_params.page
+            }),
+            'pageParameter': '[page][custom_url]'
+        }
+    } %}
+{% endif %}
+
+{% include '@ezdesign/ui/table_header.html.twig' with { header_text: 'tab.urls.system.title'|trans|desc('System URL') } %}
+
+{{  include('@ezdesign/content/tab/url/system_urls_table.html.twig', {
+        'system_urls_pager': system_urls_pager,
+}) }}
+
+{% if system_urls_pager.haveToPaginate %}
+    {% include '@ezdesign/ui/pagination.html.twig' with {
+        'pager': system_urls_pager,
+        'paginaton_params': {
+            'routeName': system_urls_pagination_params.route_name,
+            'routeParams': system_urls_pagination_params.route_params|merge({
+                '_fragment': constant('EzSystems\\EzPlatformAdminUi\\Tab\\LocationView\\UrlsTab::URI_FRAGMENT'),
+                'page[custom_url]': custom_urls_pagination_params.page
+            }),
+            'pageParameter': '[page][system_url]'
+        }
+    } %}
+{% endif %}
+
+{% if can_edit_custom_url %}
+    {% include '@ezdesign/content/tab/url/modal_add_custom_url.html.twig' with {
+        'form': form_custom_url_add,
+        'parent_name': parent_name
+    } only %}
+{% endif %}
+
+{% macro table_header_tools(form_custom_url_remove, can_edit_custom_url) %}
+    {% if can_edit_custom_url %}
+        <button
+            class="btn btn-icon ez-btn--prevented"
+            data-toggle="modal"
+            data-target="#ez-modal--custom-url-alias"
+            title="{{ 'tab.urls.action.add'|trans|desc('Add a custom URL alias') }}">
+            <svg class="ez-icon ez-icon-create">
+                <use xlink:href="{{ ez_icon_path('create') }}"></use>
+            </svg>
+        </button>
+
+        {% set modal_data_target = 'delete-custom-url-modal' %}
+        <button
+            id="delete-custom-urls"
+            type="button"
+            class="btn btn-icon"
+            disabled
+            data-toggle="modal"
+            data-target="#{{ modal_data_target }}"
+            title="{{ 'tab.urls.action.delete'|trans|desc('Delete custom URL alias') }}">
+            <svg class="ez-icon ez-icon-trash">
+                <use xlink:href="{{ ez_icon_path('trash') }}"></use>
+            </svg>
+        </button>
+        {% include '@ezdesign/ui/modal/bulk_delete_confirmation.html.twig' with {
+            'id': modal_data_target,
+            'message': 'tab.urls.modal.message'|trans|desc('Do you want to delete the selected custom URL alias(es)?'),
+            'data_click': '#' ~ form_custom_url_remove.remove.vars.id,
+        }%}
+    {% endif %}
+{% endmacro %}

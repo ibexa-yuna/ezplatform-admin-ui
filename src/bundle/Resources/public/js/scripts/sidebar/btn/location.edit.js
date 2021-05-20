@@ -1,4 +1,4 @@
-(function(global, doc, $) {
+(function(global, doc, eZ, $, Routing) {
     const editActions = doc.querySelector('.ez-extra-actions--edit') || doc.querySelector('.ez-extra-actions--edit-user');
     const btns = [...editActions.querySelectorAll('.form-check [type="radio"]')];
     const form = editActions.querySelector('form');
@@ -17,7 +17,7 @@
     const redirectToUserEdit = (languageCode) => {
         const versionNo = form.querySelector('#user_edit_version_info_version_no').value;
 
-        window.location.href = global.Routing.generate('ez_user_update', { contentId, versionNo, language: languageCode });
+        window.location.href = Routing.generate('ezplatform.user.update', { contentId, versionNo, language: languageCode });
     };
     const onModalHidden = () => {
         resetRadioButtons();
@@ -33,13 +33,14 @@
             addDraftButton.addEventListener('click', addDraft, false);
         }
 
-        [...wrapper.querySelectorAll('.ez-btn--prevented')].forEach((btn) =>
-            btn.addEventListener('click', (event) => event.preventDefault(), false)
-        );
+        wrapper
+            .querySelectorAll('.ez-btn--prevented')
+            .forEach((btn) => btn.addEventListener('click', (event) => event.preventDefault(), false));
 
         $('#version-draft-conflict-modal')
             .modal('show')
-            .on('hidden.bs.modal', onModalHidden);
+            .on('hidden.bs.modal', onModalHidden)
+            .on('shown.bs.modal', () => eZ.helpers.tooltips.parse());
     };
     const showModal = (modalHtml) => {
         const wrapper = doc.querySelector('.ez-modal-wrapper');
@@ -50,7 +51,7 @@
     const changeHandler = (event) => {
         const checkedBtn = event.currentTarget;
         const languageCode = checkedBtn.value;
-        const checkVersionDraftLink = global.Routing.generate(
+        const checkVersionDraftLink = Routing.generate(
             'ezplatform.version_draft.has_no_conflict',
             { contentId, languageCode, locationId }
         );
@@ -73,4 +74,4 @@
     };
 
     btns.forEach((btn) => btn.addEventListener('change', changeHandler, false));
-})(window, document, window.jQuery);
+})(window, window.document, window.eZ, window.jQuery, window.Routing);

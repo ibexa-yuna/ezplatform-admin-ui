@@ -1,4 +1,4 @@
-(function(global, doc, eZ, React, ReactDOM, Translator) {
+(function (global, doc, eZ, Translator) {
     let currentPageLink = null;
     let getNotificationsStatusErrorShowed = false;
     let lastFailedCountFetchNotificationNode = null;
@@ -20,7 +20,7 @@
         }
 
         if (response.redirect) {
-            window.location = response.redirect;
+            global.location = response.redirect;
         }
     };
     const handleNotificationClick = (notification) => {
@@ -30,17 +30,11 @@
             credentials: 'same-origin',
         });
 
-        fetch(request)
-            .then(getJsonFromResponse)
-            .then(markAsRead.bind(null, notification))
-            .catch(showErrorNotification);
+        fetch(request).then(getJsonFromResponse).then(markAsRead.bind(null, notification)).catch(showErrorNotification);
     };
     const handleTableClick = (event) => {
         if (event.target.classList.contains('description__read-more')) {
-            event.target
-                .closest(SELECTOR_MODAL_ITEM)
-                .querySelector(SELECTOR_DESC_TEXT)
-                .classList.remove(CLASS_ELLIPSIS);
+            event.target.closest(SELECTOR_MODAL_ITEM).querySelector(SELECTOR_DESC_TEXT).classList.remove(CLASS_ELLIPSIS);
 
             return;
         }
@@ -86,7 +80,7 @@
 
         if (!getNotificationsStatusErrorShowed) {
             const message = Translator.trans(
-                /* @Desc("Cannot update notifications count") */ 'notifications.modal.message.error',
+                /* @Desc("Cannot update notifications") */ 'notifications.modal.message.error',
                 { error: error.message },
                 'notifications'
             );
@@ -105,12 +99,12 @@
     };
     const updatePendingNotificationsView = (notificationsInfo) => {
         const pendingNotificationsExist = notificationsInfo.pending;
-        const userAvatar = doc.querySelector('.ez-user-menu__avatar-wrapper');
+        const userName = doc.querySelector('.ez-user-menu__name');
 
-        userAvatar.dataset.count = notificationsInfo.pending;
-        userAvatar.classList.toggle('n-pending-notifications', pendingNotificationsExist);
+        userName.dataset.count = notificationsInfo.pending;
+        userName.classList.toggle('n-pending-notifications', pendingNotificationsExist);
 
-        doc.querySelector('.ez-user-menu__item--notifications').dataset.count = `(${notificationsInfo.pending})`;
+        doc.querySelector('.ez-user-menu__item--notifications').dataset.count = notificationsInfo.pending;
     };
     const setPendingNotificationCount = (notificationsInfo) => {
         updatePendingNotificationsView(notificationsInfo);
@@ -150,10 +144,7 @@
 
         currentPageLink = link;
         toggleLoading(true);
-        fetch(request)
-            .then(getTextFromResponse)
-            .then(showNotificationPage)
-            .catch(showErrorNotification);
+        fetch(request).then(getTextFromResponse).then(showNotificationPage).catch(showErrorNotification);
     };
     const handleModalResultsClick = (event) => {
         const isPaginationBtn = event.target.classList.contains(CLASS_PAGINATION_LINK);
@@ -184,4 +175,4 @@
 
     getNotificationsStatus();
     global.setInterval(getNotificationsStatus, INTERVAL);
-})(window, document, window.eZ, window.React, window.ReactDOM, window.Translator);
+})(window, window.document, window.eZ, window.Translator);

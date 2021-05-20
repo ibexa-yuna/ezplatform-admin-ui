@@ -6,9 +6,11 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\Authors;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\Checkbox;
+use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\ContentQuery;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\ContentRelationMultiple;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\ContentRelationSingle;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\Country;
@@ -41,6 +43,7 @@ use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\IconLinkedListTable;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\LinkedListTable;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\SimpleListTable;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\SimpleTable;
+use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\SubitemsGridList;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\SubItemsTable;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\SystemInfoTable;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\TrashTable;
@@ -49,13 +52,13 @@ use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\VerticalOrientedTable;
 class PlatformElementFactory extends ElementFactory
 {
     /**
-     * @param UtilityContext $context
+     * @param BrowserContext $context
      * @param string $elementName
      * @param null[]|string[] ...$parameters
      *
-     * @return AdminList|AdminUpdateForm|Breadcrumb|ContentField|DraftConflictDialog|ContentRelationTable|ContentTypePicker|ContentUpdateForm|DateAndTimePopup|Dialog|DraftConflictDialog|DefaultFieldElement|LanguagePicker|LeftMenu|NavLinkTabs|Notification|PreviewNav|RightMenu|DashboardTable|DoubleHeaderTable|LinkedListTable|IconLinkedListTable|SimpleListTable|SimpleTable|SubItemsTable|SystemInfoTable|TrashTable|VerticalOrientedTable|UniversalDiscoveryWidget|UpperMenu
+     * @return AdminList|AdminUpdateForm|Breadcrumb|ContentField|ContentRelationTable|ContentTypePicker|ContentUpdateForm|DashboardTable|DateAndTimePopup|DefaultFieldElement|Dialog|DoubleHeaderTable|DraftConflictDialog|DraftConflictTable|Element|IconLinkedListTable|LanguagePicker|LeftMenu|LinkedListTable|NavLinkTabs|Notification|Pagination|PreviewNav|RightMenu|SimpleListTable|SimpleTable|SubItemsList|SubItemsTable|SystemInfoTable|TrashTable|UniversalDiscoveryWidget|UpperMenu|VerticalOrientedTable
      */
-    public static function createElement(UtilityContext $context, string $elementName, ?string ...$parameters): Element
+    public static function createElement(BrowserContext $context, string $elementName, ?string ...$parameters)
     {
         switch ($elementName) {
             case AdminList::ELEMENT_NAME:
@@ -106,8 +109,10 @@ class PlatformElementFactory extends ElementFactory
                 return new TrashTable($context, $parameters[0]);
             case SubItemsTable::ELEMENT_NAME:
                 return new SubItemsTable($context, $parameters[0]);
+            case SubitemsGridList::ELEMENT_NAME:
+                return new SubitemsGridList($context, $parameters[0]);
             case SubItemsList::ELEMENT_NAME:
-                return new SubItemsList($context);
+                return new SubItemsList($context, $parameters[0]);
             case NavLinkTabs::ELEMENT_NAME:
                 return new NavLinkTabs($context);
             case PreviewNav::ELEMENT_NAME:
@@ -154,6 +159,8 @@ class PlatformElementFactory extends ElementFactory
                 return new Image($context, $parameters[0], $parameters[1]);
             case ImageAsset::ELEMENT_NAME:
                 return new ImageAsset($context, $parameters[0], $parameters[1]);
+            case ContentQuery::ELEMENT_NAME:
+                return new ContentQuery($context, $parameters[0], $parameters[1]);
             case File::ELEMENT_NAME:
                 return new File($context, $parameters[0], $parameters[1]);
             case ContentRelationSingle::ELEMENT_NAME:

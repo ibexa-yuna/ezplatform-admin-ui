@@ -62,7 +62,7 @@
         l: 'dddd',
         N: 'E',
         S: function() {
-            return '[' + this.format('Do').replace(/\d*/g, '') + ']';
+            return `[${this.format('Do').replace(/\d*/g, '')}]`;
         },
         w: 'd',
         z: function() {
@@ -109,17 +109,6 @@
         c: 'YYYY-MM-DD[T]HH:mm:ssZ',
         r: 'ddd, DD MMM YYYY HH:mm:ss ZZ',
         U: 'X',
-    };
-
-    moment.fn.formatPHP = function(format) {
-        console.warn('[DEPRECATED] formatPHP function is deprecated');
-        console.warn('[DEPRECATED] it will be removed from ezplatform-admin-ui 2.0');
-        console.warn('[DEPRECATED] use formatICU instead');
-        return this.format(
-            format.replace(formatPHPEx, (phpStr) => {
-                return typeof formatPHPMap[phpStr] === 'function' ? formatPHPMap[phpStr].call(this) : formatPHPMap[phpStr];
-            })
-        );
     };
 
     const formatEscapedString = function(icuStr) {

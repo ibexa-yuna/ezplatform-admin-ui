@@ -6,8 +6,9 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\NavLinkTabs;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\DashboardTable;
 use PHPUnit\Framework\Assert;
@@ -26,14 +27,14 @@ class DashboardPage extends Page
 
     public $fields;
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->siteAccess = 'admin';
         $this->route = '/dashboard';
         $this->fields = [
-            'tableSelector' => '.card-body',
-            'tableTitle' => '.mb-3',
+            'tableSelector' => '.ez-card',
+            'tableTitle' => '.ez-card__title',
             'tableTabSelector' => '.ez-tabs .nav-item',
         ];
         $this->pageTitle = 'My dashboard';
@@ -44,16 +45,16 @@ class DashboardPage extends Page
 
     public function switchTab(string $tableName, string $tabName)
     {
-        $table = $this->context->getElementByText('Me', $this->fields['tableSelector'], $this->fields['tableTitle']);
+        $table = $this->context->getElementByText('My content', $this->fields['tableSelector'], $this->fields['tableTitle']);
         $this->context->getElementByText($tabName, $this->fields['tableTabSelector'], null, $table)->click();
     }
 
     /**
-     * Verifies that the Dashboard has the "Me" section.
+     * Verifies that the Dashboard has the "My content" section.
      */
     public function verifyElements(): void
     {
-        Assert::assertNotNull($this->context->getElementByText('Me', $this->fields['tableSelector'], $this->fields['tableTitle']));
+        Assert::assertNotNull($this->context->getElementByText('My content', $this->fields['tableSelector'], $this->fields['tableTitle']));
         $this->navLinkTabs->verifyVisibility();
         $this->dashboardTable->verifyVisibility();
     }
@@ -62,6 +63,6 @@ class DashboardPage extends Page
     {
         $tableValue = $this->context->findElement($this::TABLE_CONTAINER)->getText();
 
-        return strpos($tableValue, 'No content items.') !== false;
+        return strpos($tableValue, 'No content.') !== false;
     }
 }

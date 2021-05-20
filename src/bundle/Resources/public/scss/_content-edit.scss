@@ -1,3 +1,94 @@
+.ez-content-edit-page-title {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding: 0 calculateRem(6px);
+
+    &--increased-left-margin {
+        margin-left: calculateRem(55px);
+    }
+
+    &__main-data {
+        max-width: calculateRem(1000px);
+    }
+
+    &__aditional-data {
+        display: flex;
+        align-items: flex-end;
+        max-width: calculateRem(380px);
+        margin-left: calculateRem(170px);
+    }
+
+    &__action {
+        font-weight: bold;
+    }
+
+    &__title {
+        display: flex;
+        align-items: center;
+        margin-bottom: calculateRem(4px);
+        font-size: calculateRem(26px);
+    }
+
+    &__icon-wrapper {
+        display: inline-flex;
+        width: calculateRem(24px);
+        height: calculateRem(24px);
+        justify-content: center;
+        margin-left: calculateRem(8px);
+
+        .ez-icon {
+            fill: $ibexa-color-base-dark;
+        }
+    }
+
+    &__description,
+    &__location,
+    &__aditional-data {
+        color: $ibexa-color-font-pale;
+        font-size: calculateRem(14px);
+    }
+
+    &__content-info {
+        margin-left: calculateRem(10px);
+    }
+
+    &__autosave-wrapper {
+        &--not-saved {
+            .ez-content-edit-page-title {
+                &__autosave-failed,
+                &__autosave-last-saved {
+                    display: none;
+                }
+            }
+        }
+
+        &--saved {
+            .ez-content-edit-page-title {
+                &__autosave-failed {
+                    display: none;
+                }
+            }
+        }
+
+        &--failed {
+            .ez-content-edit-page-title {
+                &__autosave-info {
+                    display: none;
+                }
+
+                &__autosave-failed-marked {
+                    color: $ibexa-color-danger;
+                }
+            }
+
+            .ez-icon {
+                fill: $ibexa-color-danger;
+            }
+        }
+    }
+}
+
 .ez-content-item {
     &__title {
         display: flex;
@@ -12,82 +103,37 @@
 }
 
 .ez-content-item-status {
-    font-size: calculateRem(18px);
-    color: $ez-color-base-light;
+    font-size: calculateRem(16px);
+    color: $ibexa-color-base-dark;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
 .ez-content-edit-container {
     position: relative;
+    width: calc(100% - #{calculateRem(80px)});
+    margin-left: calculateRem(80px);
 
     &__close {
-        position: absolute;
-        left: 0;
-        top: 0;
-        font-size: calculateRem(32px);
-        color: $ez-black;
-        width: calculateRem(32px);
-        height: calculateRem(32px);
-        margin-left: calculateRem(8px);
-        padding: calculateRem(16px);
-
-        &:before,
-        &:after {
-            content: '';
-            width: calculateRem(32px);
-            height: calculateRem(2px);
-            position: absolute;
-            background-color: $ez-black;
-            top: 50%;
-            left: 0;
-        }
-
-        &:before {
-            transform: rotate(45deg);
-        }
-
-        &:after {
-            transform: rotate(-45deg);
-        }
-
-        &:hover {
-            text-decoration: none;
-            color: $ez-black;
-        }
-    }
-}
-
-.ez-content-edit {
-    .ez-field-edit {
-        margin: calculateRem(24px) 0;
-
-        &__label-wrapper {
-            .ez-field-edit {
-                &__label {
-                    margin-top: 0;
-                }
-            }
-        }
-
-        &--ezdate,
-        &--eztime,
-        &--ezdatetime {
-            .ez-field-edit__data {
-                .form-control {
-                    margin-bottom: calculateRem(-8px);
-                }
-            }
-        }
-    }
-
-    .card-body {
-        padding: 0 calculateRem(20px);
+        position: fixed;
+        top: calculateRem(5px);
+        left: calculateRem(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: calculateRem(30px);
+        height: calculateRem(30px);
     }
 }
 
 .ez-content-item__errors-wrapper {
-    font-style: italic;
-    color: $ez-color-warning-dark;
-    font-size: calculateRem(16px);
+    color: $ibexa-color-danger;
+    font-size: calculateRem(14px);
+    padding: 0 calculateRem(6px);
+}
+
+.ez-header--content-edit {
+    .breadcrumb {
+        margin-bottom: 0;
+    }
 }

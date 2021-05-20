@@ -8,13 +8,13 @@ namespace EzSystems\EzPlatformAdminUi\Behat\BusinessContext;
 
 use Behat\Gherkin\Node\TableNode;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Dialog;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\LeftMenu;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\RightMenu;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\UniversalDiscoveryWidget;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\EzEnvironmentConstants;
+use EzSystems\Behat\Core\Environment\EnvironmentConstants;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\UpperMenu;
-use EzSystems\EzPlatformAdminUi\Behat\PageObject\PageObjectFactory;
+use EzSystems\Behat\Browser\Factory\PageObjectFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageObject\TrashPage;
 use EzSystems\EzPlatformAdminUi\Behat\PageObject\ContentItemPage;
 use PHPUnit\Framework\Assert;
@@ -26,7 +26,7 @@ class TrashContext extends BusinessContext
      */
     public function trashIsEmpty(): void
     {
-        $trash = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trash = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
         Assert::assertTrue(
             $trash->isTrashEmpty(),
             'Trash is not empty.'
@@ -38,7 +38,7 @@ class TrashContext extends BusinessContext
      */
     public function trashIsNotEmpty(): void
     {
-        $trash = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trash = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
         Assert::assertFalse(
             $trash->isTrashEmpty(),
             'Trash is empty.'
@@ -50,9 +50,9 @@ class TrashContext extends BusinessContext
      */
     public function iEmptyTrash(): void
     {
-        $rightMenu = ElementFactory::createElement($this->utilityContext, RightMenu::ELEMENT_NAME);
+        $rightMenu = ElementFactory::createElement($this->browserContext, RightMenu::ELEMENT_NAME);
         $rightMenu->clickButton('Empty Trash');
-        $dialog = ElementFactory::createElement($this->utilityContext, Dialog::ELEMENT_NAME);
+        $dialog = ElementFactory::createElement($this->browserContext, Dialog::ELEMENT_NAME);
         $dialog->confirm();
     }
 
@@ -61,21 +61,21 @@ class TrashContext extends BusinessContext
      */
     public function goingToTrashThereIsItemOnList(string $itemType, string $itemName): void
     {
-        $leftMenu = ElementFactory::createElement($this->utilityContext, LeftMenu::ELEMENT_NAME);
+        $leftMenu = ElementFactory::createElement($this->browserContext, LeftMenu::ELEMENT_NAME);
 
         if (!$leftMenu->isVisible()) {
             // we're not in Content View
-            $upperMenu = ElementFactory::createElement($this->utilityContext, UpperMenu::ELEMENT_NAME);
+            $upperMenu = ElementFactory::createElement($this->browserContext, UpperMenu::ELEMENT_NAME);
             $upperMenu->goToTab('Content');
             $upperMenu->goToSubTab('Content structure');
 
-            $contentPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, EzEnvironmentConstants::get('ROOT_CONTENT_NAME'));
+            $contentPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, EnvironmentConstants::get('ROOT_CONTENT_NAME'));
             $contentPage->verifyIsLoaded();
         }
 
         $leftMenu->clickButton('Trash');
 
-        $trash = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trash = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
         $trash->verifyIfItemInTrash($itemType, $itemName, true);
     }
 
@@ -84,7 +84,7 @@ class TrashContext extends BusinessContext
      */
     public function iDeleteItemFromTrash(TableNode $itemsTable): void
     {
-        $trashPage = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trashPage = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
 
         foreach ($itemsTable->getHash() as $itemTable) {
             $trashPage->trashTable->selectListElement($itemTable['item']);
@@ -100,7 +100,7 @@ class TrashContext extends BusinessContext
      */
     public function iRestoreItemFromTrash(TableNode $itemsTable): void
     {
-        $trashPage = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trashPage = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
 
         foreach ($itemsTable->getHash() as $itemTable) {
             $trashPage->trashTable->selectListElement($itemTable['item']);
@@ -114,14 +114,14 @@ class TrashContext extends BusinessContext
      */
     public function iRestoreItemFromTrashUnderNewLocation(TableNode $itemsTable, string $pathToContent): void
     {
-        $trashPage = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trashPage = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
 
         foreach ($itemsTable->getHash() as $itemTable) {
             $trashPage->trashTable->selectListElement($itemTable['item']);
         }
 
         $trashPage->trashTable->clickRestoreUnderNewLocationButton();
-        $udw = ElementFactory::createElement($this->utilityContext, UniversalDiscoveryWidget::ELEMENT_NAME);
+        $udw = ElementFactory::createElement($this->browserContext, UniversalDiscoveryWidget::ELEMENT_NAME);
         $udw->verifyVisibility();
         $udw->selectContent($pathToContent);
         $udw->confirm();
@@ -132,7 +132,7 @@ class TrashContext extends BusinessContext
      */
     public function thereIsItemOnTrashList(string $itemType, string $itemName): void
     {
-        $trashPage = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trashPage = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
         $trashPage->verifyIfItemInTrash($itemType, $itemName, true);
     }
 
@@ -141,7 +141,7 @@ class TrashContext extends BusinessContext
      */
     public function thereIsNoItemOnTrashList(string $itemType, string $itemName): void
     {
-        $trashPage = PageObjectFactory::createPage($this->utilityContext, TrashPage::PAGE_NAME);
+        $trashPage = PageObjectFactory::createPage($this->browserContext, TrashPage::PAGE_NAME);
         $trashPage->verifyIfItemInTrash($itemType, $itemName, false);
     }
 }

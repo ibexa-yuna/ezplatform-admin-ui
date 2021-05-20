@@ -3,8 +3,6 @@
     const form = doc.querySelector('form[name="location_swap"]');
     const input = form.querySelector('#location_swap_new_location');
     const udwContainer = doc.getElementById('react-udw');
-    const token = doc.querySelector('meta[name="CSRF-Token"]').content;
-    const siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
     const closeUDW = () => ReactDOM.unmountComponentAtNode(udwContainer);
     const onConfirm = (items) => {
         closeUDW();
@@ -17,26 +15,19 @@
         event.preventDefault();
 
         const config = JSON.parse(event.currentTarget.dataset.udwConfig);
-        const title = Translator.trans(/*@Desc("Select location to be swapped with")*/ 'swap.title', {}, 'universal_discovery_widget');
+        const title = Translator.trans(/*@Desc("Select Location to swap with")*/ 'swap.title', {}, 'universal_discovery_widget');
 
         ReactDOM.render(
-            React.createElement(
-                eZ.modules.UniversalDiscovery,
-                Object.assign(
-                    {
-                        onConfirm,
-                        onCancel,
-                        title,
-                        multiple: false,
-                        startingLocationId: eZ.adminUiConfig.universalDiscoveryWidget.startingLocationId,
-                        restInfo: { token, siteaccess },
-                    },
-                    config
-                )
-            ),
+            React.createElement(eZ.modules.UniversalDiscovery, {
+                onConfirm,
+                onCancel,
+                title,
+                multiple: false,
+                ...config,
+            }),
             udwContainer
         );
     };
 
     btns.forEach((btn) => btn.addEventListener('click', openUDW, false));
-})(window, document, window.eZ, window.React, window.ReactDOM, window.Translator);
+})(window, window.document, window.eZ, window.React, window.ReactDOM, window.Translator);

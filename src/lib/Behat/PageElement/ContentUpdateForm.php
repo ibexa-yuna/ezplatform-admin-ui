@@ -6,7 +6,10 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\API\ContentData\FieldTypeNameConverter;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Browser\Element\Element;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\EzFieldElement;
 use PHPUnit\Framework\Assert;
 
@@ -17,14 +20,15 @@ class ContentUpdateForm extends Element
 
     public const FIELD_TYPE_CLASS_REGEX = '/ez-field-edit--ez[a-z]*/';
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->fields = [
-            'formElement' => '[name=ezrepoforms_content_edit],[name=ezrepoforms_user_create],[name=ezrepoforms_user_update]',
+            'formElement' => '[name=ezplatform_content_forms_content_edit],[name=ezplatform_content_forms_user_create],[name=ezplatform_content_forms_user_update]',
             'closeButton' => '.ez-content-edit-container__close',
-            'fieldLabel' => '.ez-field-edit__label-wrapper label.ez-field-edit__label, .ez-field-edit__label-wrapper legend',
-            'nthField' => '.ez-field-edit:nth-child(%s)',
+            'fieldLabel' => '.ez-field-edit__label-wrapper label.ez-field-edit__label, .ez-field-edit__label-wrapper legend, .ez-card > .card-body > div > div > legend',
+            'nthField' => '.ez-card .card-body > div > div:nth-of-type(%s)',
+            'noneditableFieldClass' => 'ez-field-edit--eznoneditable',
             'fieldOfType' => '.ez-field-edit--%s',
         ];
     }
@@ -58,14 +62,18 @@ class ContentUpdateForm extends Element
             Assert::fail(sprintf('Field %s not found.', $fieldName));
         }
 
-        $fieldClass = $this->context->findElement(sprintf($this->fields['nthField'], $fieldPosition))->getAttribute('class');
-
-        preg_match($this::FIELD_TYPE_CLASS_REGEX, $fieldClass, $matches);
-
-        $fieldType = explode('--', $matches[0])[1];
         $fieldLocator = sprintf($this->fields['nthField'], $fieldPosition);
 
-        return ElementFactory::createElement($this->context, EzFieldElement::getFieldNameByInternalName($fieldType), $fieldLocator, $fieldName);
+        $isEditable = !$this->context->findElement($fieldLocator)->hasClass($this->fields['noneditableFieldClass']);
+        if (!$isEditable) {
+            $fieldType = strtolower($fieldName);
+        } else {
+            $fieldClass = $this->context->findElement($fieldLocator)->getAttribute('class');
+            preg_match($this::FIELD_TYPE_CLASS_REGEX, $fieldClass, $matches);
+            $fieldType = explode('--', $matches[0])[1];
+        }
+
+        return ElementFactory::createElement($this->context, FieldTypeNameConverter::getFieldTypeNameByIdentifier($fieldType), $fieldLocator, $fieldName);
     }
 
     /**

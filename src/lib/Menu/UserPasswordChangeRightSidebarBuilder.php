@@ -14,6 +14,8 @@ use InvalidArgumentException;
 use JMS\TranslationBundle\Model\Message;
 use JMS\TranslationBundle\Translation\TranslationContainerInterface;
 use Knp\Menu\ItemInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * KnpMenuBundle Menu Builder service implementation for AdminUI change password contextual sidebar menu.
@@ -25,6 +27,19 @@ class UserPasswordChangeRightSidebarBuilder extends AbstractBuilder implements T
     /* Menu items */
     const ITEM__UPDATE = 'user_password_change__sidebar_right__update';
     const ITEM__CANCEL = 'user_password_change__sidebar_right__cancel';
+
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
+    private $translator;
+
+    public function __construct(
+        MenuItemFactory $factory,
+        EventDispatcherInterface $eventDispatcher,
+        TranslatorInterface $translator
+    ) {
+        parent::__construct($factory, $eventDispatcher);
+
+        $this->translator = $translator;
+    }
 
     /**
      * @return string

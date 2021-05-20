@@ -10,7 +10,7 @@ namespace EzSystems\EzPlatformAdminUi\Menu;
 
 use EzSystems\EzPlatformAdminUi\Menu\Event\ConfigureMenuEvent;
 use Knp\Menu\ItemInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -51,7 +51,7 @@ abstract class AbstractBuilder
      */
     protected function dispatchMenuEvent(string $name, Event $event): void
     {
-        $this->eventDispatcher->dispatch($name, $event);
+        $this->eventDispatcher->dispatch($event, $name);
     }
 
     /**

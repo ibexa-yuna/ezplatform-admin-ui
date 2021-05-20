@@ -1,5 +1,6 @@
 name: Automatic Upmerge
 
+# Must match destination keys below
 on:
   push:
     branches:

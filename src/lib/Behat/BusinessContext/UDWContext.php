@@ -6,18 +6,15 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\BusinessContext;
 
-use EzSystems\BehatBundle\Helper\ArgumentParser;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\EzEnvironmentConstants;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Core\Environment\EnvironmentConstants;
+use EzSystems\Behat\Core\Behat\ArgumentParser;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\UniversalDiscoveryWidget;
 
 class UDWContext extends BusinessContext
 {
     private $argumentParser;
 
-    /**
-     * @injectService $argumentParser @EzSystems\BehatBundle\Helper\ArgumentParser
-     */
     public function __construct(ArgumentParser $argumentParser)
     {
         $this->argumentParser = $argumentParser;
@@ -28,7 +25,7 @@ class UDWContext extends BusinessContext
      */
     public function iSelectContent(string $pathToContent): void
     {
-        $udw = ElementFactory::createElement($this->utilityContext, UniversalDiscoveryWidget::ELEMENT_NAME);
+        $udw = ElementFactory::createElement($this->browserContext, UniversalDiscoveryWidget::ELEMENT_NAME);
         $udw->verifyVisibility();
         $pathToContent = $this->argumentParser->replaceRootKeyword($pathToContent);
         $udw->selectContent($pathToContent);
@@ -39,18 +36,18 @@ class UDWContext extends BusinessContext
      */
     public function iSelectRootNodeContent(): void
     {
-        $this->iSelectContent(EzEnvironmentConstants::get('ROOT_CONTENT_NAME'));
+        $this->iSelectContent(EnvironmentConstants::get('ROOT_CONTENT_NAME'));
     }
 
     /** @When I close the UDW window */
     public function iCloseUDW(): void
     {
-        ElementFactory::createElement($this->utilityContext, UniversalDiscoveryWidget::ELEMENT_NAME)->cancel();
+        ElementFactory::createElement($this->browserContext, UniversalDiscoveryWidget::ELEMENT_NAME)->cancel();
     }
 
     /** @When I confirm the selection in UDW */
     public function iConfirmSelection(): void
     {
-        ElementFactory::createElement($this->utilityContext, UniversalDiscoveryWidget::ELEMENT_NAME)->confirm();
+        ElementFactory::createElement($this->browserContext, UniversalDiscoveryWidget::ELEMENT_NAME)->confirm();
     }
 }

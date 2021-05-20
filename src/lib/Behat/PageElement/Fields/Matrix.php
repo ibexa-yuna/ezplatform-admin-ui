@@ -7,7 +7,7 @@
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields;
 
 use Behat\Mink\Element\NodeElement;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
 use PHPUnit\Framework\Assert;
 
 class Matrix extends EzFieldElement
@@ -15,10 +15,10 @@ class Matrix extends EzFieldElement
     /** @var string Name by which Element is recognised */
     public const ELEMENT_NAME = 'Matrix';
 
-    public function __construct(UtilityContext $context, string $locator, string $label)
+    public function __construct(BrowserContext $context, string $locator, string $label)
     {
         parent::__construct($context, $locator, $label);
-        $this->fields['matrixCellSelectorFormat'] = '[name="ezrepoforms_content_edit[fieldsData][ezmatrix][value][entries][%d][%s]"]';
+        $this->fields['matrixCellSelectorFormat'] = '[name="ezplatform_content_forms_content_edit[fieldsData][ezmatrix][value][entries][%d][%s]"]';
         $this->fields['row'] = '.ez-table__matrix-entry';
         $this->fields['addRowButton'] = '.ez-btn--add-matrix-entry';
         $this->fields['viewModeTableHeaders'] = '.ez-content-field-value thead th';

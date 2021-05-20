@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace EzSystems\EzPlatformAdminUi\UniversalDiscovery\Event\Subscriber;
 
 use eZ\Publish\API\Repository\ContentTypeService;
-use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\PermissionResolver;
+use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository\Values\User\Limitation\ContentTypeLimitation;
 use eZ\Publish\API\Repository\Values\User\Limitation\LanguageLimitation;
 use EzSystems\EzPlatformAdminUi\UniversalDiscovery\Event\ConfigResolveEvent;
@@ -68,12 +68,8 @@ class ContentCreate implements EventSubscriberInterface
     {
         $config = $event->getConfig();
 
-        if (!$this->hasCreateTab($config)) {
-            return;
-        }
-
         if ($this->hasContentTypeRestrictions()) {
-            $config['content_on_the_fly']['allowed_content_types'] = $this->restrictedContentTypesIdentifiers;
+            $config['allowed_content_types'] = $this->restrictedContentTypesIdentifiers;
             $event->setConfig($config);
         }
 
@@ -81,16 +77,6 @@ class ContentCreate implements EventSubscriberInterface
             $config['content_on_the_fly']['allowed_languages'] = $this->restrictedLanguagesCodes;
             $event->setConfig($config);
         }
-    }
-
-    /**
-     * @param array $config
-     *
-     * @return bool
-     */
-    private function hasCreateTab(array $config): bool
-    {
-        return empty($config['visible_tabs']) || \in_array('create', $config['visible_tabs'], true);
     }
 
     /**
@@ -110,17 +96,11 @@ class ContentCreate implements EventSubscriberInterface
             return [];
         }
 
-        $restrictedContentTypesIdentifiers = [];
-        foreach ($restrictedContentTypesIds as $restrictedContentTypeId) {
-            // TODO: Change to `contentTypeService->loadContentTypeList($restrictedContentTypesIds)` after #2444 will be merged
-            try {
-                $identifier = $this->contentTypeService->loadContentType($restrictedContentTypeId)->identifier;
-                $restrictedContentTypesIdentifiers[] = $identifier;
-            } catch (NotFoundException $e) {
-            }
-        }
+        $restrictedContentTypes = $this->contentTypeService->loadContentTypeList($restrictedContentTypesIds);
 
-        return $restrictedContentTypesIdentifiers;
+        return array_values(array_map(function (ContentType $contentType): string {
+            return $contentType->identifier;
+        }, (array)$restrictedContentTypes));
     }
 
     /**

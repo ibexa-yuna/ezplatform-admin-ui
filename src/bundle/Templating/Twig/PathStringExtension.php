@@ -9,10 +9,10 @@ declare(strict_types=1);
 namespace EzSystems\EzPlatformAdminUiBundle\Templating\Twig;
 
 use eZ\Publish\API\Repository\LocationService;
-use Twig_Extension;
-use Twig_SimpleFunction;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
-class PathStringExtension extends Twig_Extension
+class PathStringExtension extends AbstractExtension
 {
     private $locationService;
 
@@ -28,31 +28,24 @@ class PathStringExtension extends Twig_Extension
     public function getFunctions(): array
     {
         return [
-            new Twig_SimpleFunction(
-                'ez_path_string_to_locations',
+            new TwigFunction(
+                'ez_path_to_locations',
                 [$this, 'getLocationList']
             ),
         ];
     }
 
     /**
-     * @param string $pathString
-     *
-     * @return array
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
+     * @return \eZ\Publish\API\Repository\Values\Content\Location[]
      */
     public function getLocationList(string $pathString): array
     {
-        $pathStringParts = explode('/', trim($pathString, '/'));
-        array_shift($pathStringParts);
+        $locationIds = array_map(
+            'intval',
+            explode('/', trim($pathString, '/'))
+        );
+        array_shift($locationIds);
 
-        $locationList = [];
-        foreach ($pathStringParts as $locationId) {
-            $locationList[] = $this->locationService->loadLocation($locationId);
-        }
-
-        return $locationList;
+        return $this->locationService->loadLocationList($locationIds);
     }
 }

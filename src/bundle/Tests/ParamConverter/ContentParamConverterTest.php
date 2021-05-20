@@ -12,7 +12,7 @@ use eZ\Publish\API\Repository\ContentService;
 use eZ\Publish\API\Repository\Values\Content\Content;
 use EzSystems\EzPlatformAdminUiBundle\ParamConverter\ContentParamConverter;
 use Symfony\Component\HttpFoundation\Request;
-use PHPUnit_Framework_MockObject_MockObject as MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Loads Content object using ids from request parameters.
@@ -28,7 +28,7 @@ class ContentParamConverterTest extends AbstractParamConverterTest
     /** @var MockObject */
     protected $contentServiceMock;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->contentServiceMock = $this->createMock(ContentService::class);
 
@@ -57,8 +57,7 @@ class ContentParamConverterTest extends AbstractParamConverterTest
         $request = new Request([], [], $requestAttributes);
         $config = $this->createConfiguration(self::SUPPORTED_CLASS, self::PARAMETER_NAME);
 
-        $this->converter->apply($request, $config);
-
+        $this->assertTrue($this->converter->apply($request, $config));
         $this->assertInstanceOf(self::SUPPORTED_CLASS, $request->attributes->get(self::PARAMETER_NAME));
     }
 

@@ -1,0 +1,66 @@
+{% trans_default_domain 'draft_conflict' %}
+
+{% import _self as version_modal_draft_conflict %}
+
+<div class="modal fade ez-modal ez-modal--version-draft-conflict" id="version-draft-conflict-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ 'draft.conflict.header'|trans|desc('Draft conflict') }}</h5>
+                <button 
+                    type="button" 
+                    class="close" 
+                    data-dismiss="modal" 
+                    aria-label={{ 'draft.conflict.close'|trans|desc('Close') }}
+                    title={{ 'draft.conflict.close'|trans|desc('Close') }}
+                >
+                    <svg class="ez-icon ez-icon--small" aria-hidden="true">
+                        <use xlink:href="{{ ez_icon_path('discard') }}"></use>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="ez-modal-body__main">
+                    {% set number = conflicted_drafts|length %}
+                    {% if number == 1 %}
+                        {{ 'draft.conflict.number.one'|trans|desc('There is already one draft for this Content item.') }}
+                    {% else %}
+                        {{ 'draft.conflict.number.multiple'|trans({ '%number%': number })|desc('There are already %number% drafts for this Content item.') }}
+                    {% endif %}
+                    <br/>
+                    {% if content_is_user %}
+                        {{ 'draft.conflict.choice_content_is_user'|trans({})|desc('You can edit any of your existing draft(s)') }}
+                    {% else %}
+                        {{ 'draft.conflict.choice'|trans({})|desc('You can either edit any of your existing draft(s) or add a new one.') }}
+                    {% endif %}
+                </div>
+                {% set show_add_draft_button = (not content_is_user) %}
+                {% include '@ezdesign/ui/table_header.html.twig' with { header_text: null, tools: version_modal_draft_conflict.table_header_tools(show_add_draft_button) } %}
+                <div class="ez-scrollable-wrapper">
+                    {{ include('@ezdesign/content/tab/versions/table.html.twig', {
+                        'versions': conflicted_drafts,
+                        'location': location,
+                        'is_draft': true,
+                        'have_to_paginate': false,
+                        'is_draft_conflict': true,
+                        'content_is_user': content_is_user
+                    }) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% macro table_header_tools(show_add_button) %}
+    {% if show_add_button %}
+        <button 
+            type="button" 
+            class="btn btn-icon ez-btn--add-draft"
+            title="{{ 'tab.versions.action.delete'|trans|desc('Create a draft') }}"
+        >
+            <svg class="ez-icon ez-icon-create">
+                <use xlink:href="{{ ez_icon_path('create') }}"></use>
+            </svg>
+        </button>
+    {% endif %}
+{% endmacro %}

@@ -19,14 +19,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\SecurityEvents;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class CredentialsExpirationWarningListener implements EventSubscriberInterface
 {
     /** @var \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface */
     private $notificationHandler;
 
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     private $translator;
 
     /** @var \Symfony\Component\Routing\Generator\UrlGeneratorInterface */
@@ -87,7 +87,7 @@ final class CredentialsExpirationWarningListener implements EventSubscriberInter
 
         if ($passwordExpiresIn->d > 0) {
             $warning = $this->translator->trans(
-                /** @Desc("Your password will expire in %days% days. Consider updating it in User Settings/My Account Settings.") */
+                /** @Desc("Your current password will expire in %days% day(s). You can change it in User Settings/My Account Settings.") */
                 'authentication.credentials_expire_in.warning',
                 [
                     '%days%' => $passwordExpiresIn->d + ($passwordExpiresIn->h >= 12 ? 1 : 0),
@@ -97,7 +97,7 @@ final class CredentialsExpirationWarningListener implements EventSubscriberInter
             );
         } else {
             $warning = $this->translator->trans(
-                /** @Desc("Your password will expire today. Consider updating it in User Settings/My Account Settings.") */
+                /** @Desc("Your current password will expire today. You can change it in User Settings/My Account Settings.") */
                 'authentication.credentials_expire_today.warning',
                 [
                     '%url%' => $this->urlGenerator->generate('ezplatform.user_profile.change_password'),

@@ -6,7 +6,7 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
 use PHPUnit\Framework\Assert;
 
 class UserAccount extends EzFieldElement
@@ -14,16 +14,16 @@ class UserAccount extends EzFieldElement
     /** @var string Name by which Element is recognised */
     public const ELEMENT_NAME = 'User account';
 
-    public function __construct(UtilityContext $context, string $locator, string $label)
+    public function __construct(BrowserContext $context, string $locator, string $label)
     {
         parent::__construct($context, $locator, $label);
-        $this->fields['firstname'] = '#ezrepoforms_user_create_fieldsData_first_name_value,#ezrepoforms_user_update_fieldsData_first_name_value';
-        $this->fields['lastname'] = '#ezrepoforms_user_create_fieldsData_last_name_value,#ezrepoforms_user_update_fieldsData_last_name_value';
-        $this->fields['username'] = '#ezrepoforms_user_create_fieldsData_user_account_value_username,#ezrepoforms_user_update_fieldsData_user_account_value_username';
-        $this->fields['password'] = '#ezrepoforms_user_create_fieldsData_user_account_value_password_first,#ezrepoforms_user_update_fieldsData_user_account_value_password_first';
-        $this->fields['confirmPassword'] = '#ezrepoforms_user_create_fieldsData_user_account_value_password_second,#ezrepoforms_user_update_fieldsData_user_account_value_password_second';
-        $this->fields['email'] = '#ezrepoforms_user_create_fieldsData_user_account_value_email,#ezrepoforms_user_update_fieldsData_user_account_value_email';
-        $this->fields['buttonEnabled'] = '#ezrepoforms_user_create_fieldsData_user_account_value_enabled,#ezrepoforms_user_update_fieldsData_user_account_value_enabled';
+        $this->fields['firstname'] = '#ezplatform_content_forms_user_create_fieldsData_first_name_value,#ezplatform_content_forms_user_update_fieldsData_first_name_value';
+        $this->fields['lastname'] = '#ezplatform_content_forms_user_create_fieldsData_last_name_value,#ezplatform_content_forms_user_update_fieldsData_last_name_value';
+        $this->fields['username'] = '#ezplatform_content_forms_user_create_fieldsData_user_account_value_username,#ezplatform_content_forms_user_update_fieldsData_user_account_value_username';
+        $this->fields['password'] = '#ezplatform_content_forms_user_create_fieldsData_user_account_value_password_first,#ezplatform_content_forms_user_update_fieldsData_user_account_value_password_first';
+        $this->fields['confirmPassword'] = '#ezplatform_content_forms_user_create_fieldsData_user_account_value_password_second,#ezplatform_content_forms_user_update_fieldsData_user_account_value_password_second';
+        $this->fields['email'] = '#ezplatform_content_forms_user_create_fieldsData_user_account_value_email,#ezplatform_content_forms_user_update_fieldsData_user_account_value_email';
+        $this->fields['buttonEnabled'] = '#ezplatform_content_forms_user_create_fieldsData_user_account_value_enabled,#ezplatform_content_forms_user_update_fieldsData_user_account_value_enabled';
     }
 
     public function setValue(array $parameters): void

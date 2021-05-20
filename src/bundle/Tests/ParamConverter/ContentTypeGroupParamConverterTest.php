@@ -7,10 +7,11 @@
 namespace EzSystems\EzPlatformAdminUiBundle\Tests\ParamConverter;
 
 use eZ\Publish\API\Repository\ContentTypeService;
+use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Values\ContentType\ContentTypeGroup;
 use EzSystems\EzPlatformAdminUiBundle\ParamConverter\ContentTypeGroupParamConverter;
 use Symfony\Component\HttpFoundation\Request;
-use PHPUnit_Framework_MockObject_MockObject as MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ContentTypeGroupParamConverterTest extends AbstractParamConverterTest
@@ -24,22 +25,27 @@ class ContentTypeGroupParamConverterTest extends AbstractParamConverterTest
     /** @var MockObject */
     protected $serviceMock;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->serviceMock = $this->createMock(ContentTypeService::class);
 
         $this->converter = new ContentTypeGroupParamConverter($this->serviceMock);
     }
 
-    public function testApply()
+    /**
+     * @dataProvider dataProvider
+     *
+     * @param mixed $contentTypeGroupId The identifier fetched from the request
+     * @param int $contentTypeGroupIdToLoad The identifier used to load the Content Type Group
+     */
+    public function testApply($contentTypeGroupId, int $contentTypeGroupIdToLoad)
     {
-        $contentTypeGroupId = 42;
         $valueObject = $this->createMock(ContentTypeGroup::class);
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadContentTypeGroup')
-            ->with($contentTypeGroupId)
+            ->with($contentTypeGroupIdToLoad)
             ->willReturn($valueObject);
 
         $requestAttributes = [
@@ -49,8 +55,7 @@ class ContentTypeGroupParamConverterTest extends AbstractParamConverterTest
         $request = new Request([], [], $requestAttributes);
         $config = $this->createConfiguration(self::SUPPORTED_CLASS, self::PARAMETER_NAME);
 
-        $this->converter->apply($request, $config);
-
+        $this->assertTrue($this->converter->apply($request, $config));
         $this->assertInstanceOf(self::SUPPORTED_CLASS, $request->attributes->get(self::PARAMETER_NAME));
     }
 
@@ -72,13 +77,17 @@ class ContentTypeGroupParamConverterTest extends AbstractParamConverterTest
         $contentTypeGroupId = 42;
 
         $this->expectException(NotFoundHttpException::class);
-        $this->expectExceptionMessage(sprintf('ContentTypeGroup %s not found!', $contentTypeGroupId));
+        $this->expectExceptionMessage(
+            sprintf('Content Type group %s not found.', $contentTypeGroupId)
+        );
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadContentTypeGroup')
             ->with($contentTypeGroupId)
-            ->willReturn(null);
+            ->willThrowException(
+                $this->createMock(NotFoundException::class)
+            );
 
         $requestAttributes = [
             ContentTypeGroupParamConverter::PARAMETER_CONTENT_TYPE_GROUP_ID => $contentTypeGroupId,
@@ -88,5 +97,14 @@ class ContentTypeGroupParamConverterTest extends AbstractParamConverterTest
         $config = $this->createConfiguration(self::SUPPORTED_CLASS, self::PARAMETER_NAME);
 
         $this->converter->apply($request, $config);
+    }
+
+    public function dataProvider(): array
+    {
+        return [
+            'integer' => [42, 42],
+            'number_as_string' => ['42', 42],
+            'string' => ['42k', 42],
+        ];
     }
 }

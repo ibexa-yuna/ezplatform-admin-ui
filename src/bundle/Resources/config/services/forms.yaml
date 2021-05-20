@@ -1,0 +1,138 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    _instanceof:
+        EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\TrashLocationOptionProvider:
+            tags: ['ezplatform.form.trash_location_option']
+
+    EzSystems\EzPlatformAdminUi\Form\SubmitHandler: ~
+
+    EzSystems\EzPlatformAdminUi\Form\Factory\:
+        resource: '../../../lib/Form/Factory'
+
+    EzSystems\EzPlatformAdminUi\Form\DataMapper\:
+        resource: '../../../lib/Form/DataMapper'
+
+    EzSystems\EzPlatformAdminUi\Form\Type\:
+        resource: '../../../lib/Form/Type'
+
+    EzSystems\EzPlatformAdminUi\Form\EventListener\:
+        resource: '../../../lib/Form/EventListener'
+
+    EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\:
+        resource: '../../../lib/Form/TrashLocationOptionProvider'
+
+    EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\OptionsFactory:
+        arguments: [!tagged ezplatform.form.trash_location_option]
+
+    EzSystems\EzPlatformAdminUi\Form\Type\Extension\Content\ContentEditTypeExtension:
+        tags:
+            - { name: form.type_extension }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\Policy\PolicyChoiceType:
+        arguments:
+            $policyMap: "%ezpublish.api.role.policy_map%"
+
+    EzSystems\EzPlatformAdminUi\Form\Type\Content\Draft\ContentCreateType:
+        arguments:
+            $contentTypeChoiceLoader: '@EzSystems\EzPlatformAdminUi\Form\Type\ChoiceList\Loader\ContentTypeChoiceLoader'
+            $languageChoiceLoader: '@EzSystems\EzPlatformAdminUi\Form\Type\ChoiceList\Loader\LanguageChoiceLoader'
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ChoiceList\Loader\ContentTypeChoiceLoader: ~
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ChoiceList\Loader\LanguageChoiceLoader:
+        arguments:
+            $configResolver: "@ezpublish.config.resolver"
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ChoiceList\Loader\ConfiguredLanguagesChoiceLoader:
+        arguments:
+            $configResolver: "@ezpublish.config.resolver"
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ChoiceList\Loader\TimePeriodChoiceLoader: ~
+
+    EzSystems\EzPlatformAdminUi\Form\Extension\RichTextTypeExtension:
+        public: true
+        tags:
+            - { name: form.type_extension }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\Role\LimitationType:
+        arguments: ["@ezplatform.content_forms.limitation_form_mapper.registry", "@ezplatform.content_forms.limitation.form_mapper.null"]
+        tags:
+            - { name: form.type, alias: ezplatform_content_forms_policy_limitation_edit }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\SwitcherType: ~
+
+    EzSystems\EzPlatformAdminUi\Form\Type\LocationType: ~
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ContentType\ContentTypeCreateType:
+        arguments: ["@ezpublish.api.service.content_type"]
+        tags:
+            - {name: form.type, alias: ezplatform_content_forms_contenttype_create}
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ContentType\ContentTypeUpdateType:
+        tags:
+            - {name: form.type, alias: ezplatform_content_forms_contenttype_update}
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ContentType\FieldTypeChoiceType:
+        arguments: ['@eZ\Publish\Core\FieldType\FieldTypeRegistry', '@translator']
+        tags:
+            - { name: form.type, alias: ezplatform_content_forms_contenttype_field_type_choice }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ContentType\SortFieldChoiceType:
+        arguments: ["@translator"]
+        tags:
+            - { name: form.type, alias: ezplatform_content_forms_contenttype_sort_field_choice }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\ContentType\SortOrderChoiceType:
+        arguments: ["@translator"]
+        tags:
+            - { name: form.type, alias: ezplatform_content_forms_contenttype_sort_order_choice }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\FieldDefinition\FieldDefinitionType:
+        arguments:
+            $fieldTypeService: "@ezpublish.api.service.field_type"
+            $thumbnailStrategy: '@eZ\Publish\Core\Repository\Strategy\ContentThumbnail\Field\ContentFieldStrategy'
+        calls:
+            - [setGroupsList, ["@ezpublish.fields_groups.list"]]
+        tags:
+            - { name: form.type, alias: ezplatform_content_forms_fielddefinition_update }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\URL\URLListType:
+        arguments:
+            - '@translator'
+        tags:
+            - { name: form.type, alias: ezplatform_content_forms_url_list }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\URL\URLEditType:
+        tags:
+            - { name: form.type, alias: ezplatform_content_forms_url_edit }
+
+    EzSystems\EzPlatformAdminUi\Form\Extension\HelpMultilineMessageExtension:
+        tags:
+            - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
+
+    EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\HasReverseRelations:
+        tags:
+            - { name: 'ezplatform.form.trash_location_option', priority: 100 }
+
+    EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\HasChildren:
+        tags:
+            - { name: 'ezplatform.form.trash_location_option', priority: 80 }
+
+    EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\HasUniqueAssetRelation:
+        tags:
+            - { name: 'ezplatform.form.trash_location_option', priority: 60 }
+
+    EzSystems\EzPlatformAdminUi\Form\TrashLocationOptionProvider\HasAssetRelation:
+        tags:
+            - { name: 'ezplatform.form.trash_location_option', priority: 40 }
+
+    EzSystems\EzPlatformAdminUi\Form\Type\Search\SearchType:
+        arguments:
+            $baseType: '@Ibexa\Platform\Bundle\Search\Form\Type\SearchType'
+            $translator: '@translator'
+        tags:
+            - { name: form.type, alias: EzSystems\EzPlatformAdminUi\Form\Type\Search\SearchType }

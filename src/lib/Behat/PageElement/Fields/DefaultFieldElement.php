@@ -7,8 +7,8 @@
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields;
 
 use Behat\Mink\Element\NodeElement;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\Element;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Element\Element;
 use PHPUnit\Framework\Assert;
 
 class DefaultFieldElement extends Element
@@ -21,7 +21,7 @@ class DefaultFieldElement extends Element
     /** @var string */
     private $containerSelector;
 
-    public function __construct(UtilityContext $context, string $fieldName, string $containerSelector)
+    public function __construct(BrowserContext $context, string $fieldName, string $containerSelector)
     {
         parent::__construct($context);
         $this->fieldName = $fieldName;

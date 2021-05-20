@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 
 use eZ\Publish\API\Repository\NotificationService;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\Notification\Renderer\Registry;
 use EzSystems\EzPlatformAdminUi\Pagination\Pagerfanta\NotificationAdapter;
 use EzSystems\EzPlatformAdminUiBundle\View\EzPagerfantaView;
@@ -17,7 +18,7 @@ use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class NotificationController extends Controller
 {
@@ -27,28 +28,22 @@ class NotificationController extends Controller
     /** @var \eZ\Publish\Core\Notification\Renderer\Registry */
     protected $registry;
 
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     protected $translator;
 
-    /** @var int */
-    protected $notificationPaginationLimit;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /**
-     * @param \eZ\Publish\API\Repository\NotificationService $notificationService
-     * @param \eZ\Publish\Core\Notification\Renderer\Registry $registry
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param int $notificationPaginationLimit
-     */
     public function __construct(
         NotificationService $notificationService,
         Registry $registry,
         TranslatorInterface $translator,
-        int $notificationPaginationLimit
+        ConfigResolverInterface $configResolver
     ) {
         $this->notificationService = $notificationService;
         $this->registry = $registry;
         $this->translator = $translator;
-        $this->notificationPaginationLimit = $notificationPaginationLimit;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -80,29 +75,6 @@ class NotificationController extends Controller
     }
 
     /**
-     * @deprecated Deprecated in 1.2 and will be removed in 3.0. Please use NotificationController::renderNotificationsPageAction instead.
-     *
-     * @param int $offset
-     * @param int $limit
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function renderNotificationsAction(int $offset, int $limit): Response
-    {
-        $notifications = $this->notificationService->loadNotifications($offset, $limit);
-
-        $html = '';
-        foreach ($notifications as $notification) {
-            if ($this->registry->hasRenderer($notification->type)) {
-                $renderer = $this->registry->getRenderer($notification->type);
-                $html .= $renderer->render($notification);
-            }
-        }
-
-        return new Response($html);
-    }
-
-    /**
      * @param int $page
      *
      * @return \Symfony\Component\HttpFoundation\Response
@@ -112,7 +84,7 @@ class NotificationController extends Controller
         $pagerfanta = new Pagerfanta(
             new NotificationAdapter($this->notificationService)
         );
-        $pagerfanta->setMaxPerPage($this->notificationPaginationLimit);
+        $pagerfanta->setMaxPerPage($this->configResolver->getParameter('pagination.notification_limit'));
         $pagerfanta->setCurrentPage(min($page, $pagerfanta->getNbPages()));
 
         $notifications = '';
@@ -131,7 +103,7 @@ class NotificationController extends Controller
 
         $pagination = (new EzPagerfantaView(new EzPagerfantaTemplate($this->translator)))->render($pagerfanta, $routeGenerator);
 
-        return new Response($this->render('@ezdesign/notifications/notifications_modal_body.html.twig', [
+        return new Response($this->render('@ezdesign/account/notifications/list.html.twig', [
             'page' => $page,
             'pagination' => $pagination,
             'notifications' => $notifications,

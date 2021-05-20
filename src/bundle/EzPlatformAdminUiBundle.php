@@ -6,15 +6,14 @@
  */
 namespace EzSystems\EzPlatformAdminUiBundle;
 
-use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\AdminThemePathPass;
 use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\ComponentPass;
+use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\FieldTypeFormMapperDispatcherPass;
+use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\LimitationFormMapperPass;
+use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\LimitationValueMapperPass;
 use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\SecurityLoginPass;
-use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\SystemInfoTabGroupPass;
 use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\TabPass;
 use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\UiConfigProviderPass;
-use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Compiler\ViewBuilderRegistryPass;
 use EzSystems\EzPlatformAdminUiBundle\DependencyInjection\Configuration\Parser;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -35,7 +34,7 @@ class EzPlatformAdminUiBundle extends Bundle
         $configParsers = $this->getConfigParsers();
         array_walk($configParsers, [$core, 'addConfigParser']);
 
-        $core->addDefaultSettings(__DIR__ . '/Resources/config', ['ezplatform_default_settings.yml']);
+        $core->addDefaultSettings(__DIR__ . '/Resources/config', ['ezplatform_default_settings.yaml']);
 
         $this->addCompilerPasses($container);
     }
@@ -47,11 +46,11 @@ class EzPlatformAdminUiBundle extends Bundle
     {
         $container->addCompilerPass(new TabPass());
         $container->addCompilerPass(new UiConfigProviderPass());
-        $container->addCompilerPass(new SystemInfoTabGroupPass());
         $container->addCompilerPass(new ComponentPass());
         $container->addCompilerPass(new SecurityLoginPass());
-        $container->addCompilerPass(new ViewBuilderRegistryPass());
-        $container->addCompilerPass(new AdminThemePathPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+        $container->addCompilerPass(new LimitationFormMapperPass());
+        $container->addCompilerPass(new LimitationValueMapperPass());
+        $container->addCompilerPass(new FieldTypeFormMapperDispatcherPass());
     }
 
     /**
@@ -74,6 +73,7 @@ class EzPlatformAdminUiBundle extends Bundle
             new Parser\AdminUiForms(),
             new Parser\ContentType(),
             new Parser\SubtreePath(),
+            new Parser\LimitationValueTemplates(),
         ];
     }
 }

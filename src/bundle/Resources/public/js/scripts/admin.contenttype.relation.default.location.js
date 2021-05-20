@@ -1,8 +1,6 @@
-(function (global, doc, React, ReactDOM) {
+(function(global, doc, eZ, React, ReactDOM) {
     const btns = doc.querySelectorAll('.btn--udw-relation-default-location');
     const udwContainer = doc.getElementById('react-udw');
-    const token = doc.querySelector('meta[name="CSRF-Token"]').content;
-    const siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
     const closeUDW = () => ReactDOM.unmountComponentAtNode(udwContainer);
     const onConfirm = (btn, items) => {
         closeUDW();
@@ -26,15 +24,17 @@
 
         const config = JSON.parse(event.currentTarget.dataset.udwConfig);
 
-        ReactDOM.render(React.createElement(global.eZ.modules.UniversalDiscovery, Object.assign({
-            onConfirm: onConfirm.bind(null, event.currentTarget),
-            onCancel,
-            title: event.currentTarget.dataset.universaldiscoveryTitle,
-            multiple: false,
-            startingLocationId: window.eZ.adminUiConfig.universalDiscoveryWidget.startingLocationId,
-            restInfo: { token, siteaccess }
-        }, config)), udwContainer);
+        ReactDOM.render(
+            React.createElement(eZ.modules.UniversalDiscovery, {
+                onConfirm: onConfirm.bind(null, event.currentTarget),
+                onCancel,
+                title: event.currentTarget.dataset.universaldiscoveryTitle,
+                multiple: false,
+                ...config,
+            }),
+            udwContainer
+        );
     };
 
-    btns.forEach(btn => btn.addEventListener('click', openUDW, false));
-})(window, window.document, window.React, window.ReactDOM);
+    btns.forEach((btn) => btn.addEventListener('click', openUDW, false));
+})(window, window.document, window.eZ, window.React, window.ReactDOM);

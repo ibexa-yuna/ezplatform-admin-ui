@@ -6,7 +6,7 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields;
 
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Notification;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\UniversalDiscoveryWidget;
 use PHPUnit\Framework\Assert;
@@ -16,7 +16,7 @@ class ImageAsset extends Image
     /** @var string Name by which Element is recognised */
     public const ELEMENT_NAME = 'Image Asset';
 
-    private const IMAGE_ASSET_NOTIFICATION_MESSAGE = 'Image has been published and can now be reused';
+    private const IMAGE_ASSET_NOTIFICATION_MESSAGE = 'The image has been published and can now be reused';
 
     public function setValue(array $parameters): void
     {

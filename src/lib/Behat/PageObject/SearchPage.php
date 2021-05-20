@@ -6,8 +6,9 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\DashboardTable;
 use PHPUnit\Framework\Assert;
 
@@ -15,12 +16,12 @@ class SearchPage extends Page
 {
     public const PAGE_NAME = 'Search';
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->route = '/search';
         $this->pageTitle = 'Search';
-        $this->pageTitleLocator = '.ez-page-title__content-name';
+        $this->pageTitleLocator = '.ez-page-title .ez-page-title__content-name';
         $this->fields = [
             'inputField' => '.ez-search-form #search_query',
             'buttonSearch' => '.ez-btn--search',

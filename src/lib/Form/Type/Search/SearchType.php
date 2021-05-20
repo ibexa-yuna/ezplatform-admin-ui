@@ -6,53 +6,45 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Form\Type\Search;
 
-use EzSystems\EzPlatformAdminUi\Form\Data\Search\SearchData;
-use EzSystems\EzPlatformAdminUi\Form\Type\Language\ConfiguredLanguagesChoiceType;
+use EzSystems\EzPlatformAdminUi\Form\Type\Date\DateIntervalType;
 use EzSystems\EzPlatformAdminUi\Form\Type\User\UserType;
-use EzSystems\EzPlatformAdminUi\Form\Type\ContentType\ContentTypeChoiceType;
-use EzSystems\EzPlatformAdminUi\Form\Type\Section\SectionChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\SearchType as CoreSearchType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Translation\TranslatorInterface;
-use eZ\Publish\API\Repository\PermissionResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-class SearchType extends AbstractType
+/**
+ * @internal
+ */
+final class SearchType extends AbstractType
 {
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     private $translator;
 
-    /** @var \eZ\Publish\API\Repository\PermissionResolver */
-    private $permissionResolver;
+    /** @var \Symfony\Component\Form\AbstractType */
+    private $baseType;
 
-    public function __construct(TranslatorInterface $translator, PermissionResolver $permissionResolver)
+    public function __construct(AbstractType $baseType, TranslatorInterface $translator)
     {
         $this->translator = $translator;
-        $this->permissionResolver = $permissionResolver;
+        $this->baseType = $baseType;
     }
 
     /**
-     * @param \Symfony\Component\Form\FormBuilderInterface $builder
-     * @param array $options
-     *
      * @throws \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $this->baseType->buildForm($builder, $options);
+
         $builder
-            ->add('query', CoreSearchType::class, ['required' => false])
-            ->add('page', HiddenType::class)
-            ->add('limit', HiddenType::class)
-            ->add('content_types', ContentTypeChoiceType::class, [
-                'multiple' => true,
-                'expanded' => true,
-            ])
+            ->remove('search_in_users');
+
+        $builder
+            ->add('creator', UserType::class)
             ->add('last_modified', DateIntervalType::class)
             ->add('created', DateIntervalType::class)
-            ->add('creator', UserType::class)
             ->add('last_modified_select', ChoiceType::class, [
                 'choices' => $this->getTimePeriodChoices(),
                 'required' => false,
@@ -65,28 +57,7 @@ class SearchType extends AbstractType
                 'placeholder' => /** @Desc("Any time") */ 'search.any_time',
                 'mapped' => false,
             ])
-            ->add(
-                'search_language',
-                ConfiguredLanguagesChoiceType::class,
-                [
-                    'required' => false,
-                    'multiple' => false,
-                    'expanded' => false,
-                    'placeholder' => false,
-                ]
-            )
-            ->add('subtree', HiddenType::class, [
-                'required' => false,
-            ])
         ;
-
-        if ($this->permissionResolver->hasAccess('section', 'view') !== false) {
-            $builder->add('section', SectionChoiceType::class, [
-                'required' => false,
-                'multiple' => false,
-                'placeholder' => /** @Desc("Any section") */ 'search.section.any',
-            ]);
-        }
     }
 
     /**
@@ -96,8 +67,9 @@ class SearchType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
+        $this->baseType->configureOptions($resolver);
+
         $resolver->setDefaults([
-            'data_class' => SearchData::class,
             'error_mapping' => [
                 'created' => 'created_select',
                 'last_modified' => 'last_modified_select',
@@ -107,8 +79,6 @@ class SearchType extends AbstractType
 
     /**
      * Generate time periods options available to choose.
-     *
-     * @return array
      *
      * @throws \Symfony\Component\Translation\Exception\InvalidArgumentException
      */
@@ -124,8 +94,6 @@ class SearchType extends AbstractType
 
     /**
      * Returns available time periods values.
-     *
-     * @return array
      *
      * @throws \Symfony\Component\Translation\Exception\InvalidArgumentException
      */

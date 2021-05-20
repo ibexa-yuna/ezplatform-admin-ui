@@ -1,0 +1,143 @@
+imports:
+    - { resource: services/service_aliases.yaml }
+    - { resource: services/controllers.yaml }
+    - { resource: services/tabs.yaml }
+    - { resource: services/menu.yaml }
+    - { resource: services/pagination.yaml }
+    - { resource: services/ui_config/* }
+    - { resource: services/components.yaml }
+    - { resource: services/dashboard.yaml }
+    - { resource: services/modules/subitems.yaml }
+    - { resource: services/modules/content_tree.yaml }
+    - { resource: services/form_processors.yaml }
+    - { resource: services/validators.yaml }
+    - { resource: services/siteaccess.yaml }
+    - { resource: services/universal_discovery_widget.yaml }
+    - { resource: services/utils.yaml }
+    - { resource: services/form_ui_action_mappers.yaml }
+    - { resource: services/views.yaml }
+    - { resource: services/translation.yaml }
+    - { resource: services/user_settings.yaml }
+    - { resource: services/rest.yaml }
+    - { resource: services/permissions.yaml }
+    - { resource: services/forms.yaml }
+    - { resource: services/strategies.yaml }
+    - { resource: services/query_types.yaml }
+    - { resource: services/search.yaml }
+    - { resource: services/role_form_mappers.yaml }
+    - { resource: services/fieldtype_form_mappers.yaml }
+    - { resource: services/action_dispatchers.yaml }
+    - { resource: services/events.yaml }
+    - { resource: services/twig.yaml }
+    - { resource: services/on_the_fly.yaml }
+    - { resource: services/autosave.yaml }
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    EzSystems\EzPlatformAdminUiBundle\Controller\Controller:
+        tags: ['controller.service_arguments']
+        calls:
+            - [setContainer, ["@service_container"]]
+            - [performAccessCheck, []]
+
+    EzSystems\EzPlatformAdminUiBundle\ParamConverter\:
+        resource: "../../ParamConverter/*"
+        public: true
+        tags:
+            - { name: 'request.param_converter' }
+
+    EzSystems\EzPlatformAdminUiBundle\ParamConverter\ContentTypeParamConverter:
+        public: true
+        tags:
+            - { name: 'request.param_converter' }
+
+    EzSystems\EzPlatformAdminUi\UI\Dataset\DatasetFactory:
+        lazy: true
+        arguments:
+            $configResolver: '@ezpublish.config.resolver'
+
+    EzSystems\EzPlatformAdminUi\UI\Service\:
+        resource: '../../../lib/UI/Service'
+
+    EzSystems\EzPlatformAdminUi\UI\Value\Content\Location\Mapper: ~
+
+    EzSystems\EzPlatformAdminUi\UI\Value\ValueFactory:
+        lazy: true
+        tags:
+            - { name: form.type }
+
+    EzSystems\EzPlatformAdminUi\Notification\FlashBagNotificationHandler: ~
+    EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandler: ~
+
+    EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface: '@EzSystems\EzPlatformAdminUi\Notification\FlashBagNotificationHandler'
+    EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface: '@EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandler'
+
+    EzSystems\EzPlatformAdminUi\Menu\Voter\LocationVoter:
+        arguments: [ '@request_stack' ]
+        tags:
+            - { name: knp_menu.voter }
+
+    EzSystems\EzPlatformAdminUi\Form\ActionDispatcher\CreateContentOnTheFlyDispatcher:
+        parent: ezplatform.content_forms.action_dispatcher.base
+        autowire: true
+        autoconfigure: false
+        public: false
+
+    EzSystems\EzPlatformAdminUi\Form\ActionDispatcher\CreateUserOnTheFlyDispatcher:
+        parent: ezplatform.content_forms.action_dispatcher.base
+        autowire: true
+        autoconfigure: false
+        public: false
+
+    EzSystems\EzPlatformAdminUi\Form\ActionDispatcher\EditContentOnTheFlyDispatcher:
+        parent: ezplatform.content_forms.action_dispatcher.base
+        autowire: true
+        autoconfigure: false
+        public: false
+
+    EzSystems\EzPlatformAdminUi\Form\ActionDispatcher\EditUserOnTheFlyDispatcher:
+        parent: ezplatform.content_forms.action_dispatcher.base
+        autowire: true
+        autoconfigure: false
+        public: false
+
+    EzSystems\EzPlatformAdminUi\EventListener\MenuPermissionsListener:
+        tags:
+            - {name: kernel.event_subscriber, priority: -250}
+
+    EzSystems\EzPlatformAdminUi\EventListener\CredentialsExpiredListener:
+        arguments:
+            $siteAccessGroups: '%ezpublish.siteaccess.groups%'
+        tags:
+            - {name: kernel.event_subscriber}
+
+    EzSystems\EzPlatformAdminUi\EventListener\CredentialsExpirationWarningListener:
+        arguments:
+            $siteAccessGroups: '%ezpublish.siteaccess.groups%'
+        tags:
+            - {name: kernel.event_subscriber}
+
+    EzSystems\EzPlatformAdminUiBundle\Templating\Twig\UserPreferencesGlobalExtension:
+        lazy: true
+
+    EzSystems\EzPlatformAdminUi\UI\Service\ContentTypeIconResolver: ~
+
+    EzSystems\EzPlatformContentForms\ConfigResolver\MaxUploadSize: ~
+
+    EzSystems\EzPlatformAdminUi\Form\Data\FormMapper\ContentTypeDraftMapper: ~
+
+    EzSystems\EzPlatformAdminUi\UI\Service\DateTimeFormatter: ~
+    EzSystems\EzPlatformAdminUi\UI\Service\DateTimeFormatterInterface: '@EzSystems\EzPlatformAdminUi\UI\Service\DateTimeFormatter'
+
+    EzSystems\EzPlatformAdminUi\EventListener\SearchViewFilterParametersListener:
+        arguments:
+            $formFactory: '@form.factory'
+            $configResolver: '@ezpublish.config.resolver'
+            $requestStack: '@request_stack'
+            $siteAccessGroups: '%ezpublish.siteaccess.groups%'
+        tags:
+            - {name: kernel.event_subscriber}

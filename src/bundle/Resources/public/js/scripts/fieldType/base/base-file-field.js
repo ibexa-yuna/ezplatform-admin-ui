@@ -1,8 +1,7 @@
-(function(global) {
-    const eZ = (global.eZ = global.eZ || {});
+(function(global, doc, eZ) {
     const SELECTOR_FIELD_LABEL = '.ez-field-edit__label-wrapper .ez-field-edit__label';
 
-    class BaseFileFieldValidator extends global.eZ.BaseFieldValidator {
+    class BaseFileFieldValidator extends eZ.BaseFieldValidator {
         /**
          * Validates the input
          *
@@ -23,7 +22,7 @@
             if (isRequired && isEmpty) {
                 result = {
                     isError: true,
-                    errorMessage: global.eZ.errors.emptyField.replace('{fieldName}', label),
+                    errorMessage: eZ.errors.emptyField.replace('{fieldName}', label),
                 };
             }
 
@@ -48,12 +47,12 @@
             const label = this.fieldContainer.querySelector(SELECTOR_FIELD_LABEL).innerHTML;
             const result = {
                 isError: true,
-                errorMessage: global.eZ.errors.invalidFileSize.replace('{fieldName}', label),
+                errorMessage: eZ.errors.invalidFileSize.replace('{fieldName}', label),
             };
 
             return result;
         }
     }
 
-    eZ.BaseFileFieldValidator = BaseFileFieldValidator;
-})(window);
+    eZ.addConfig('BaseFileFieldValidator', BaseFileFieldValidator);
+})(window, window.document, window.eZ);

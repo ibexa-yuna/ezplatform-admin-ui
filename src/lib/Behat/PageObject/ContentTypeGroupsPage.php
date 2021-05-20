@@ -6,22 +6,23 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Page\Page;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\AdminList;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Tables\LinkedListTable;
 
 class ContentTypeGroupsPage extends Page
 {
     /** @var string Name by which Page is recognised */
-    public const PAGE_NAME = 'Content Type Groups';
+    public const PAGE_NAME = 'Content Type groups';
 
     /**
      * @var \EzSystems\EzPlatformAdminUi\Behat\PageElement\AdminList
      */
     public $adminList;
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->siteAccess = 'admin';

@@ -14,7 +14,7 @@ use EzSystems\EzPlatformAdminUiBundle\EzPlatformAdminUiBundle;
 use SplFileInfo;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupCollectionInterface;
 use Symfony\WebpackEncoreBundle\Asset\TagRenderer;
@@ -60,7 +60,7 @@ class AdminExceptionListener
         TagRenderer $encoreTagRenderer,
         EntrypointLookupCollectionInterface $entrypointLookupCollection,
         array $siteAccessGroups,
-        string $kernelRootDir,
+        string $kernelProjectDir,
         string $kernelEnvironment
     ) {
         $this->twig = $twig;
@@ -68,14 +68,14 @@ class AdminExceptionListener
         $this->encoreTagRenderer = $encoreTagRenderer;
         $this->entrypointLookupCollection = $entrypointLookupCollection;
         $this->siteAccessGroups = $siteAccessGroups;
-        $this->rootDir = $kernelRootDir . '/..';
+        $this->rootDir = $kernelProjectDir;
         $this->kernelEnvironment = $kernelEnvironment;
     }
 
     /**
-     * @param GetResponseForExceptionEvent $event
+     * @param ExceptionEvent $event
      */
-    public function onKernelException(GetResponseForExceptionEvent $event)
+    public function onKernelException(ExceptionEvent $event)
     {
         if ($this->kernelEnvironment !== 'prod') {
             return;
@@ -86,7 +86,7 @@ class AdminExceptionListener
         }
 
         $response = new Response();
-        $exception = $event->getException();
+        $exception = $event->getThrowable();
 
         if ($exception instanceof HttpExceptionInterface) {
             $response->setStatusCode($exception->getStatusCode());
@@ -98,7 +98,7 @@ class AdminExceptionListener
         $code = $response->getStatusCode();
 
         // map exception to UI notification
-        $this->notificationHandler->error($this->getNotificationMessage($exception));
+        $this->notificationHandler->error(/** @Ignore */ $this->getNotificationMessage($exception));
 
         if ($exception instanceof RuntimeError) {
             // If exception is coming from the template where encore already
@@ -110,13 +110,13 @@ class AdminExceptionListener
 
         switch ($code) {
             case 404:
-                $content = $this->twig->render('@ezdesign/errors/404.html.twig');
+                $content = $this->twig->render('@ezdesign/ui/error_page/404.html.twig');
                 break;
             case 403:
-                $content = $this->twig->render('@ezdesign/errors/403.html.twig');
+                $content = $this->twig->render('@ezdesign/ui/error_page/403.html.twig');
                 break;
             default:
-                $content = $this->twig->render('@ezdesign/errors/error.html.twig');
+                $content = $this->twig->render('@ezdesign/ui/error_page/unknown.html.twig');
                 break;
         }
 
@@ -125,16 +125,16 @@ class AdminExceptionListener
     }
 
     /**
-     * @param GetResponseForExceptionEvent $event
+     * @param ExceptionEvent $event
      *
      * @return bool
      */
-    private function isAdminException(GetResponseForExceptionEvent $event): bool
+    private function isAdminException(ExceptionEvent $event): bool
     {
         $request = $event->getRequest();
 
         /** @var SiteAccess $siteAccess */
-        $siteAccess = $request->get('siteaccess', new SiteAccess());
+        $siteAccess = $request->get('siteaccess', new SiteAccess('default'));
 
         return \in_array($siteAccess->name, $this->siteAccessGroups[EzPlatformAdminUiBundle::ADMIN_GROUP_NAME]);
     }

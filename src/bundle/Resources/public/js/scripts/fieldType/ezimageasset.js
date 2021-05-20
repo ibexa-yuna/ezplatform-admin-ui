@@ -1,32 +1,21 @@
-(function(global, doc, eZ, React, ReactDOM, Translator) {
+(function(global, doc, eZ, React, ReactDOM, Translator, Routing) {
     const SELECTOR_FIELD = '.ez-field-edit--ezimageasset';
     const SELECTOR_INPUT_FILE = 'input[type="file"]';
     const SELECTOR_INPUT_DESTINATION_CONTENT_ID = '.ez-data-source__destination-content-id';
     const SELECTOR_LABEL_WRAPPER = '.ez-field-edit__label-wrapper';
     const SELECTOR_FILESIZE_NOTICE = '.ez-data-source__message--filesize';
     const token = doc.querySelector('meta[name="CSRF-Token"]').content;
-    const siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
     const showErrorNotification = eZ.helpers.notification.showErrorNotification;
     const showSuccessNotification = eZ.helpers.notification.showSuccessNotification;
     const getJsonFromResponse = eZ.helpers.request.getJsonFromResponse;
     const imageAssetMapping = eZ.adminUiConfig.imageAssetMapping;
 
-    /**
-     * Handles response status
-     *
-     * @function handleResponseStatus
-     * @param {Response} response
-     * @returns {Error|Promise}
-     */
-    const handleResponseStatus = (response) => {
-        if (response.status === 'failed') {
-            throw new Error(response.error);
-        }
-
-        return response;
-    };
-
     class EzImageAssetPreviewField extends eZ.BasePreviewField {
+        constructor(props) {
+            super(props);
+
+            this.showPreviewEventName = 'ez-image-asset:show-preview';
+        }
         /**
          * Creates a new Image Asset
          *
@@ -35,7 +24,7 @@
          * @param {String} languageCode
          */
         createAsset(file, languageCode) {
-            const assetCreateUri = global.Routing.generate('ezplatform.asset.upload_image');
+            const assetCreateUri = Routing.generate('ezplatform.asset.upload_image');
             const form = new FormData();
 
             form.append('languageCode', languageCode);
@@ -56,7 +45,7 @@
 
             fetch(assetCreateUri, options)
                 .then(getJsonFromResponse)
-                .then(handleResponseStatus)
+                .then(eZ.helpers.request.handleRequest)
                 .then(this.onAssetCreateSuccess.bind(this))
                 .catch(this.onAssetCreateFailure.bind(this));
         }
@@ -75,7 +64,7 @@
 
             showSuccessNotification(
                 Translator.trans(
-                    /* @Desc("Image has been published and can now be reused") */ 'ezimageasset.create.message.success',
+                    /* @Desc("The image has been published and can now be reused") */ 'ezimageasset.create.message.success',
                     {},
                     'fieldtypes_edit'
                 )
@@ -89,7 +78,7 @@
          */
         onAssetCreateFailure(error) {
             const message = Translator.trans(
-                /* @Desc("Error while creating image asset: %error%") */ 'ezimageasset.create.message.error',
+                /* @Desc("Error while creating Image Asset: %error%") */ 'ezimageasset.create.message.error',
                 { error: error.message },
                 'fieldtypes_edit'
             );
@@ -105,11 +94,16 @@
          * @param {Object} response
          */
         loadAsset(response) {
-            const imageField = response.CurrentVersion.Version.Fields.field.find((field) => {
+            const imageField = response.ContentInfo.Content.CurrentVersion.Version.Fields.field.find((field) => {
                 return field.fieldDefinitionIdentifier === imageAssetMapping['contentFieldIdentifier'];
             });
 
-            this.updateData(response.ContentInfo.Content._id, response.ContentInfo.Content.TranslatedName, response.id, imageField.fieldValue);
+            this.updateData(
+                response.ContentInfo.Content._id,
+                response.ContentInfo.Content.TranslatedName,
+                response.id,
+                imageField.fieldValue
+            );
         }
 
         /**
@@ -137,8 +131,9 @@
             const previewAlt = preview.querySelector('.ez-field-edit-preview__image-alt input');
             const previewActionPreview = preview.querySelector('.ez-field-edit-preview__action--preview');
             const assetNameContainer = preview.querySelector('.ez-field-edit-preview__asset-name a');
-            const destinationLocationUrl = global.Routing.generate('_ezpublishLocation', {
-                locationId: destinationLocationId
+            const destinationLocationUrl = Routing.generate('_ez_content_view', {
+                contentId: destinationContentId,
+                locationId: destinationLocationId,
             });
 
             previewImg.setAttribute('src', image ? image.uri : '//:0');
@@ -171,27 +166,14 @@
                 closeUDW();
                 this.loadAsset(items[0]);
             };
-            const canSelectContent = ({ item }, callback) => {
-                const itemContentType = item.ContentInfo.Content.ContentTypeInfo.identifier;
-                const isAllowedContentType = itemContentType === imageAssetMapping['contentTypeIdentifier'];
-
-                callback(isAllowedContentType);
-            };
 
             ReactDOM.render(
-                React.createElement(
-                    eZ.modules.UniversalDiscovery,
-                    Object.assign(
-                        {
-                            onConfirm,
-                            onCancel,
-                            canSelectContent,
-                            title,
-                            restInfo: { token, siteaccess },
-                        },
-                        config
-                    )
-                ),
+                React.createElement(eZ.modules.UniversalDiscovery, {
+                    onConfirm,
+                    onCancel,
+                    title,
+                    ...config,
+                }),
                 udwContainer
             );
         }
@@ -245,7 +227,7 @@
 
     class EzImageAssetFieldValidator extends eZ.BaseFileFieldValidator {
         validateFileSize(event) {
-            event.currentTarget.dispatchEvent(new CustomEvent('invalidFileSize'));
+            event.currentTarget.dispatchEvent(new CustomEvent('ez-invalid-file-size'));
 
             return {
                 isError: false,
@@ -267,7 +249,7 @@
                 {
                     isValueValidator: false,
                     selector: `${SELECTOR_INPUT_FILE}`,
-                    eventName: 'invalidFileSize',
+                    eventName: 'ez-invalid-file-size',
                     callback: 'showFileSizeError',
                     errorNodeSelectors: [SELECTOR_FILESIZE_NOTICE],
                 },
@@ -282,6 +264,6 @@
 
         previewField.init();
 
-        eZ.fieldTypeValidators = eZ.fieldTypeValidators ? [...eZ.fieldTypeValidators, validator] : [validator];
+        eZ.addConfig('fieldTypeValidators', [validator], true);
     });
-})(window, document, window.eZ, window.React, window.ReactDOM, window.Translator);
+})(window, window.document, window.eZ, window.React, window.ReactDOM, window.Translator, window.Routing);

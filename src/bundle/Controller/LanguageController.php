@@ -8,6 +8,7 @@ namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 
 use eZ\Publish\API\Repository\LanguageService;
 use eZ\Publish\API\Repository\Values\Content\Language;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\Authorization\Attribute;
 use EzSystems\EzPlatformAdminUi\Form\Data\Language\LanguageCreateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Language\LanguageDeleteData;
@@ -16,7 +17,7 @@ use EzSystems\EzPlatformAdminUi\Form\Data\Language\LanguageUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\DataMapper\LanguageCreateMapper;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -27,15 +28,11 @@ use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 use eZ\Publish\API\Repository\Exceptions\UnauthorizedException;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Translation\Exception\InvalidArgumentException as TranslationInvalidArgumentException;
-use Symfony\Component\Translation\TranslatorInterface;
 
 class LanguageController extends Controller
 {
-    /** @var NotificationHandlerInterface */
+    /** @var TranslatableNotificationHandlerInterface */
     private $notificationHandler;
-
-    /** @var TranslatorInterface */
-    private $translator;
 
     /** @var LanguageService */
     private $languageService;
@@ -49,34 +46,23 @@ class LanguageController extends Controller
     /** @var FormFactory */
     private $formFactory;
 
-    /** @var int */
-    private $defaultPaginationLimit;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /**
-     * @param NotificationHandlerInterface $notificationHandler
-     * @param TranslatorInterface $translator
-     * @param LanguageService $languageService
-     * @param LanguageCreateMapper $languageCreateMapper
-     * @param SubmitHandler $submitHandler
-     * @param FormFactory $formFactory
-     * @param int $defaultPaginationLimit
-     */
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
-        TranslatorInterface $translator,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         LanguageService $languageService,
         LanguageCreateMapper $languageCreateMapper,
         SubmitHandler $submitHandler,
         FormFactory $formFactory,
-        int $defaultPaginationLimit
+        ConfigResolverInterface $configResolver
     ) {
         $this->notificationHandler = $notificationHandler;
-        $this->translator = $translator;
         $this->languageService = $languageService;
         $this->languageCreateMapper = $languageCreateMapper;
         $this->submitHandler = $submitHandler;
         $this->formFactory = $formFactory;
-        $this->defaultPaginationLimit = $defaultPaginationLimit;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -94,7 +80,7 @@ class LanguageController extends Controller
             new ArrayAdapter($this->languageService->loadLanguages())
         );
 
-        $pagerfanta->setMaxPerPage($this->defaultPaginationLimit);
+        $pagerfanta->setMaxPerPage($this->configResolver->getParameter('pagination.language_limit'));
         $pagerfanta->setCurrentPage(min($page, $pagerfanta->getNbPages()));
 
         /** @var Language[] $languageList */
@@ -104,13 +90,9 @@ class LanguageController extends Controller
             new LanguagesDeleteData($this->getLanguagesNumbers($languageList))
         );
 
-        return $this->render('@ezdesign/admin/language/list.html.twig', [
+        return $this->render('@ezdesign/language/list.html.twig', [
             'pager' => $pagerfanta,
             'form_languages_delete' => $deleteLanguagesForm->createView(),
-            /* @deprecated since version 2.2, to be removed in 3.0. Use 'can_administrate' instead. */
-            'canEdit' => $this->isGranted(new Attribute('content', 'translations')),
-            /* @deprecated since version 2.2, to be removed in 3.0. Use 'can_administrate' instead. */
-            'canAssign' => $this->isGranted(new Attribute('content', 'translations')),
             'can_administrate' => $this->isGranted(new Attribute('content', 'translations')),
         ]);
     }
@@ -128,13 +110,9 @@ class LanguageController extends Controller
             new LanguageDeleteData($language)
         );
 
-        return $this->render('@ezdesign/admin/language/view.html.twig', [
+        return $this->render('@ezdesign/language/index.html.twig', [
             'language' => $language,
             'deleteForm' => $deleteForm->createView(),
-            /* @deprecated since version 2.2, to be removed in 3.0. Use 'can_administrate' instead. */
-            'canEdit' => $this->isGranted(new Attribute('content', 'translations')),
-            /* @deprecated since version 2.2, to be removed in 3.0. Use 'can_administrate' instead. */
-            'canAssign' => $this->isGranted(new Attribute('content', 'translations')),
             'can_administrate' => $this->isGranted(new Attribute('content', 'translations')),
         ]);
     }
@@ -160,12 +138,10 @@ class LanguageController extends Controller
                 $this->languageService->deleteLanguage($language);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Language '%name%' removed.") */
-                        'language.delete.success',
-                        ['%name%' => $language->name],
-                        'language'
-                    )
+                    /** @Desc("Language '%name%' removed.") */
+                    'language.delete.success',
+                    ['%name%' => $language->name],
+                    'language'
                 );
             });
 
@@ -205,12 +181,10 @@ class LanguageController extends Controller
                     $this->languageService->deleteLanguage($language);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Language '%name%' removed.") */
-                            'language.delete.success',
-                            ['%name%' => $language->name],
-                            'language'
-                        )
+                        /** @Desc("Language '%name%' removed.") */
+                        'language.delete.success',
+                        ['%name%' => $language->name],
+                        'language'
                     );
                 }
             });
@@ -234,12 +208,10 @@ class LanguageController extends Controller
                 $language = $this->languageService->createLanguage($languageCreateStruct);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Language '%name%' created.") */
-                        'language.create.success',
-                        ['%name%' => $language->name],
-                        'language'
-                    )
+                    /** @Desc("Language '%name%' created.") */
+                    'language.create.success',
+                    ['%name%' => $language->name],
+                    'language'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.language.view', [
@@ -252,7 +224,7 @@ class LanguageController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/language/create.html.twig', [
+        return $this->render('@ezdesign/language/create.html.twig', [
             'form' => $form->createView(),
             'actionUrl' => $this->generateUrl('ezplatform.language.create'),
         ]);
@@ -274,12 +246,10 @@ class LanguageController extends Controller
                     : $this->languageService->disableLanguage($language);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Language '%name%' updated.") */
-                        'language.update.success',
-                        ['%name%' => $language->name],
-                        'language'
-                    )
+                    /** @Desc("Language '%name%' updated.") */
+                    'language.update.success',
+                    ['%name%' => $language->name],
+                    'language'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.language.view', [
@@ -292,7 +262,7 @@ class LanguageController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/language/edit.html.twig', [
+        return $this->render('@ezdesign/language/edit.html.twig', [
             'form' => $form->createView(),
             'actionUrl' => $this->generateUrl('ezplatform.language.edit', ['languageId' => $language->id]),
             'language' => $language,

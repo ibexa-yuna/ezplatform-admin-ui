@@ -6,7 +6,8 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Element\Element;
 
 /** Element that describes dialog popup */
 class Dialog extends Element
@@ -14,12 +15,12 @@ class Dialog extends Element
     /** @var string Name by which Element is recognised */
     public const ELEMENT_NAME = 'Dialog';
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->fields = [
-            'confirm' => '.modal.show button[type="submit"],.modal.show .btn--trigger',
-            'decline' => '.modal.show .btn--no',
+            'confirm' => '.modal.show button[type="submit"],.modal.show button[data-click]',
+            'decline' => '.modal.show .btn-secondary',
         ];
     }
 

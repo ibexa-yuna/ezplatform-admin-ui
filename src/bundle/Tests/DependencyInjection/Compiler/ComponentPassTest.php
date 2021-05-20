@@ -18,7 +18,7 @@ use EzSystems\EzPlatformAdminUi\Exception\InvalidArgumentException;
 
 class ComponentPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->setDefinition(Registry::class, new Definition());
@@ -27,7 +27,7 @@ class ComponentPassTest extends AbstractCompilerPassTestCase
     /**
      * @param ContainerBuilder $container
      */
-    protected function registerCompilerPass(ContainerBuilder $container)
+    protected function registerCompilerPass(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new ComponentPass());
     }
@@ -59,7 +59,7 @@ class ComponentPassTest extends AbstractCompilerPassTestCase
         $taggedServiceId = 'collected_service';
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf('Argument \'%s\' is invalid: Tag %s must contain "group" argument.', $taggedServiceId, ComponentPass::TAG_NAME));
+        $this->expectExceptionMessage(sprintf('Argument \'%s\' is invalid: Tag %s must contain a "group" argument.', $taggedServiceId, ComponentPass::TAG_NAME));
 
         $collectedService = new Definition();
         $collectedService->addTag(ComponentPass::TAG_NAME);

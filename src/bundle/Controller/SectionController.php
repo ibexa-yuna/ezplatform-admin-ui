@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 
 use Exception;
-use eZ\Publish\API\Repository\ContentTypeService;
 use eZ\Publish\API\Repository\LocationService;
 use eZ\Publish\API\Repository\PermissionResolver;
 use eZ\Publish\API\Repository\SearchService;
@@ -18,6 +17,7 @@ use eZ\Publish\API\Repository\Values\Content\Query;
 use eZ\Publish\API\Repository\Values\Content\Query\SortClause;
 use eZ\Publish\API\Repository\Values\Content\Section;
 use eZ\Publish\API\Repository\Values\User\Limitation\NewSectionLimitation;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\Authorization\Attribute;
 use eZ\Publish\Core\Pagination\Pagerfanta\ContentSearchAdapter;
 use EzSystems\EzPlatformAdminUi\Form\Data\Section\SectionContentAssignData;
@@ -29,9 +29,9 @@ use EzSystems\EzPlatformAdminUi\Form\DataMapper\SectionCreateMapper;
 use EzSystems\EzPlatformAdminUi\Form\DataMapper\SectionUpdateMapper;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
-use EzSystems\EzPlatformAdminUi\Permission\PermissionCheckerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use EzSystems\EzPlatformAdminUi\UI\Service\PathService;
+use EzSystems\EzPlatformAdminUi\Permission\PermissionCheckerInterface;
 use EzSystems\EzPlatformAdminUiBundle\View\EzPagerfantaView;
 use EzSystems\EzPlatformAdminUiBundle\View\Template\EzPagerfantaTemplate;
 use Pagerfanta\Adapter\ArrayAdapter;
@@ -39,14 +39,14 @@ use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SectionController extends Controller
 {
-    /** @var \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface */
+    /** @var \EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface */
     private $notificationHandler;
 
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     private $translator;
 
     /** @var \eZ\Publish\API\Repository\SectionService */
@@ -67,9 +67,6 @@ class SectionController extends Controller
     /** @var \EzSystems\EzPlatformAdminUi\Form\SubmitHandler */
     private $submitHandler;
 
-    /** @var \eZ\Publish\API\Repository\ContentTypeService */
-    private $contentTypeService;
-
     /** @var \eZ\Publish\API\Repository\LocationService */
     private $locationService;
 
@@ -82,27 +79,11 @@ class SectionController extends Controller
     /** @var \EzSystems\EzPlatformAdminUi\Permission\PermissionCheckerInterface */
     private $permissionChecker;
 
-    /** @var int */
-    private $defaultPaginationLimit;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface $notificationHandler
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param \eZ\Publish\API\Repository\SectionService $sectionService
-     * @param \eZ\Publish\API\Repository\SearchService $searchService
-     * @param \EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory $formFactory
-     * @param \EzSystems\EzPlatformAdminUi\Form\DataMapper\SectionCreateMapper $sectionCreateMapper
-     * @param \EzSystems\EzPlatformAdminUi\Form\DataMapper\SectionUpdateMapper $sectionUpdateMapper
-     * @param \EzSystems\EzPlatformAdminUi\Form\SubmitHandler $submitHandler
-     * @param \eZ\Publish\API\Repository\ContentTypeService $contentTypeService
-     * @param \eZ\Publish\API\Repository\LocationService $locationService
-     * @param \EzSystems\EzPlatformAdminUi\UI\Service\PathService $pathService
-     * @param \eZ\Publish\API\Repository\PermissionResolver $permissionResolver
-     * @param \EzSystems\EzPlatformAdminUi\Permission\PermissionCheckerInterface $permissionChecker
-     * @param int $defaultPaginationLimit
-     */
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         TranslatorInterface $translator,
         SectionService $sectionService,
         SearchService $searchService,
@@ -110,12 +91,11 @@ class SectionController extends Controller
         SectionCreateMapper $sectionCreateMapper,
         SectionUpdateMapper $sectionUpdateMapper,
         SubmitHandler $submitHandler,
-        ContentTypeService $contentTypeService,
         LocationService $locationService,
         PathService $pathService,
         PermissionResolver $permissionResolver,
         PermissionCheckerInterface $permissionChecker,
-        int $defaultPaginationLimit
+        ConfigResolverInterface $configResolver
     ) {
         $this->notificationHandler = $notificationHandler;
         $this->translator = $translator;
@@ -125,12 +105,11 @@ class SectionController extends Controller
         $this->sectionCreateMapper = $sectionCreateMapper;
         $this->sectionUpdateMapper = $sectionUpdateMapper;
         $this->submitHandler = $submitHandler;
-        $this->contentTypeService = $contentTypeService;
         $this->locationService = $locationService;
         $this->pathService = $pathService;
-        $this->defaultPaginationLimit = $defaultPaginationLimit;
         $this->permissionResolver = $permissionResolver;
         $this->permissionChecker = $permissionChecker;
+        $this->configResolver = $configResolver;
     }
 
     public function performAccessCheck(): void
@@ -155,7 +134,7 @@ class SectionController extends Controller
             new ArrayAdapter($this->sectionService->loadSections())
         );
 
-        $pagerfanta->setMaxPerPage($this->defaultPaginationLimit);
+        $pagerfanta->setMaxPerPage($this->configResolver->getParameter('pagination.section_limit'));
         $pagerfanta->setCurrentPage(min($page, $pagerfanta->getNbPages()));
 
         /** @var \eZ\Publish\API\Repository\Values\Content\Section[] $sectionList */
@@ -186,7 +165,7 @@ class SectionController extends Controller
         $canAdd = $this->permissionResolver->hasAccess('section', 'view') === true
             && $this->permissionResolver->hasAccess('section', 'edit') === true;
 
-        return $this->render('@ezdesign/admin/section/list.html.twig', [
+        return $this->render('@ezdesign/section/list.html.twig', [
             'can_add' => $canAdd,
             'can_edit' => $canEdit,
             'can_assign' => $canAssign,
@@ -210,7 +189,7 @@ class SectionController extends Controller
             new SectionDeleteData($section)
         )->createView();
 
-        return $this->render('@ezdesign/admin/section/view.html.twig', [
+        return $this->render('@ezdesign/section/view.html.twig', [
             'section' => $section,
             'form_section_delete' => $sectionDeleteForm,
             'deletable' => !$this->sectionService->isSectionUsed($section),
@@ -268,7 +247,7 @@ class SectionController extends Controller
 
         $pagination = (new EzPagerfantaView(new EzPagerfantaTemplate($this->translator)))->render($pagerfanta, $routeGenerator);
 
-        return $this->render('@ezdesign/admin/section/assigned_content.html.twig', [
+        return $this->render('@ezdesign/section/assigned_content.html.twig', [
             'section' => $section,
             'form_section_content_assign' => $sectionContentAssignForm,
             'assigned_content' => $assignedContent,
@@ -299,12 +278,10 @@ class SectionController extends Controller
                 $this->sectionService->deleteSection($section);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Section '%name%' removed.") */
-                        'section.delete.success',
-                        ['%name%' => $section->name],
-                        'section'
-                    )
+                    /** @Desc("Section '%name%' removed.") */
+                    'section.delete.success',
+                    ['%name%' => $section->name],
+                    'section'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.section.list'));
@@ -340,12 +317,10 @@ class SectionController extends Controller
                     $this->sectionService->deleteSection($section);
 
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Section '%name%' removed.") */
-                            'section.delete.success',
-                            ['%name%' => $section->name],
-                            'section'
-                        )
+                        /** @Desc("Section '%name%' removed.") */
+                        'section.delete.success',
+                        ['%name%' => $section->name],
+                        'section'
                     );
                 }
             });
@@ -390,12 +365,10 @@ class SectionController extends Controller
                 }
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("%contentItemsCount% content items were assigned to '%name%'") */
-                        'section.assign_content.success',
-                        ['%name%' => $section->name, '%contentItemsCount%' => \count($contentInfos)],
-                        'section'
-                    )
+                    /** @Desc("%contentItemsCount% Content items assigned to '%name%'") */
+                    'section.assign_content.success',
+                    ['%name%' => $section->name, '%contentItemsCount%' => \count($contentInfos)],
+                    'section'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.section.view', [
@@ -433,23 +406,21 @@ class SectionController extends Controller
                 $section = $this->sectionService->createSection($sectionCreateStruct);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Section '%name%' created.") */
-                        'section.create.success',
-                        ['%name%' => $section->name],
-                        'section'
-                    )
+                    /** @Desc("Section '%name%' created.") */
+                    'section.create.success',
+                    ['%name%' => $section->name],
+                    'section'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.section.view', [
                     'sectionId' => $section->id,
                 ]));
             } catch (Exception $e) {
-                $this->notificationHandler->error($e->getMessage());
+                $this->notificationHandler->error(/** @Ignore */ $e->getMessage());
             }
         }
 
-        return $this->render('@ezdesign/admin/section/create.html.twig', [
+        return $this->render('@ezdesign/section/create.html.twig', [
             'form_section_create' => $form->createView(),
         ]);
     }
@@ -475,23 +446,21 @@ class SectionController extends Controller
                 $section = $this->sectionService->updateSection($data->getSection(), $sectionUpdateStruct);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Section '%name%' updated.") */
-                        'section.update.success',
-                        ['%name%' => $section->name],
-                        'section'
-                    )
+                    /** @Desc("Section '%name%' updated.") */
+                    'section.update.success',
+                    ['%name%' => $section->name],
+                    'section'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.section.view', [
                     'sectionId' => $section->id,
                 ]));
             } catch (Exception $e) {
-                $this->notificationHandler->error($e->getMessage());
+                $this->notificationHandler->error(/** @Ignore */ $e->getMessage());
             }
         }
 
-        return $this->render('@ezdesign/admin/section/update.html.twig', [
+        return $this->render('@ezdesign/section/update.html.twig', [
             'section' => $section,
             'form_section_update' => $form->createView(),
         ]);

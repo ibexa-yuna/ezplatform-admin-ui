@@ -1,9 +1,9 @@
-(function(global, doc, flatpickr) {
+(function(global, doc, eZ, flatpickr) {
     const SELECTOR_PICKER = '.ez-picker';
     const SELECTOR_PICKER_INPUT = '.ez-picker__input';
     const SELECTOR_FORM_INPUT = '.ez-picker__form-input';
     const SELECTOR_CLEAR_BTN = '.ez-picker__btn--clear-input';
-    const pickers = [...doc.querySelectorAll(SELECTOR_PICKER)];
+    const pickers = doc.querySelectorAll(SELECTOR_PICKER);
     const { formatShortDateTime } = eZ.helpers.timezone;
     const pickerConfig = {
         enableTime: true,
@@ -29,22 +29,24 @@
         const formInput = field.querySelector(SELECTOR_FORM_INPUT);
         const pickerInput = field.querySelector(SELECTOR_PICKER_INPUT);
         const btnClear = field.querySelector(SELECTOR_CLEAR_BTN);
+        const customConfig = JSON.parse(pickerInput.dataset.flatpickrConfig || '{}');
         let defaultDate;
 
         if (formInput.value) {
             defaultDate = new Date(formInput.value * 1000);
         }
 
-        const flatpickrInstance = flatpickr(
-            pickerInput,
-            Object.assign({}, pickerConfig, {
-                onChange: updateInputValue.bind(null, formInput),
-                defaultDate,
-            }),
-        );
+        const flatpickrInstance = flatpickr(pickerInput, {
+            ...pickerConfig,
+            onChange: updateInputValue.bind(null, formInput),
+            defaultDate,
+            ...customConfig,
+        });
 
-        btnClear.addEventListener('click', onClearBtnClick.bind(null, flatpickrInstance), false);
+        if (btnClear) {
+            btnClear.addEventListener('click', onClearBtnClick.bind(null, flatpickrInstance), false);
+        }
     };
 
     pickers.forEach(initFlatPickr);
-})(window, window.document, window.flatpickr);
+})(window, window.document, window.eZ, window.flatpickr);

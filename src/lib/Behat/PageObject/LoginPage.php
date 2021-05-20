@@ -6,7 +6,8 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageObject;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Page\Page;
+use EzSystems\Behat\Browser\Context\BrowserContext;
 
 class LoginPage extends Page
 {
@@ -18,7 +19,7 @@ class LoginPage extends Page
         'password' => '#password',
     ];
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->siteAccess = 'admin';
@@ -48,7 +49,7 @@ class LoginPage extends Page
      */
     protected function clickLogin(): void
     {
-        $this->context->getSession()->getPage()->findButton('Login')->click();
+        $this->context->getSession()->getPage()->findButton('Sign in')->click();
     }
 
     /**

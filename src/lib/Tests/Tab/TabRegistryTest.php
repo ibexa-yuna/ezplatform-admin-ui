@@ -12,14 +12,14 @@ use EzSystems\EzPlatformAdminUi\Tab\TabInterface;
 use EzSystems\EzPlatformAdminUi\Tab\TabRegistry;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 class TabRegistryTest extends TestCase
 {
     private $groupName;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->groupName = 'group_name';
@@ -28,7 +28,7 @@ class TabRegistryTest extends TestCase
     public function testGetTabsByGroupNameWhenGroupDoesNotExist()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf('Requested group named "%s" is not found. Did you forget to tag the service?', $this->groupName));
+        $this->expectExceptionMessage(sprintf('Could not find the requested group named "%s". Did you tag the service?', $this->groupName));
 
         $tabRegistry = new TabRegistry();
         $tabRegistry->getTabsByGroupName($this->groupName);
@@ -61,7 +61,7 @@ class TabRegistryTest extends TestCase
     public function testGetTabFromGroupWhenGroupDoesNotExist()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf('Requested group named "%s" is not found. Did you forget to tag the service?', $this->groupName));
+        $this->expectExceptionMessage(sprintf('Could not find the requested group named "%s". Did you tag the service?', $this->groupName));
 
         $tabRegistry = new TabRegistry();
         $tabRegistry->getTabFromGroup('tab1', $this->groupName);
@@ -72,7 +72,7 @@ class TabRegistryTest extends TestCase
         $tabName = 'tab1';
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage(sprintf('Requested tab "%s" from group "%s" is not found. Did you forget to tag the service?', $tabName, $this->groupName));
+        $this->expectExceptionMessage(sprintf('Could not find the requested tab "%s" from group "%s". Did you tag the service?', $tabName, $this->groupName));
 
         $tabs = [];
         $tabRegistry = new TabRegistry();
@@ -149,7 +149,7 @@ class TabRegistryTest extends TestCase
      *
      * @param string $name
      * @param Environment|MockObject $twig
-     * @param TranslatorInterface|MockObject $translator
+     * @param MockObject|TranslatorInterface $translator
      *
      * @return TabInterface
      */

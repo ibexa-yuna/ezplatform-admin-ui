@@ -53,11 +53,13 @@ class NotificationTwigStrategy
      */
     public function decide($contentId): string
     {
+        $contentId = (int)$contentId;
+
         if ($this->isContentPermanentlyDeleted($contentId)) {
-            return '@EzPlatformAdminUi/notifications/permanently_deleted.html.twig';
+            return '@ezdesign/account/notifications/list_item_deleted.html.twig';
         }
         if ($this->isContentTrashed($contentId)) {
-            return '@EzPlatformAdminUi/notifications/trashed.html.twig';
+            return '@ezdesign/account/notifications/list_item_trashed.html.twig';
         }
         if (!empty($this->defaultTemplate)) {
             return $this->defaultTemplate;

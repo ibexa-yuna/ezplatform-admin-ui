@@ -7,11 +7,13 @@
 namespace EzSystems\EzPlatformAdminUi\Behat\BusinessContext;
 
 use Behat\Gherkin\Node\TableNode;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\EzEnvironmentConstants;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
+use EzSystems\Behat\Browser\Factory\PageObjectFactory;
+use EzSystems\Behat\Core\Environment\EnvironmentConstants;
+use EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields\NonEditableField;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\ContentUpdateForm;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageObject\ContentUpdateItemPage;
-use EzSystems\EzPlatformAdminUi\Behat\PageObject\PageObjectFactory;
+use PHPUnit\Framework\Assert;
 use EzSystems\EzPlatformAdminUi\Behat\PageObject\UserCreationPage;
 
 class ContentUpdateContext extends BusinessContext
@@ -21,7 +23,7 @@ class ContentUpdateContext extends BusinessContext
      */
     public function iSetFields(TableNode $table): void
     {
-        $updateItemPage = PageObjectFactory::createPage($this->utilityContext, ContentUpdateItemPage::PAGE_NAME, '');
+        $updateItemPage = PageObjectFactory::createPage($this->browserContext, ContentUpdateItemPage::PAGE_NAME, '');
         $hash = $table->getHash();
         foreach ($hash as $row) {
             $values = $this->filterOutNonEmptyValues($row);
@@ -30,11 +32,21 @@ class ContentUpdateContext extends BusinessContext
     }
 
     /**
+     * @Given the :fieldName field is noneditable
+     */
+    public function verifyFieldIsNotEditable(string $fieldName): void
+    {
+        $updateItemPage = PageObjectFactory::createPage($this->browserContext, ContentUpdateItemPage::PAGE_NAME, '');
+        $field = $updateItemPage->contentUpdateForm->getField($fieldName);
+        Assert::assertEquals(NonEditableField::EXPECTED_NON_EDITABLE_TEXT, $field->getValue()[0]);
+    }
+
+    /**
      * @When I set content fields for user
      */
     public function iSetFieldsForUser(TableNode $table): void
     {
-        $updateItemPage = PageObjectFactory::createPage($this->utilityContext, UserCreationPage::PAGE_NAME, '');
+        $updateItemPage = PageObjectFactory::createPage($this->browserContext, UserCreationPage::PAGE_NAME, '');
         $updateItemPage->verifyIsLoaded();
         foreach ($table->getHash() as $row) {
             $values = $this->filterOutNonEmptyValues($row);
@@ -47,7 +59,7 @@ class ContentUpdateContext extends BusinessContext
      */
     public function selectContentFromIARepository(string $contentPath, string $fieldName): void
     {
-        $contentUpdateForm = ElementFactory::createElement($this->utilityContext, ContentUpdateForm::ELEMENT_NAME);
+        $contentUpdateForm = ElementFactory::createElement($this->browserContext, ContentUpdateForm::ELEMENT_NAME);
         $contentUpdateForm->getField($fieldName)->selectFromRepository($contentPath);
     }
 
@@ -64,7 +76,7 @@ class ContentUpdateContext extends BusinessContext
      */
     public function verifyFieldsAreSet(TableNode $table): void
     {
-        $updateItemPage = PageObjectFactory::createPage($this->utilityContext, ContentUpdateItemPage::PAGE_NAME, '');
+        $updateItemPage = PageObjectFactory::createPage($this->browserContext, ContentUpdateItemPage::PAGE_NAME, '');
         $hash = $table->getHash();
         foreach ($hash as $row) {
             $updateItemPage->contentUpdateForm->verifyFieldHasValue($row);
@@ -76,7 +88,7 @@ class ContentUpdateContext extends BusinessContext
      */
     public function iClickCloseButton(): void
     {
-        $updateItemPage = PageObjectFactory::createPage($this->utilityContext, ContentUpdateItemPage::PAGE_NAME, '');
+        $updateItemPage = PageObjectFactory::createPage($this->browserContext, ContentUpdateItemPage::PAGE_NAME, '');
         $updateItemPage->contentUpdateForm->closeUpdateForm();
     }
 
@@ -85,8 +97,8 @@ class ContentUpdateContext extends BusinessContext
      */
     public function iSetArticleMainContentField(string $intro): void
     {
-        $updateItemPage = PageObjectFactory::createPage($this->utilityContext, ContentUpdateItemPage::PAGE_NAME, '');
-        $fieldName = EzEnvironmentConstants::get('ARTICLE_MAIN_FIELD_NAME');
+        $updateItemPage = PageObjectFactory::createPage($this->browserContext, ContentUpdateItemPage::PAGE_NAME, '');
+        $fieldName = EnvironmentConstants::get('ARTICLE_MAIN_FIELD_NAME');
         $updateItemPage->contentUpdateForm->fillFieldWithValue($fieldName, ['value' => $intro]);
     }
 
@@ -95,8 +107,8 @@ class ContentUpdateContext extends BusinessContext
      */
     public function verifyArticleMainContentFieldIsSet(string $intro): void
     {
-        $updateItemPage = PageObjectFactory::createPage($this->utilityContext, ContentUpdateItemPage::PAGE_NAME, '');
-        $fieldName = EzEnvironmentConstants::get('ARTICLE_MAIN_FIELD_NAME');
+        $updateItemPage = PageObjectFactory::createPage($this->browserContext, ContentUpdateItemPage::PAGE_NAME, '');
+        $fieldName = EnvironmentConstants::get('ARTICLE_MAIN_FIELD_NAME');
         $updateItemPage->contentUpdateForm->verifyFieldHasValue(['label' => $fieldName, 'value' => $intro]);
     }
 }

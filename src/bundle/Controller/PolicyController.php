@@ -11,6 +11,7 @@ namespace EzSystems\EzPlatformAdminUiBundle\Controller;
 use eZ\Publish\API\Repository\RoleService;
 use eZ\Publish\API\Repository\Values\User\Policy;
 use eZ\Publish\API\Repository\Values\User\Role;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\Authorization\Attribute;
 use EzSystems\EzPlatformAdminUi\Form\Data\Policy\PoliciesDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Policy\PolicyCreateData;
@@ -20,22 +21,18 @@ use EzSystems\EzPlatformAdminUi\Form\DataMapper\PolicyCreateMapper;
 use EzSystems\EzPlatformAdminUi\Form\DataMapper\PolicyUpdateMapper;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatorInterface;
 use eZ\Publish\API\Repository\Exceptions\NotFoundException;
 
 class PolicyController extends Controller
 {
-    /** @var \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface */
+    /** @var \EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface */
     private $notificationHandler;
-
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
-    private $translator;
 
     /** @var \eZ\Publish\API\Repository\RoleService */
     private $roleService;
@@ -52,37 +49,25 @@ class PolicyController extends Controller
     /** @var \EzSystems\EzPlatformAdminUi\Form\SubmitHandler */
     private $submitHandler;
 
-    /** @var int */
-    private $defaultPaginationLimit;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface $notificationHandler
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param \eZ\Publish\API\Repository\RoleService $roleService
-     * @param \EzSystems\EzPlatformAdminUi\Form\DataMapper\PolicyCreateMapper $policyCreateMapper
-     * @param \EzSystems\EzPlatformAdminUi\Form\DataMapper\PolicyUpdateMapper $policyUpdateMapper
-     * @param \EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory $formFactory
-     * @param \EzSystems\EzPlatformAdminUi\Form\SubmitHandler $submitHandler
-     * @param int $defaultPaginationLimit
-     */
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
-        TranslatorInterface $translator,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         RoleService $roleService,
         PolicyCreateMapper $policyCreateMapper,
         PolicyUpdateMapper $policyUpdateMapper,
         FormFactory $formFactory,
         SubmitHandler $submitHandler,
-        int $defaultPaginationLimit
+        ConfigResolverInterface $configResolver
     ) {
         $this->notificationHandler = $notificationHandler;
-        $this->translator = $translator;
         $this->roleService = $roleService;
         $this->policyCreateMapper = $policyCreateMapper;
         $this->policyUpdateMapper = $policyUpdateMapper;
         $this->formFactory = $formFactory;
         $this->submitHandler = $submitHandler;
-        $this->defaultPaginationLimit = $defaultPaginationLimit;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -106,7 +91,7 @@ class PolicyController extends Controller
             new ArrayAdapter($role->getPolicies())
         );
 
-        $pagerfanta->setMaxPerPage($this->defaultPaginationLimit);
+        $pagerfanta->setMaxPerPage($this->configResolver->getParameter('pagination.policy_limit'));
         $pagerfanta->setCurrentPage(min($policyPage, $pagerfanta->getNbPages()));
 
         /** @var \eZ\Publish\API\Repository\Values\User\Policy[] $policies */
@@ -125,7 +110,7 @@ class PolicyController extends Controller
             new PoliciesDeleteData($role, $this->getPoliciesNumbers($policies))
         );
 
-        return $this->render('@ezdesign/admin/policy/list.html.twig', [
+        return $this->render('@ezdesign/user/policy/list.html.twig', [
             'form_policies_delete' => $deletePoliciesForm->createView(),
             'is_editable' => $isEditable,
             'role' => $role,
@@ -164,12 +149,10 @@ class PolicyController extends Controller
 
                 if ($isEditable) {
                     $this->notificationHandler->success(
-                        $this->translator->trans(
-                            /** @Desc("Now you can set limitations for the policy.") */
-                            'policy.add.set_limitation',
-                            ['%role%' => $role->identifier],
-                            'role'
-                        )
+                        /** @Desc("Now you can set Limitations for the Policy.") */
+                        'policy.add.set_limitation',
+                        ['%role%' => $role->identifier],
+                        'role'
                     );
 
                     return new RedirectResponse($this->generateUrl('ezplatform.policy.create_with_limitation', [
@@ -189,12 +172,10 @@ class PolicyController extends Controller
                 $this->roleService->publishRoleDraft($roleDraft);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("New policies in role '%role%' created.") */
-                        'policy.add.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Created new Policies in Role '%role%'.") */
+                    'policy.add.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [
@@ -207,7 +188,7 @@ class PolicyController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/policy/add.html.twig', [
+        return $this->render('@ezdesign/user/policy/add.html.twig', [
             'role' => $role,
             'form' => $form->createView(),
         ]);
@@ -235,12 +216,10 @@ class PolicyController extends Controller
 
         if (!$isEditable) {
             $this->notificationHandler->error(
-                $this->translator->trans(
-                    /** @Desc("Policy type '%policy%' does not contain limitations.") */
-                    'policy.edit.no_limitations',
-                    ['%policy%' => $policy->module . '/' . $policy->function],
-                    'role'
-                )
+                /** @Desc("Policy type '%policy%' does not contain Limitations.") */
+                'policy.edit.no_limitations',
+                ['%policy%' => $policy->module . '/' . $policy->function],
+                'role'
             );
 
             return new RedirectResponse($this->generateUrl('ezplatform.role.view', [
@@ -268,12 +247,10 @@ class PolicyController extends Controller
                 }
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Policies in role '%role%' updated.") */
-                        'policy.update.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Updated Policies in Role '%role%'.") */
+                    'policy.update.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [
@@ -286,7 +263,7 @@ class PolicyController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/policy/edit.html.twig', [
+        return $this->render('@ezdesign/user/policy/edit.html.twig', [
             'role' => $role,
             'policy' => $policy,
             'form' => $form->createView(),
@@ -320,12 +297,10 @@ class PolicyController extends Controller
                 $this->roleService->publishRoleDraft($roleDraft);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("New policies in role '%role%' created.") */
-                        'policy.add.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Created new Policies in Role '%role%'.") */
+                    'policy.add.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [
@@ -338,7 +313,7 @@ class PolicyController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/policy/create_with_limitation.html.twig', [
+        return $this->render('@ezdesign/user/policy/create_with_limitation.html.twig', [
             'role' => $role,
             'form' => $form->createView(),
         ]);
@@ -374,12 +349,10 @@ class PolicyController extends Controller
                 }
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Policies in role '%role%' removed.") */
-                        'policy.delete.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Removed Policies from Role '%role%'.") */
+                    'policy.delete.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [
@@ -432,12 +405,10 @@ class PolicyController extends Controller
                 $this->roleService->publishRoleDraft($roleDraft);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Policies in role '%role%' removed.") */
-                        'policy.delete.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Removed Policies from Role '%role%'.") */
+                    'policy.delete.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [

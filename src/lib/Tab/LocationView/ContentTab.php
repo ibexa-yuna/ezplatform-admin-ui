@@ -12,11 +12,12 @@ use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\ContentType\ContentType;
 use eZ\Publish\API\Repository\LanguageService;
 use eZ\Publish\API\Repository\Values\Content\Language;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use EzSystems\EzPlatformAdminUi\Tab\AbstractEventDispatchingTab;
 use EzSystems\EzPlatformAdminUi\Tab\OrderedTabInterface;
 use EzSystems\EzPlatformAdminUi\Util\FieldDefinitionGroupsUtil;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 class ContentTab extends AbstractEventDispatchingTab implements OrderedTabInterface
@@ -27,30 +28,22 @@ class ContentTab extends AbstractEventDispatchingTab implements OrderedTabInterf
     /** @var \eZ\Publish\API\Repository\LanguageService */
     private $languageService;
 
-    /** @var array */
-    private $siteAccessLanguages;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /**
-     * @param \Twig\Environment $twig
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param \EzSystems\EzPlatformAdminUi\Util\FieldDefinitionGroupsUtil $fieldDefinitionGroupsUtil
-     * @param \eZ\Publish\API\Repository\LanguageService $languageService
-     * @param array $siteAccessLanguages
-     * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher
-     */
     public function __construct(
         Environment $twig,
         TranslatorInterface $translator,
         FieldDefinitionGroupsUtil $fieldDefinitionGroupsUtil,
         LanguageService $languageService,
-        array $siteAccessLanguages,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        ConfigResolverInterface $configResolver
     ) {
         parent::__construct($twig, $translator, $eventDispatcher);
 
         $this->fieldDefinitionGroupsUtil = $fieldDefinitionGroupsUtil;
         $this->languageService = $languageService;
-        $this->siteAccessLanguages = $siteAccessLanguages;
+        $this->configResolver = $configResolver;
     }
 
     public function getIdentifier(): string
@@ -93,8 +86,6 @@ class ContentTab extends AbstractEventDispatchingTab implements OrderedTabInterf
 
         return array_replace($contextParameters, [
             'content' => $content,
-            /* @deprecated since version 2.2, to be removed in 3.0 */
-            'fieldDefinitionsByGroup' => $fieldDefinitionsByGroup,
             'field_definitions_by_group' => $fieldDefinitionsByGroup,
             'languages' => $languages,
             'location' => $contextParameters['location'],
@@ -124,7 +115,7 @@ class ContentTab extends AbstractEventDispatchingTab implements OrderedTabInterf
 
         $saLanguages = [];
 
-        foreach ($this->siteAccessLanguages as $languageCode) {
+        foreach ($this->configResolver->getParameter('languages') as $languageCode) {
             if (!isset($languagesByCode[$languageCode])) {
                 continue;
             }

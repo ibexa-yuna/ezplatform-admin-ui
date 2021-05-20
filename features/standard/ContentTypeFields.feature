@@ -8,7 +8,7 @@ Feature: Content fields setting and editing
     Given I create a "<fieldName> CT" Content Type in "Content" with "<fieldInternalName>" identifier
       | Field Type  | Name        | Identifier          | Required | Searchable | Translatable | Settings       |
       | <fieldName> | Field       | <fieldInternalName> | no      | no	      | yes          | <fieldSettings>  |
-      | Text line   | Name         | name	           | no      | yes	       | yes          |                 |
+      | Text line   | Name        | name	            | no      | yes	      | yes          |                  |
     And I am logged as "admin"
       And I go to "Content structure" in "Content" tab
     When I start creating a new content "<fieldName> CT"
@@ -31,7 +31,7 @@ Feature: Content fields setting and editing
       | ezboolean            | Checkbox                     |                                                                       | value     | true                                                                      |            |                       |         |             | 1                         |
       | ezobjectrelation     | Content relation (single)    |                                                                       | value     | Media/Images                                                              |            |                       |         |             | Images                    |
       | ezobjectrelationlist | Content relations (multiple) |                                                                       | firstItem | Media/Images                                                              | secondItem | Media/Files           |         |             | Images Files              |
-      | ezcountry            | Country                      |                                                                       | value     | Poland                                                                    |            |                       |         |             | Poland                    |
+      | ezcountry            | Country                      |                                                                       | value     | Angola                                                                    |            |                       |         |             | Angola                    |
       | ezdate               | Date                         |                                                                       | value     | 11/23/2019                                                                |            |                       |         |             | Saturday 23 November 2019 |
       | ezdatetime           | Date and time                |                                                                       | date      | 11/23/2019                                                                | time       | 14:45                 |         |             | Sat 2019-23-11 14:45:00   |
       | ezemail              | Email address                |                                                                       | value     | email@example.com                                                         |            |                       |         |             | email@example.com         |
@@ -53,15 +53,15 @@ Feature: Content fields setting and editing
   @javascript @common @admin
   Scenario: Create an ImageAsset Content item and edit specified field
     Given I create "image" Content items in "/Media/Images/" in "eng-GB"
-      | name             | image                                                                              |
-      | ImageAssetImage  | vendor/ezsystems/behatbundle/EzSystems/BehatBundle/Data/Images/small2.jpg  |
+      | name             | image                                                        |
+      | ImageAssetImage  | vendor/ezsystems/behatbundle/src/lib/Data/Images/small2.jpg  |
       And I create a 'Image Asset CT2' Content Type in "Content" with 'ImageAssetCT2' identifier
       | Field Type  | Name         | Identifier        | Required | Searchable | Translatable | Settings        |
       | Image Asset | ImageAField  | imageafield       | yes      | no	       | yes          |                 |
       And I am logged as "admin"
       And I go to "Content structure" in "Content" tab
     When I start creating a new content 'Image Asset CT2'
-      And I select "ImageAssetImage" from Image Asset Repository for "ImageAField" field
+      And I select "Media/Images/ImageAssetImage" from Image Asset Repository for "ImageAField" field
       And I click on the edit action bar button "Publish"
     Then success notification that "Content published." appears
       And I should be on content item page "ImageAssetImage" of type "Image Asset CT2" in root path
@@ -93,7 +93,7 @@ Feature: Content fields setting and editing
       | Checkbox                     | value     | false                        |            |                          |         |           | 1                         | 0                            |
       | Content relation (single)    | value     | Media/Files                  |            |                          |         |           | Images                    | Files                        |
       | Content relations (multiple) | firstItem | Users/Editors                | secondItem | Media/Multimedia         |         |           | Images Files              | Editors Multimedia           |
-      | Country                      | value     | Sweden                       |            |                          |         |           | Poland                    | Sweden                       |
+      | Country                      | value     | Argentina                    |            |                          |         |           | Angola                    | Argentina                       |
       | Date                         | value     | 12/30/2019                   |            |                          |         |           | Saturday 23 November 2019 | Monday 30 December 2019      |
       | Date and time                | date      | 12/30/2019                   | time       | 15:15                    |         |           | Sat 2019-23-11 14:45:00   | Mon 2019-30-12 15:15:00      |
       | Email address                | value     | edited.email@example.com     |            |                          |         |           | email@example.com         | edited.email@example.com     |
@@ -111,3 +111,41 @@ Feature: Content fields setting and editing
       | File                         | value     | binary2.txt.zip              |            |                          |         |           | binary1.txt               | binary2.txt                  |
       | Matrix                       | value     | col1:col2:col3,11:12:13,21:22:23,31:32:33 |                         ||         |           | Matrix                    | Matrix                       |
       | Image Asset                  | value     | imageasset2.png.zip          |            |                          |         |           | imageasset1.png           | imageasset2.png              |
+
+  @javascript @common @admin @queryFieldType
+  Scenario Outline: Create content item with Content Query field
+    Given I create a "<fieldName> CT" Content Type in "Content" with "<fieldInternalName>" identifier
+      | Field Type  | Name        | Identifier          | Required | Searchable | Translatable | Settings        |
+      | <fieldName> | Field       | <fieldInternalName> | no       | no	        | yes          | <fieldSettings> |
+      | Text line   | Name        | name	            | no       | yes	    | yes          |                 |
+    And I am logged as "admin"
+    And I go to "Content structure" in "Content" tab
+    When I start creating a new content "<fieldName> CT"
+    And the "Ezcontentquery" field is noneditable
+    And I set content fields
+      | label    | <label1>    |
+      | Name     | <fieldName> |
+    And I click on the edit action bar button "Publish"
+    Then success notification that "Content published." appears
+    And I should be on content item page "<fieldName>" of type "<fieldName> CT" in root path
+    And content attributes equal
+      | label    | <label1> | fieldType   |
+      | Field    | <value1> | <fieldName> |
+    Examples:
+      | fieldInternalName | fieldName     | fieldSettings                                                                                                  | label1 | value1                  |
+      | ezcontentquery    | Content query | QueryType-Folders under media,ContentType-folder,ItemsPerPage-100,Parameters-contentTypeId:folder;locationId:43| value  | Images,Files,Multimedia |
+
+  @javascript @common @queryFieldType
+  Scenario: Edit content item with Content Query
+    Given I am logged as "admin"
+    And I navigate to content "Content query" of type "Content query CT" in root path
+    When I click on the edit action bar button "Edit"
+    And I set content fields
+      | label    | <label1>          |
+      | Name     | New Content query |
+    And I click on the edit action bar button "Publish"
+    Then success notification that "Content published." appears
+    And I should be on content item page "New Content query" of type "Content query CT" in root path
+    And content attributes equal
+      | label    | value                  | fieldType     |
+      | Field    | Images,Files,Multimedia | Content query |

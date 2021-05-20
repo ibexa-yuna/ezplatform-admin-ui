@@ -6,7 +6,8 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
+use EzSystems\Behat\Browser\Element\Element;
 use PHPUnit\Framework\Assert;
 
 /** Element that describes user notification bar, that appears on the bottom of the screen */
@@ -18,11 +19,12 @@ class Notification extends Element
     private $checkVisibilityTimeout;
     private $notificationElement;
 
-    public function __construct(UtilityContext $context)
+    public function __construct(BrowserContext $context)
     {
         parent::__construct($context);
         $this->fields = [
             'alert' => '.ez-notifications-container .alert.show',
+            'alertMessage' => '.ez-notifications-container .alert.show span:nth-of-type(2)',
             'successAlert' => 'alert-success',
             'failureAlert' => 'alert-danger',
             'closeAlert' => 'button.close',
@@ -64,7 +66,7 @@ class Notification extends Element
         $this->setAlertElement();
 
         try {
-            return $this->notificationElement->getText();
+            return $this->context->findElement($this->fields['alertMessage'])->getText();
         } catch (\Exception $e) {
             Assert::fail('Notification alert not found, no message can be fetched.');
         }

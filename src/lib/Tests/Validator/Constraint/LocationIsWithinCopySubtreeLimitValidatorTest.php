@@ -11,6 +11,7 @@ namespace EzSystems\EzPlatformAdminUi\Tests\Validator\Constraint;
 use eZ\Publish\API\Repository\SearchService;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\API\Repository\Values\Content\Search\SearchResult;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use EzSystems\EzPlatformAdminUi\Validator\Constraints\LocationIsWithinCopySubtreeLimit;
 use EzSystems\EzPlatformAdminUi\Validator\Constraints\LocationIsWithinCopySubtreeLimitValidator;
 use PHPUnit\Framework\TestCase;
@@ -34,12 +35,14 @@ class LocationIsWithinCopySubtreeLimitValidatorTest extends TestCase
     /** @var \eZ\Publish\API\Repository\Values\Content\Location|\PHPUnit\Framework\MockObject\MockObject */
     private $location;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->copyLimit = 10;
+        $configResolver = $this->createMock(ConfigResolverInterface::class);
+        $configResolver->method('getParameter')->with('subtree_operations.copy_subtree.limit')->willReturn($this->copyLimit);
         $this->searchService = $this->createMock(SearchService::class);
         $this->executionContext = $this->createMock(ExecutionContextInterface::class);
-        $this->validator = new LocationIsWithinCopySubtreeLimitValidator($this->searchService, $this->copyLimit);
+        $this->validator = new LocationIsWithinCopySubtreeLimitValidator($this->searchService, $configResolver);
         $this->validator->initialize($this->executionContext);
         $this->location = $this
             ->getMockBuilder(Location::class)

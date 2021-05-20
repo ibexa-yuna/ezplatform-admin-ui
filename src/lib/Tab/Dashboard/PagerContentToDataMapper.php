@@ -15,7 +15,7 @@ use eZ\Publish\API\Repository\UserService;
 use eZ\Publish\Core\Helper\TranslationHelper;
 use eZ\Publish\Core\MVC\Symfony\Locale\UserLanguagePreferenceProviderInterface;
 use eZ\Publish\Core\Repository\LocationResolver\LocationResolver;
-use EzSystems\EzPlatformAdminUi\Search\AbstractPagerContentToDataMapper;
+use EzSystems\EzPlatformAdminUi\Pagination\Mapper\AbstractPagerContentToDataMapper;
 use Pagerfanta\Pagerfanta;
 
 class PagerContentToDataMapper extends AbstractPagerContentToDataMapper
@@ -28,6 +28,9 @@ class PagerContentToDataMapper extends AbstractPagerContentToDataMapper
 
     /** @var \eZ\Publish\API\Repository\UserService */
     protected $userService;
+
+    /** @var \eZ\Publish\Core\Repository\LocationResolver\LocationResolver */
+    protected $locationResolver;
 
     /**
      * @param \eZ\Publish\API\Repository\ContentService $contentService
@@ -49,14 +52,14 @@ class PagerContentToDataMapper extends AbstractPagerContentToDataMapper
         $this->contentService = $contentService;
         $this->contentTypeService = $contentTypeService;
         $this->userService = $userService;
+        $this->locationResolver = $locationResolver;
 
         parent::__construct(
             $contentTypeService,
             $userService,
             $userLanguagePreferenceProvider,
             $translationHelper,
-            $languageService,
-            $locationResolver
+            $languageService
         );
     }
 
@@ -81,13 +84,14 @@ class PagerContentToDataMapper extends AbstractPagerContentToDataMapper
                 'contentId' => $content->id,
                 'name' => $this->translationHelper->getTranslatedContentName($content),
                 'language' => $contentInfo->mainLanguageCode,
-                'contributor' => $this->getContributor($contentInfo),
+                'contributor' => $this->getVersionContributor($content->versionInfo),
                 'version' => $content->versionInfo->versionNo,
                 'content_type' => $content->getContentType(),
                 'modified' => $content->versionInfo->modificationDate,
                 'initialLanguageCode' => $content->versionInfo->initialLanguageCode,
                 'content_is_user' => $this->isContentIsUser($content),
                 'available_enabled_translations' => $this->getAvailableTranslations($content, true),
+                'resolvedLocation' => $this->locationResolver->resolveLocation($contentInfo),
             ];
         }
 

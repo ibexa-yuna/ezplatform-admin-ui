@@ -1,6 +1,13 @@
 .ez-field-edit--ezimage {
+    .ez-field-edit__error {
+        @include error-under-label();
+    }
+
     .ez-field-edit-preview {
-        padding: 1.25rem 0 .75rem 1.25rem;
+        &__media-wrapper {
+            position: relative;
+            display: inline-block;
+        }
 
         &__media {
             max-width: 100%;
@@ -9,52 +16,79 @@
             display: block;
         }
 
-        &__details {
-            color: $ez-color-base-light;
-            font-size: .75rem;
-            padding-top: .5rem;
+        &__actions {
+            position: absolute;
+            top: calculateRem(16px);
+            right: calculateRem(16px);
+            width: calculateRem(40px);
+            height: calculateRem(90px);
         }
 
-        .ez-field-edit-preview__image-alt {
-            margin-top: .5rem;
+        &__action--remove,
+        &__action--preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: calculateRem(40px);
+            height: calculateRem(40px);
+            margin-bottom: calculateRem(12px);
+            background: $ibexa-color-primary;
+            border: none;
+            outline: none;
+
+            .ez-icon {
+                fill: $ibexa-white;
+            }
+        }
+
+        &__details {
+            color: $ibexa-color-font;
+            padding-top: calculateRem(16px);
+        }
+
+        &__file-name,
+        &__file-size {
+            display: inline-block;
+
+            &:first-child {
+                margin-right: calculateRem(32px);
+            }
+        }
+
+        &__image-alt {
+            margin-top: calculateRem(8px);
         }
     }
 
     &.is-invalid {
+        .ez-data-source {
+            @include area-invalid();
+        }
+
         .ez-field-edit-preview {
             position: relative;
 
             &:before {
-                content : '!';
+                content: '!';
                 position: absolute;
                 top: 0;
-                left: -20px;
-                width: 20px;
-                background: red;
-                color: white;
+                left: calculateRem(-20px);
+                width: calculateRem(20px);
+                background: $ibexa-color-danger;
+                color: $ibexa-white;
                 text-align: center;
-                font-size: 1.5rem;
-                border-top-left-radius: 5px;
-                border-bottom-left-radius: 5px;
+                border-top-left-radius: $ibexa-border-radius;
+                border-bottom-left-radius: $ibexa-border-radius;
             }
         }
     }
 
-    .ez-data-source__field--alternativeText {
-        &.is-invalid {
-            .ez-data-source__label-wrapper,
-            .ez-data-source__label-wrapper .ez-field-edit__label {
-                color: $ez-color-danger;
-            }
+    .ez-data-source {
+        padding: calculateRem(16px) calculateRem(30px);
+        background: $ibexa-color-base-light;
 
-            .ez-field-edit__error {
-                margin-left: 8px;
-                display: inline-block;
-            }
-
-            .ez-data-source__input {
-                background: $ez-color-warning-pale;
-            }
+        &__label {
+            margin-top: calculateRem(24px);
         }
     }
 }

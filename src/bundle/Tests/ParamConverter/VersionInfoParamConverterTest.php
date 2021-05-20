@@ -10,7 +10,7 @@ use eZ\Publish\API\Repository\Values\Content\ContentInfo;
 use eZ\Publish\API\Repository\Values\Content\VersionInfo;
 use EzSystems\EzPlatformAdminUiBundle\ParamConverter\VersionInfoParamConverter;
 use Symfony\Component\HttpFoundation\Request;
-use PHPUnit_Framework_MockObject_MockObject as MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 use eZ\Publish\API\Repository\ContentService;
 
 class VersionInfoParamConverterTest extends AbstractParamConverterTest
@@ -24,30 +24,39 @@ class VersionInfoParamConverterTest extends AbstractParamConverterTest
     /** @var MockObject */
     protected $serviceMock;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->serviceMock = $this->createMock(ContentService::class);
 
         $this->converter = new VersionInfoParamConverter($this->serviceMock);
     }
 
-    public function testApply()
+    /**
+     * @dataProvider dataProvider
+     *
+     * @param mixed $versionNo
+     * @param int $versionNoToload
+     * @param mixed $contentId
+     * @param int $contentIdToLoad
+     *
+     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
+     * @throws \eZ\Publish\API\Repository\Exceptions\UnauthorizedException
+     */
+    public function testApply($versionNo, int $versionNoToload, $contentId, int $contentIdToLoad)
     {
-        $contentId = 42;
-        $versionNo = 53;
         $valueObject = $this->createMock(ContentInfo::class);
         $versionInfo = $this->createMock(VersionInfo::class);
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadContentInfo')
-            ->with($contentId)
+            ->with($contentIdToLoad)
             ->willReturn($valueObject);
 
         $this->serviceMock
             ->expects($this->once())
             ->method('loadVersionInfo')
-            ->with($valueObject, $versionNo)
+            ->with($valueObject, $versionNoToload)
             ->willReturn($versionInfo);
 
         $requestAttributes = [
@@ -58,8 +67,7 @@ class VersionInfoParamConverterTest extends AbstractParamConverterTest
         $request = new Request([], [], $requestAttributes);
         $config = $this->createConfiguration(self::SUPPORTED_CLASS, self::PARAMETER_NAME);
 
-        $this->converter->apply($request, $config);
-
+        $this->assertTrue($this->converter->apply($request, $config));
         $this->assertInstanceOf(self::SUPPORTED_CLASS, $request->attributes->get(self::PARAMETER_NAME));
     }
 
@@ -91,6 +99,15 @@ class VersionInfoParamConverterTest extends AbstractParamConverterTest
         return [
             'empty_content_id' => [null, 53],
             'empty_version_no' => [42, null],
+        ];
+    }
+
+    public function dataProvider(): array
+    {
+        return [
+            'integer' => [53, 53, 42, 42],
+            'number_as_string' => ['53', 53, '42', 42],
+            'string' => ['53k', 53, '42k', 42],
         ];
     }
 }

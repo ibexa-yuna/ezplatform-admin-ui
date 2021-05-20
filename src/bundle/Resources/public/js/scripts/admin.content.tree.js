@@ -1,22 +1,27 @@
-(function(doc, React, ReactDOM, eZ, localStorage) {
+(function (global, doc, React, ReactDOM, eZ, localStorage) {
     const KEY_CONTENT_TREE_EXPANDED = 'ez-content-tree-expanded';
     const CLASS_CONTENT_TREE_EXPANDED = 'ez-content-tree-container--expanded';
+    const CLASS_CONTENT_TREE_ANIMATE = 'ez-content-tree-container--animate';
     const CLASS_BTN_CONTENT_TREE_EXPANDED = 'ez-btn--content-tree-expanded';
     const token = doc.querySelector('meta[name="CSRF-Token"]').content;
     const siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
     const contentTreeContainer = doc.querySelector('.ez-content-tree-container');
     const contentTreeWrapper = doc.querySelector('.ez-content-tree-container__wrapper');
     const btn = doc.querySelector('.ez-btn--toggle-content-tree');
-    const { currentLocationPath, userId, treeRootLocationId } = contentTreeContainer.dataset;
+    const { currentLocationPath, treeRootLocationId } = contentTreeContainer.dataset;
+    const userId = window.eZ.helpers.user.getId();
     let frame = null;
     const toggleContentTreePanel = () => {
+        doc.activeElement.blur();
         contentTreeContainer.classList.toggle(CLASS_CONTENT_TREE_EXPANDED);
+        contentTreeContainer.classList.add(CLASS_CONTENT_TREE_ANIMATE);
         btn.classList.toggle(CLASS_BTN_CONTENT_TREE_EXPANDED);
         updateContentTreeWrapperHeight();
 
         const isContentTreeExpanded = contentTreeContainer.classList.contains(CLASS_CONTENT_TREE_EXPANDED);
 
         saveContentTreeExpandedState(userId, isContentTreeExpanded);
+        eZ.helpers.tooltips.hideAll();
     };
     const updateContentTreeWrapperHeight = () => {
         const height = Math.min(window.innerHeight - contentTreeContainer.getBoundingClientRect().top, window.innerHeight);
@@ -68,4 +73,4 @@
 
     doc.addEventListener('scroll', handleViewportChange, { capture: false, passive: true });
     window.addEventListener('resize', handleViewportChange, { capture: false, passive: true });
-})(window.document, window.React, window.ReactDOM, window.eZ, window.localStorage);
+})(window, window.document, window.React, window.ReactDOM, window.eZ, window.localStorage);

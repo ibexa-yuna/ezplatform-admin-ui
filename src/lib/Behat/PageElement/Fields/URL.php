@@ -6,7 +6,7 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\PageElement\Fields;
 
-use EzSystems\EzPlatformAdminUi\Behat\Helper\UtilityContext;
+use EzSystems\Behat\Browser\Context\BrowserContext;
 use PHPUnit\Framework\Assert;
 
 class URL extends EzFieldElement
@@ -14,11 +14,11 @@ class URL extends EzFieldElement
     /** @var string Name by which Element is recognised */
     public const ELEMENT_NAME = 'URL';
 
-    public function __construct(UtilityContext $context, string $locator, string $label)
+    public function __construct(BrowserContext $context, string $locator, string $label)
     {
         parent::__construct($context, $locator, $label);
-        $this->fields['url'] = '#ezrepoforms_content_edit_fieldsData_ezurl_value_link';
-        $this->fields['text'] = '#ezrepoforms_content_edit_fieldsData_ezurl_value_text';
+        $this->fields['url'] = '#ezplatform_content_forms_content_edit_fieldsData_ezurl_value_link';
+        $this->fields['text'] = '#ezplatform_content_forms_content_edit_fieldsData_ezurl_value_text';
     }
 
     public function setValue(array $parameters): void

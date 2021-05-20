@@ -40,9 +40,7 @@ final class ContentTypeIconResolver
      * Path is resolved based on configuration (ezpublish.system.<SCOPE>.content_type.<IDENTIFIER>). If there isn't
      * corresponding entry for given content type, then path to default icon will be returned.
      *
-     * @param string $identifier
-     *
-     * @return string
+     * @throws \EzSystems\EzPlatformAdminUi\Exception\ContentTypeIconNotFoundException
      */
     public function getContentTypeIcon(string $identifier): string
     {
@@ -57,34 +55,26 @@ final class ContentTypeIconResolver
     }
 
     /**
-     * @param string $identifier
-     *
-     * @return string
+     * @throws \EzSystems\EzPlatformAdminUi\Exception\ContentTypeIconNotFoundException
      */
     private function resolveIcon(string $identifier): string
     {
-        $config = null;
-
         $parameterName = $this->getConfigParameterName($identifier);
+        $defaultParameterName = $this->getConfigParameterName(self::DEFAULT_IDENTIFIER);
+
         if ($this->configResolver->hasParameter($parameterName)) {
             $config = $this->configResolver->getParameter($parameterName);
         }
 
-        if ($config === null || empty($config[self::ICON_KEY])) {
-            $config = $this->configResolver->getParameter(
-                $this->getConfigParameterName(self::DEFAULT_IDENTIFIER)
-            );
+        if ((empty($config) || empty($config[self::ICON_KEY])) && $this->configResolver->hasParameter($defaultParameterName)) {
+            $config = $this->configResolver->getParameter($defaultParameterName);
         }
 
-        return $config[self::ICON_KEY];
+        return $config[self::ICON_KEY] ?? '';
     }
 
     /**
      * Return configuration parameter name for given content type identifier.
-     *
-     * @param string $identifier
-     *
-     * @return string
      */
     private function getConfigParameterName(string $identifier): string
     {

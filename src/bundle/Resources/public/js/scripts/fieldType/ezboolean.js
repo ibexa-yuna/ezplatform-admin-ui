@@ -1,7 +1,8 @@
-(function (global) {
+(function(global, doc, eZ) {
     const SELECTOR_FIELD = '.ez-field-edit--ezboolean';
+    const SELECTOR_ERROR_NODE = '.ez-data-source';
 
-    class EzBooleanValidator extends global.eZ.BaseFieldValidator {
+    class EzBooleanValidator extends eZ.BaseFieldValidator {
         /**
          * Validates the input field value
          *
@@ -13,11 +14,11 @@
         validateInput(event) {
             const isError = !event.target.checked && event.target.required;
             const label = event.target.closest(SELECTOR_FIELD).querySelector('.ez-field-edit__label').innerHTML;
-            const errorMessage = global.eZ.errors.emptyField.replace('{fieldName}', label);
+            const errorMessage = eZ.errors.emptyField.replace('{fieldName}', label);
 
             return {
                 isError,
-                errorMessage
+                errorMessage,
             };
         }
 
@@ -43,8 +44,9 @@
                 selector: '.ez-field-edit--ezboolean input',
                 eventName: 'change',
                 callback: 'validateInput',
-                errorNodeSelectors: ['.ez-field-edit__label-wrapper'],
-            }, {
+                errorNodeSelectors: [SELECTOR_ERROR_NODE],
+            },
+            {
                 isValueValidator: false,
                 selector: '.ez-field-edit--ezboolean input',
                 eventName: 'change',
@@ -55,7 +57,5 @@
 
     validator.init();
 
-    global.eZ.fieldTypeValidators = global.eZ.fieldTypeValidators ?
-        [...global.eZ.fieldTypeValidators, validator] :
-        [validator];
-})(window);
+    eZ.addConfig('fieldTypeValidators', [validator], true);
+})(window, window.document, window.eZ);

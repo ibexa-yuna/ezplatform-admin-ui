@@ -14,7 +14,7 @@ use eZ\Publish\Core\QueryType\QueryType;
 use EzSystems\EzPlatformAdminUi\Tab\AbstractTab;
 use EzSystems\EzPlatformAdminUi\Tab\OrderedTabInterface;
 use Pagerfanta\Pagerfanta;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
 class EveryoneMediaTab extends AbstractTab implements OrderedTabInterface
@@ -30,7 +30,7 @@ class EveryoneMediaTab extends AbstractTab implements OrderedTabInterface
 
     /**
      * @param \Twig\Environment $twig
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
+     * @param \Symfony\Contracts\Translation\TranslatorInterface $translator
      * @param \EzSystems\EzPlatformAdminUi\Tab\Dashboard\PagerContentToDataMapper $pagerContentToDataMapper
      * @param \eZ\Publish\API\Repository\SearchService $searchService
      * @param \eZ\Publish\Core\QueryType\QueryType $mediaSubtreeQueryType
@@ -80,7 +80,7 @@ class EveryoneMediaTab extends AbstractTab implements OrderedTabInterface
         $pager->setMaxPerPage($limit);
         $pager->setCurrentPage($page);
 
-        return $this->twig->render('@ezdesign/dashboard/tab/all_media.html.twig', [
+        return $this->twig->render('@ezdesign/ui/dashboard/tab/all_media.html.twig', [
             'data' => $this->pagerContentToDataMapper->map($pager),
         ]);
     }

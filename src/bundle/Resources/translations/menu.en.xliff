@@ -186,6 +186,11 @@
         <target state="new">System Information</target>
         <note>key: main__admin__systeminfo</note>
       </trans-unit>
+      <trans-unit id="82375ef2c63989a07c692f526407d75316414dff" resname="main__admin__url_management">
+        <source>URL Management</source>
+        <target state="new">URL Management</target>
+        <note>key: main__admin__url_management</note>
+      </trans-unit>
       <trans-unit id="975e43875a74d509e3e0cedd926de1223d09cdf4" resname="main__admin__users">
         <source>Users</source>
         <target state="new">Users</target>
@@ -200,11 +205,6 @@
         <source>Content structure</source>
         <target state="new">Content structure</target>
         <note>key: main__content__content_structure</note>
-      </trans-unit>
-      <trans-unit id="2887dd09dcb0f287e947da3e735133c540991df1" resname="main__content__linkmanager">
-        <source>Link Manager</source>
-        <target state="new">Link Manager</target>
-        <note>key: main__content__linkmanager</note>
       </trans-unit>
       <trans-unit id="e8c5aefc86b31ee2bed9359787ddf0a2b1cad4a6" resname="main__content__media">
         <source>Media</source>
@@ -286,6 +286,16 @@
         <target state="new">Save</target>
         <note>key: role_assignment_create__sidebar_right__save</note>
       </trans-unit>
+      <trans-unit id="88bfe7703596452559485dd44c7a7dbf289584a5" resname="role_copy__sidebar_right__cancel">
+        <source>Discard changes</source>
+        <target state="new">Discard changes</target>
+        <note>key: role_copy__sidebar_right__cancel</note>
+      </trans-unit>
+      <trans-unit id="36e448abb1ab7844befaf5a70ac65edf976bae85" resname="role_copy__sidebar_right__save">
+        <source>Save</source>
+        <target state="new">Save</target>
+        <note>key: role_copy__sidebar_right__save</note>
+      </trans-unit>
       <trans-unit id="ec3a03215b15b79b7db72bac312b5e59734ac99c" resname="role_create__sidebar_right__cancel">
         <source>Discard changes</source>
         <target state="new">Discard changes</target>
@@ -366,15 +376,20 @@
         <target state="new">Save</target>
         <note>key: url_edit__sidebar_right__save</note>
       </trans-unit>
+      <trans-unit id="279fb028abf07d3fadda07ff6e00b91f0fd53932" resname="url_wildcard_edit__sidebar_right__cancel">
+        <source>Discard changes</source>
+        <target state="new">Discard changes</target>
+        <note>key: url_wildcard_edit__sidebar_right__cancel</note>
+      </trans-unit>
+      <trans-unit id="02bb48356132caeef070ebc7eb4d266884044e85" resname="url_wildcard_edit__sidebar_right__save">
+        <source>Save</source>
+        <target state="new">Save</target>
+        <note>key: url_wildcard_edit__sidebar_right__save</note>
+      </trans-unit>
       <trans-unit id="8acab9e005da20efe4001fac5f84ff2c835bb7c8" resname="user__bookmark">
         <source>Bookmarks</source>
         <target state="new">Bookmarks</target>
         <note>key: user__bookmark</note>
-      </trans-unit>
-      <trans-unit id="da5c7f4f526c2dd5b1e1f51ab5238ef4ba86d421" resname="user__change_password">
-        <source>Change password</source>
-        <target state="new">Change password</target>
-        <note>key: user__change_password</note>
       </trans-unit>
       <trans-unit id="06accb26fbb1b72012942af2b3e03f7c138e28c3" resname="user__content">
         <source>Logout</source>

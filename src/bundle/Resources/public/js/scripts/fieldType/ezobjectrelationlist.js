@@ -1,4 +1,4 @@
-(function (global, doc, eZ, React, ReactDOM, Translator) {
+(function(global, doc, eZ, React, ReactDOM, Translator) {
     const CLASS_FIELD_SINGLE = 'ez-field-edit--ezobjectrelation';
     const SELECTOR_FIELD_MULTIPLE = '.ez-field-edit--ezobjectrelationlist';
     const SELECTOR_FIELD_SINGLE = '.ez-field-edit--ezobjectrelation';
@@ -64,8 +64,6 @@
             ],
         });
         const udwContainer = doc.getElementById('react-udw');
-        const token = doc.querySelector('meta[name="CSRF-Token"]').content;
-        const siteaccess = doc.querySelector('meta[name="SiteAccess"]').content;
         const sourceInput = fieldContainer.querySelector(SELECTOR_INPUT);
         const relationsContainer = fieldContainer.querySelector('.ez-relations__list');
         const relationsWrapper = fieldContainer.querySelector('.ez-relations__wrapper');
@@ -75,9 +73,7 @@
         const isSingle = fieldContainer.classList.contains(CLASS_FIELD_SINGLE);
         const selectedItemsLimit = isSingle ? 1 : parseInt(relationsContainer.dataset.limit, 10);
         const startingLocationId =
-            relationsContainer.dataset.defaultLocation !== '0'
-                ? parseInt(relationsContainer.dataset.defaultLocation, 10)
-                : eZ.adminUiConfig.universalDiscoveryWidget.startingLocationId;
+            relationsContainer.dataset.defaultLocation !== '0' ? parseInt(relationsContainer.dataset.defaultLocation, 10) : null;
         const allowedContentTypes = relationsContainer.dataset.allowedContentTypes.split(',').filter((item) => item.length);
         const closeUDW = () => ReactDOM.unmountComponentAtNode(udwContainer);
         const renderRows = (items) => items.forEach((...args) => relationsContainer.insertAdjacentHTML('beforeend', renderRow(...args)));
@@ -136,48 +132,40 @@
                       );
 
             ReactDOM.render(
-                React.createElement(
-                    eZ.modules.UniversalDiscovery,
-                    Object.assign(
-                        {
-                            onConfirm,
-                            onCancel: closeUDW,
-                            title,
-                            multiple: isSingle ? false : selectedItemsLimit !== 1,
-                            selectedItemsLimit,
-                            startingLocationId,
-                            restInfo: { token, siteaccess },
-                            canSelectContent,
-                        },
-                        config
-                    )
-                ),
+                React.createElement(eZ.modules.UniversalDiscovery, {
+                    onConfirm,
+                    onCancel: closeUDW,
+                    title,
+                    multiple: isSingle ? false : selectedItemsLimit !== 1,
+                    multipleItemsLimit: selectedItemsLimit,
+                    startingLocationId,
+                    canSelectContent,
+                    ...config,
+                }),
                 udwContainer
             );
         };
         const excludeDuplicatedItems = (items) => {
-            selectedItemsMap = items.reduce(
-                (total, item) => Object.assign({}, total, { [item.ContentInfo.Content._id]: item }),
-                selectedItemsMap
-            );
+            selectedItemsMap = items.reduce((total, item) => ({ ...total, [item.ContentInfo.Content._id]: item }), selectedItemsMap);
 
             return items.filter((item) => selectedItemsMap[item.ContentInfo.Content._id]);
         };
         const renderRow = (item, index) => {
             const { escapeHTML } = eZ.helpers.text;
-            const contentTypeName = eZ.adminUiConfig.contentTypeNames[item.ContentInfo.Content.ContentTypeInfo.identifier];
+            const { formatShortDateTime } = eZ.helpers.timezone;
+            const contentTypeName = eZ.helpers.contentType.getContentTypeName(item.ContentInfo.Content.ContentTypeInfo.identifier);
             const contentName = escapeHTML(item.ContentInfo.Content.TranslatedName);
             const contentId = escapeHTML(item.ContentInfo.Content._id);
 
             return `
                 <tr class="ez-relations__item" data-content-id="${contentId}">
-                    <td><input type="checkbox" value="${contentId}" /></td>
+                    <td><input class="ez-input ez-input--checkbox" type="checkbox" value="${contentId}" /></td>
                     <td class="ez-relations__item-name">${contentName}</td>
                     <td>${contentTypeName}</td>
-                    <td>${new Date(item.ContentInfo.Content.publishedDate).toLocaleString()}</td>
-                    <td colspan="2"><input class="ez-relations__order-input" type="number" value="${
-                        selectedItems.length + index + 1
-                    }" /></td>
+                    <td>${formatShortDateTime(item.ContentInfo.Content.publishedDate)}</td>
+                    <td colspan="2"><input class="ez-relations__order-input" type="number" value="${selectedItems.length +
+                        index +
+                        1}" /></td>
                 </tr>
             `;
         };
@@ -208,7 +196,7 @@
 
             const removedItems = [];
 
-            [...relationsContainer.querySelectorAll('input:checked')].forEach((input) => {
+            relationsContainer.querySelectorAll('input:checked').forEach((input) => {
                 removedItems.push(parseInt(input.value, 10));
 
                 input.closest('tr').remove();
@@ -276,7 +264,7 @@
             updateInputValue(selectedItems);
         };
         let selectedItems = [...fieldContainer.querySelectorAll(SELECTOR_ROW)].map((row) => parseInt(row.dataset.contentId, 10));
-        let selectedItemsMap = selectedItems.reduce((total, item) => Object.assign({}, total, { [item]: item }), {});
+        let selectedItemsMap = selectedItems.reduce((total, item) => ({ ...total, [item]: item }), {});
 
         updateAddBtnState();
         attachRowsEventHandlers();
@@ -292,6 +280,6 @@
 
         validator.init();
 
-        eZ.fieldTypeValidators = eZ.fieldTypeValidators ? [...eZ.fieldTypeValidators, validator] : [validator];
+        eZ.addConfig('fieldTypeValidators', [validator], true);
     });
-})(window, document, window.eZ, window.React, window.ReactDOM, window.Translator);
+})(window, window.document, window.eZ, window.React, window.ReactDOM, window.Translator);

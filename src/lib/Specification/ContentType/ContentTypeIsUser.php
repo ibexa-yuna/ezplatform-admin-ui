@@ -39,19 +39,13 @@ class ContentTypeIsUser extends AbstractSpecification
     public function isSatisfiedBy($contentType): bool
     {
         if (!$contentType instanceof ContentType) {
-            throw new InvalidArgumentException('$contentType', sprintf('Must be instance of %s', ContentType::class));
+            throw new InvalidArgumentException('$contentType', sprintf('Must be an instance of %s', ContentType::class));
         }
 
         if (in_array($contentType->identifier, $this->userContentTypeIdentifier, true)) {
             return true;
         }
 
-        foreach ($contentType->getFieldDefinitions() as $fieldDefinition) {
-            if ($fieldDefinition->fieldTypeIdentifier === self::EZUSER_FIELD_TYPE_IDENTIFIER) {
-                return true;
-            }
-        }
-
-        return false;
+        return $contentType->hasFieldDefinitionOfType(self::EZUSER_FIELD_TYPE_IDENTIFIER);
     }
 }

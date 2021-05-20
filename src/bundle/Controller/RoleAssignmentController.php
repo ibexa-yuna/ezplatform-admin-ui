@@ -14,27 +14,24 @@ use eZ\Publish\API\Repository\Values\User\Limitation\SectionLimitation;
 use eZ\Publish\API\Repository\Values\User\Limitation\SubtreeLimitation;
 use eZ\Publish\API\Repository\Values\User\Role;
 use eZ\Publish\API\Repository\Values\User\RoleAssignment;
+use eZ\Publish\Core\MVC\ConfigResolverInterface;
 use eZ\Publish\Core\MVC\Symfony\Security\Authorization\Attribute;
 use EzSystems\EzPlatformAdminUi\Form\Data\Role\RoleAssignmentsDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Role\RoleAssignmentCreateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Role\RoleAssignmentDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\TranslatorInterface;
 
 class RoleAssignmentController extends Controller
 {
-    /** @var \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface */
+    /** @var \EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface */
     private $notificationHandler;
-
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
-    private $translator;
 
     /** @var \eZ\Publish\API\Repository\RoleService */
     private $roleService;
@@ -45,31 +42,21 @@ class RoleAssignmentController extends Controller
     /** @var \EzSystems\EzPlatformAdminUi\Form\SubmitHandler */
     private $submitHandler;
 
-    /** @var int */
-    private $defaultPaginationLimit;
+    /** @var \eZ\Publish\Core\MVC\ConfigResolverInterface */
+    private $configResolver;
 
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface $notificationHandler
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
-     * @param \eZ\Publish\API\Repository\RoleService $roleService
-     * @param \EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory $formFactory
-     * @param \EzSystems\EzPlatformAdminUi\Form\SubmitHandler $submitHandler
-     * @param int $defaultPaginationLimit
-     */
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
-        TranslatorInterface $translator,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         RoleService $roleService,
         FormFactory $formFactory,
         SubmitHandler $submitHandler,
-        int $defaultPaginationLimit
+        ConfigResolverInterface $configResolver
     ) {
         $this->notificationHandler = $notificationHandler;
-        $this->translator = $translator;
         $this->roleService = $roleService;
         $this->formFactory = $formFactory;
         $this->submitHandler = $submitHandler;
-        $this->defaultPaginationLimit = $defaultPaginationLimit;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -92,7 +79,7 @@ class RoleAssignmentController extends Controller
             new ArrayAdapter($assignments)
         );
 
-        $pagerfanta->setMaxPerPage($this->defaultPaginationLimit);
+        $pagerfanta->setMaxPerPage($this->configResolver->getParameter('pagination.role_assignment_limit'));
         $pagerfanta->setCurrentPage(min($assignmentPage, $pagerfanta->getNbPages()));
 
         /** @var \eZ\Publish\API\Repository\Values\User\RoleAssignment[] $assignments */
@@ -102,7 +89,7 @@ class RoleAssignmentController extends Controller
             new RoleAssignmentsDeleteData($role, $this->getRoleAssignmentsNumbers($assignments))
         );
 
-        return $this->render('@ezdesign/admin/role_assignment/list.html.twig', [
+        return $this->render('@ezdesign/user/role_assignment/list.html.twig', [
             'role' => $role,
             'form_role_assignments_delete' => $deleteRoleAssignmentsForm->createView(),
             'pager' => $pagerfanta,
@@ -135,12 +122,10 @@ class RoleAssignmentController extends Controller
                 }
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Assignments on role '%role%' created.") */
-                        'role.assignment_create.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Assigned Users/Groups to Role '%role%'.") */
+                    'role.assignment_create.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [
@@ -153,7 +138,7 @@ class RoleAssignmentController extends Controller
             }
         }
 
-        return $this->render('@ezdesign/admin/role_assignment/create.html.twig', [
+        return $this->render('@ezdesign/user/role_assignment/create.html.twig', [
             'role' => $role,
             'form' => $form->createView(),
         ]);
@@ -180,12 +165,10 @@ class RoleAssignmentController extends Controller
                 $this->roleService->removeRoleAssignment($roleAssignment);
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Assignment on role '%role%' removed.") */
-                        'role.assignment_delete.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Unassigned Users/Groups from Role '%role%'.") */
+                    'role.assignment_delete.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [
@@ -227,12 +210,10 @@ class RoleAssignmentController extends Controller
                 }
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Assignment on role '%role%' removed.") */
-                        'role.assignment_delete.success',
-                        ['%role%' => $role->identifier],
-                        'role'
-                    )
+                    /** @Desc("Unassigned Users/Groups from Role '%role%'.") */
+                    'role.assignment_delete.success',
+                    ['%role%' => $role->identifier],
+                    'role'
                 );
 
                 return new RedirectResponse($this->generateUrl('ezplatform.role.view', [

@@ -147,7 +147,7 @@ class TranslationAddType extends AbstractType
 
         if (isset($data['location'])) {
             try {
-                $location = $this->locationService->loadLocation($data['location']);
+                $location = $this->locationService->loadLocation((int)$data['location']);
             } catch (NotFoundException $e) {
                 $location = null;
             }
@@ -213,8 +213,9 @@ class TranslationAddType extends AbstractType
                 ChoiceType::class,
                 [
                     'required' => true,
+                    'placeholder' => false,
                     'multiple' => false,
-                    'expanded' => true,
+                    'expanded' => false,
                     'choice_loader' => new CallbackChoiceLoader(function () use ($contentLanguages, $limitationLanguageCodes) {
                         return $this->loadLanguages(
                             function (Language $language) use ($contentLanguages, $limitationLanguageCodes) {
@@ -235,7 +236,7 @@ class TranslationAddType extends AbstractType
                     'required' => false,
                     'placeholder' => false,
                     'multiple' => false,
-                    'expanded' => true,
+                    'expanded' => false,
                     'choice_loader' => new CallbackChoiceLoader(function () use ($contentLanguages) {
                         return $this->loadLanguages(
                             function (Language $language) use ($contentLanguages) {

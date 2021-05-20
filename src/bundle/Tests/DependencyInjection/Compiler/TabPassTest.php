@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class TabPassTest extends AbstractCompilerPassTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->setDefinition(TabRegistry::class, new Definition());
@@ -26,7 +26,7 @@ class TabPassTest extends AbstractCompilerPassTestCase
     /**
      * @param ContainerBuilder $container
      */
-    protected function registerCompilerPass(ContainerBuilder $container)
+    protected function registerCompilerPass(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new TabPass());
     }

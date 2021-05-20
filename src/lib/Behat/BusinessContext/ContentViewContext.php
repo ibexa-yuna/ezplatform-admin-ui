@@ -7,27 +7,24 @@
 namespace EzSystems\EzPlatformAdminUi\Behat\BusinessContext;
 
 use Behat\Gherkin\Node\TableNode;
-use EzSystems\BehatBundle\Helper\ArgumentParser;
-use EzSystems\EzPlatformAdminUi\Behat\Helper\EzEnvironmentConstants;
+use EzSystems\Behat\Core\Environment\EnvironmentConstants;
+use EzSystems\Behat\Core\Behat\ArgumentParser;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Breadcrumb;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\Dialog;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\DraftConflictDialog;
-use EzSystems\EzPlatformAdminUi\Behat\PageElement\ElementFactory;
+use EzSystems\Behat\Browser\Factory\ElementFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\LanguagePicker;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\LeftMenu;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\RightMenu;
 use EzSystems\EzPlatformAdminUi\Behat\PageElement\UniversalDiscoveryWidget;
 use EzSystems\EzPlatformAdminUi\Behat\PageObject\ContentItemPage;
-use EzSystems\EzPlatformAdminUi\Behat\PageObject\PageObjectFactory;
+use EzSystems\Behat\Browser\Factory\PageObjectFactory;
 use PHPUnit\Framework\Assert;
 
 class ContentViewContext extends BusinessContext
 {
     private $argumentParser;
 
-    /**
-     * @injectService $argumentParser @EzSystems\BehatBundle\Helper\ArgumentParser
-     */
     public function __construct(ArgumentParser $argumentParser)
     {
         $this->argumentParser = $argumentParser;
@@ -38,7 +35,7 @@ class ContentViewContext extends BusinessContext
      */
     public function startCreatingContent(string $contentType): void
     {
-        PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, 'Home')->startCreatingContent($contentType);
+        PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, 'Home')->startCreatingContent($contentType);
     }
 
     /**
@@ -46,7 +43,7 @@ class ContentViewContext extends BusinessContext
      */
     public function startCreatingUser(): void
     {
-        PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, '')->startCreatingUser();
+        PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, '')->startCreatingUser();
     }
 
     /**
@@ -55,10 +52,10 @@ class ContentViewContext extends BusinessContext
      */
     public function startEditingContent(string $language = null): void
     {
-        $rightMenu = new RightMenu($this->utilityContext);
+        $rightMenu = new RightMenu($this->browserContext);
         $rightMenu->clickButton('Edit');
 
-        $languagePicker = ElementFactory::createElement($this->utilityContext, LanguagePicker::ELEMENT_NAME);
+        $languagePicker = ElementFactory::createElement($this->browserContext, LanguagePicker::ELEMENT_NAME);
 
         if ($languagePicker->isVisible()) {
             $availableLanguages = $languagePicker->getLanguages();
@@ -73,14 +70,14 @@ class ContentViewContext extends BusinessContext
      */
     public function iOpenUDWAndGoTo(string $itemPath): void
     {
-        $leftMenu = new LeftMenu($this->utilityContext);
+        $leftMenu = new LeftMenu($this->browserContext);
         $leftMenu->verifyVisibility();
         $leftMenu->clickButton('Browse');
 
-        $udw = ElementFactory::createElement($this->utilityContext, UniversalDiscoveryWidget::ELEMENT_NAME);
+        $udw = ElementFactory::createElement($this->browserContext, UniversalDiscoveryWidget::ELEMENT_NAME);
         $udw->verifyVisibility();
         $udw->selectContent($this->argumentParser->replaceRootKeyword($itemPath));
-        $udw->confirm();
+        $udw->openPreview();
     }
 
     /**
@@ -88,7 +85,7 @@ class ContentViewContext extends BusinessContext
      */
     public function iSeeTitle(string $title): void
     {
-        $contentItemPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, 'Home');
+        $contentItemPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, 'Home');
         Assert::assertEquals($title, $contentItemPage->getPageTitle());
     }
 
@@ -102,7 +99,7 @@ class ContentViewContext extends BusinessContext
      */
     private function verifyItemExistenceInSubItemList(string $itemName, string $itemType, string $containerName, bool $itemShouldExist): void
     {
-        $isItemInTable = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, $containerName)
+        $isItemInTable = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, $containerName)
             ->subItemList->table->isElementInTable($itemName);
 
         $itemShouldExistString = $itemShouldExist ? '' : 'n\'t';
@@ -133,7 +130,7 @@ class ContentViewContext extends BusinessContext
      */
     public function verifyThereIsNoItemInSubItemListInRoot(string $itemName, string $itemType): void
     {
-        $this->verifyThereIsNoItemInSubItemList($itemName, $itemType, EzEnvironmentConstants::get('ROOT_CONTENT_NAME'));
+        $this->verifyThereIsNoItemInSubItemList($itemName, $itemType, EnvironmentConstants::get('ROOT_CONTENT_NAME'));
     }
 
     /**
@@ -146,10 +143,10 @@ class ContentViewContext extends BusinessContext
         $path = $this->argumentParser->replaceRootKeyword($path);
         $spacedPath = str_replace('/', ' ', $path);
 
-        $contentPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, $contentName);
+        $contentPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, $contentName);
         $contentPage->verifyIsLoaded();
         $contentPage->verifyContentType($contentType);
-        $breadcrumb = ElementFactory::createElement($this->utilityContext, Breadcrumb::ELEMENT_NAME);
+        $breadcrumb = ElementFactory::createElement($this->browserContext, Breadcrumb::ELEMENT_NAME);
         Assert::assertEquals($spacedPath, $breadcrumb->getBreadcrumb(), 'Wrong content location');
     }
 
@@ -158,7 +155,7 @@ class ContentViewContext extends BusinessContext
      */
     public function verifyImOnContentItemPageInRoot(string $contentName, string $contentType)
     {
-        $this->verifyImOnContentItemPage($contentName, $contentType, EzEnvironmentConstants::get('ROOT_CONTENT_NAME'));
+        $this->verifyImOnContentItemPage($contentName, $contentType, EnvironmentConstants::get('ROOT_CONTENT_NAME'));
     }
 
     /**
@@ -169,7 +166,7 @@ class ContentViewContext extends BusinessContext
     {
         $this->verifyImOnContentItemPage($contentName, $contentType, $path);
 
-        PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, $contentName)->verifySubItemListVisibility();
+        PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, $contentName)->verifySubItemListVisibility();
     }
 
     /**
@@ -177,7 +174,7 @@ class ContentViewContext extends BusinessContext
      */
     public function verifyImOnContentContainerPageInRoot(string $contentName, string $contentType)
     {
-        $this->verifyImOnContentContainerPage($contentName, $contentType, EzEnvironmentConstants::get('ROOT_CONTENT_NAME'));
+        $this->verifyImOnContentContainerPage($contentName, $contentType, EnvironmentConstants::get('ROOT_CONTENT_NAME'));
     }
 
     /**
@@ -185,8 +182,8 @@ class ContentViewContext extends BusinessContext
      */
     public function verifyImOnRootPage()
     {
-        $contentName = EzEnvironmentConstants::get('ROOT_CONTENT_NAME');
-        $contentType = EzEnvironmentConstants::get('ROOT_CONTENT_TYPE');
+        $contentName = EnvironmentConstants::get('ROOT_CONTENT_NAME');
+        $contentType = EnvironmentConstants::get('ROOT_CONTENT_TYPE');
 
         $this->verifyImOnContentContainerPage($contentName, $contentType);
     }
@@ -197,9 +194,9 @@ class ContentViewContext extends BusinessContext
     public function contentAttributesEqual(TableNode $parameters): void
     {
         $hash = $parameters->getHash();
-        $contentItemPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, '');
-        foreach ($hash as $field) {
-            $contentItemPage->contentField->verifyFieldHasValue($field['label'], $field);
+        $contentItemPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, '');
+        foreach ($hash as $fieldData) {
+            $contentItemPage->contentField->verifyFieldHasValue($fieldData['label'], $fieldData);
         }
     }
 
@@ -208,8 +205,8 @@ class ContentViewContext extends BusinessContext
      */
     public function articleMainContentFieldEquals(string $intro): void
     {
-        $contentItemPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, '');
-        $fieldName = EzEnvironmentConstants::get('ARTICLE_MAIN_FIELD_NAME');
+        $contentItemPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, '');
+        $fieldName = EnvironmentConstants::get('ARTICLE_MAIN_FIELD_NAME');
         $contentItemPage->contentField->verifyFieldHasValue($fieldName, ['value' => $intro]);
     }
 
@@ -218,7 +215,7 @@ class ContentViewContext extends BusinessContext
      */
     public function startCreatingNewDraftFromDraftConflictModal(): void
     {
-        $draftConflictModal = ElementFactory::createElement($this->utilityContext, DraftConflictDialog::ELEMENT_NAME);
+        $draftConflictModal = ElementFactory::createElement($this->browserContext, DraftConflictDialog::ELEMENT_NAME);
         $draftConflictModal->verifyVisibility();
         $draftConflictModal->createNewDraft();
     }
@@ -228,7 +225,7 @@ class ContentViewContext extends BusinessContext
      */
     public function startEditingDraftFromDraftConflictModal(string $draftID): void
     {
-        $draftConflictModal = ElementFactory::createElement($this->utilityContext, DraftConflictDialog::ELEMENT_NAME);
+        $draftConflictModal = ElementFactory::createElement($this->browserContext, DraftConflictDialog::ELEMENT_NAME);
         $draftConflictModal->verifyVisibility();
         $draftConflictModal->draftConflictTable->clickEditButton($draftID);
     }
@@ -238,7 +235,7 @@ class ContentViewContext extends BusinessContext
      */
     public function goingToPathTheresNoSubItem(string $path, string $contentName, string $contentType): void
     {
-        $contentPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, $contentName);
+        $contentPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, $contentName);
         $contentPage->navigateToPath($path);
 
         $explodedPath = explode('/', $path);
@@ -251,7 +248,7 @@ class ContentViewContext extends BusinessContext
      */
     public function goingToRootTheresNoSubItem(string $contentName, string $contentType): void
     {
-        $this->goingToPathTheresNoSubItem(EzEnvironmentConstants::get('ROOT_CONTENT_NAME'), $contentName, $contentType);
+        $this->goingToPathTheresNoSubItem(EnvironmentConstants::get('ROOT_CONTENT_NAME'), $contentName, $contentType);
     }
 
     /**
@@ -259,14 +256,17 @@ class ContentViewContext extends BusinessContext
      */
     public function goingToPathTheresSubItem(string $path, string $contentName, string $contentType): void
     {
-        $contentPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, $contentName);
+        $contentPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, $contentName);
         $contentPage->navigateToPath($path);
 
         $explodedPath = explode('/', $path);
         $pathSize = count($explodedPath);
 
-        $contentItemPage = PageObjectFactory::createPage($this->utilityContext, ContentItemPage::PAGE_NAME, $explodedPath[$pathSize - 1]);
-        $contentItemPage->subItemList->sortBy('Modified', false);
+        $contentItemPage = PageObjectFactory::createPage($this->browserContext, ContentItemPage::PAGE_NAME, $explodedPath[$pathSize - 1]);
+
+        if ($contentItemPage->subItemList->canBeSorted()) {
+            $contentItemPage->subItemList->sortBy('Modified', false);
+        }
 
         Assert::assertTrue(
             $contentItemPage->subItemList->table->isElementInTable($contentName),
@@ -279,7 +279,7 @@ class ContentViewContext extends BusinessContext
      */
     public function goingToRootTheresSubItem(string $contentName, string $contentType): void
     {
-        $this->goingToPathTheresSubItem(EzEnvironmentConstants::get('ROOT_CONTENT_NAME'), $contentName, $contentType);
+        $this->goingToPathTheresSubItem(EnvironmentConstants::get('ROOT_CONTENT_NAME'), $contentName, $contentType);
     }
 
     /**
@@ -287,10 +287,10 @@ class ContentViewContext extends BusinessContext
      */
     public function iSendContentToTrash(): void
     {
-        $rightMenu = ElementFactory::createElement($this->utilityContext, RightMenu::ELEMENT_NAME);
+        $rightMenu = ElementFactory::createElement($this->browserContext, RightMenu::ELEMENT_NAME);
         $rightMenu->clickButton('Send to Trash');
 
-        $dialog = ElementFactory::createElement($this->utilityContext, Dialog::ELEMENT_NAME);
+        $dialog = ElementFactory::createElement($this->browserContext, Dialog::ELEMENT_NAME);
         $dialog->confirm();
     }
 }

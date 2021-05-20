@@ -6,7 +6,7 @@
  */
 namespace EzSystems\EzPlatformAdminUi\Behat\BusinessContext;
 
-use EzSystems\EzPlatformAdminUi\Behat\PageObject\PageObjectFactory;
+use EzSystems\Behat\Browser\Factory\PageObjectFactory;
 use EzSystems\EzPlatformAdminUi\Behat\PageObject\SearchPage;
 
 class SearchContext extends BusinessContext
@@ -16,7 +16,7 @@ class SearchContext extends BusinessContext
      */
     public function iSearchForContent(string $contentItemName): void
     {
-        $searchPage = PageObjectFactory::createPage($this->utilityContext, SearchPage::PAGE_NAME);
+        $searchPage = PageObjectFactory::createPage($this->browserContext, SearchPage::PAGE_NAME);
         $searchPage->verifyIsLoaded();
         $searchPage->search($contentItemName);
     }
@@ -26,7 +26,7 @@ class SearchContext extends BusinessContext
      */
     public function searchResults(string $contentItemName): void
     {
-        $searchPage = PageObjectFactory::createPage($this->utilityContext, SearchPage::PAGE_NAME);
+        $searchPage = PageObjectFactory::createPage($this->browserContext, SearchPage::PAGE_NAME);
         $searchPage->verifyItemInSearchResults($contentItemName);
     }
 }

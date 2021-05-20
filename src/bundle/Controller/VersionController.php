@@ -15,22 +15,18 @@ use eZ\Publish\Core\Helper\TranslationHelper;
 use EzSystems\EzPlatformAdminUi\Form\Data\Version\VersionRemoveData;
 use EzSystems\EzPlatformAdminUi\Form\Factory\FormFactory;
 use EzSystems\EzPlatformAdminUi\Form\SubmitHandler;
-use EzSystems\EzPlatformAdminUi\Notification\NotificationHandlerInterface;
+use EzSystems\EzPlatformAdminUi\Notification\TranslatableNotificationHandlerInterface;
 use EzSystems\EzPlatformAdminUi\Tab\LocationView\VersionsTab;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
-use Symfony\Component\Translation\TranslatorInterface;
 
 class VersionController extends Controller
 {
-    /** @var NotificationHandlerInterface */
+    /** @var TranslatableNotificationHandlerInterface */
     private $notificationHandler;
-
-    /** @var TranslatorInterface */
-    private $translator;
 
     /** @var ContentService */
     private $contentService;
@@ -45,23 +41,20 @@ class VersionController extends Controller
     private $translationHelper;
 
     /**
-     * @param NotificationHandlerInterface $notificationHandler
-     * @param TranslatorInterface $translator
+     * @param TranslatableNotificationHandlerInterface $notificationHandler
      * @param ContentService $contentService
      * @param FormFactory $formFactory
      * @param SubmitHandler $submitHandler
      * @param \eZ\Publish\Core\Helper\TranslationHelper $translationHelper
      */
     public function __construct(
-        NotificationHandlerInterface $notificationHandler,
-        TranslatorInterface $translator,
+        TranslatableNotificationHandlerInterface $notificationHandler,
         ContentService $contentService,
         FormFactory $formFactory,
         SubmitHandler $submitHandler,
         TranslationHelper $translationHelper
     ) {
         $this->notificationHandler = $notificationHandler;
-        $this->translator = $translator;
         $this->contentService = $contentService;
         $this->formFactory = $formFactory;
         $this->submitHandler = $submitHandler;
@@ -108,17 +101,16 @@ class VersionController extends Controller
                 }
 
                 $this->notificationHandler->success(
-                    $this->translator->trans(
-                        /** @Desc("Versions removed from '%name%' content.") */
-                        'version.delete.success',
-                        [
-                            '%name%' => $this->translationHelper->getTranslatedContentNameByContentInfo($contentInfo),
-                        ],
-                        'version'
-                    )
+                    /** @Desc("Removed version(s) from '%name%'.") */
+                    'version.delete.success',
+                    [
+                        '%name%' => $this->translationHelper->getTranslatedContentNameByContentInfo($contentInfo),
+                    ],
+                    'version'
                 );
 
-                return new RedirectResponse($this->generateUrl('_ezpublishLocation', [
+                return new RedirectResponse($this->generateUrl('_ez_content_view', [
+                    'contentId' => $contentInfo->id,
                     'locationId' => $contentInfo->mainLocationId,
                     '_fragment' => VersionsTab::URI_FRAGMENT,
                 ]));
@@ -129,7 +121,8 @@ class VersionController extends Controller
             }
         }
 
-        return $this->redirect($this->generateUrl('_ezpublishLocation', [
+        return $this->redirect($this->generateUrl('_ez_content_view', [
+            'contentId' => $contentInfo->id,
             'locationId' => $contentInfo->mainLocationId,
             '_fragment' => VersionsTab::URI_FRAGMENT,
         ]));

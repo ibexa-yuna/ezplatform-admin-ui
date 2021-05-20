@@ -10,7 +10,7 @@ namespace EzSystems\EzPlatformAdminUi\Menu\Event;
 
 use Knp\Menu\FactoryInterface;
 use Knp\Menu\ItemInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event triggered after building AdminUI menus. Provides extensibility point for menus' customization.
@@ -30,6 +30,7 @@ class ConfigureMenuEvent extends Event
     const POLICY_CREATE_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.policy_create_sidebar_right';
     const ROLE_EDIT_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.role_edit_sidebar_right';
     const ROLE_CREATE_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.role_create_sidebar_right';
+    const ROLE_COPY_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.role_copy_sidebar_right';
     const USER_EDIT_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.user_edit_sidebar_right';
     const USER_CREATE_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.user_create_sidebar_right';
     const ROLE_ASSIGNMENT_CREATE_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.role_assignment_create_sidebar_right';
@@ -40,6 +41,7 @@ class ConfigureMenuEvent extends Event
     const CONTENT_TYPE_CREATE_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.content_type_create_sidebar_right';
     const CONTENT_TYPE_EDIT_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.content_type_edit_sidebar_right';
     const URL_EDIT_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.url_edit_sidebar_right';
+    const URL_WILDCARD_EDIT_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.url_wildcard_edit_sidebar_right';
     const USER_PASSWORD_CHANGE_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.user_password_change_sidebar_right';
     const OBJECT_STATE_GROUP_CREATE_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.object_state_group_create_sidebar_right';
     const OBJECT_STATE_GROUP_EDIT_SIDEBAR_RIGHT = 'ezplatform_admin_ui.menu_configure.object_state_group_edit_sidebar_right';

@@ -80,7 +80,7 @@ class PermissionChecker implements PermissionCheckerInterface
      *
      * @return array
      */
-    public function getRestrictions($hasAccess, string $class): array
+    public function getRestrictions(array $hasAccess, string $class): array
     {
         $restrictions = [];
         $oneOfPoliciesHasNoLimitation = false;
@@ -187,9 +187,6 @@ class PermissionChecker implements PermissionCheckerInterface
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getContentCreateLimitations(Location $parentLocation): LookupLimitationResult
     {
         $contentType = $this->contentTypeService->loadContentType($parentLocation->contentInfo->contentTypeId);
@@ -204,6 +201,21 @@ class PermissionChecker implements PermissionCheckerInterface
         return $this->permissionResolver->lookupLimitations('content', 'create',
             $contentCreateStruct,
             [$versionBuilder->build(), $locationCreateStruct],
+            [Limitation::CONTENTTYPE, Limitation::LANGUAGE]
+        );
+    }
+
+    public function getContentUpdateLimitations(Location $location): LookupLimitationResult
+    {
+        $contentInfo = $location->getContentInfo();
+
+        $versionBuilder = new VersionBuilder();
+        $versionBuilder->translateToAnyLanguageOf($this->getActiveLanguageCodes());
+        $versionBuilder->createFromAnyContentTypeOf($this->getContentTypeIds());
+
+        return $this->permissionResolver->lookupLimitations('content', 'edit',
+            $contentInfo,
+            [$versionBuilder->build(), $location],
             [Limitation::CONTENTTYPE, Limitation::LANGUAGE]
         );
     }

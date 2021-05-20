@@ -1,3 +1,4 @@
+@systemInformation
 Feature: System info verification
   As an administrator
   In order to customize my eZ installation
@@ -8,6 +9,11 @@ Feature: System info verification
       And I go to "System Information" in "Admin" tab
 
   @javascript @common
+  Scenario: Check My Ibexa Information
+    When I go to "My Ibexa" tab in System Information
+    Then I see "Product" system information table
+
+  @javascript @common
   Scenario: Check Composer System Information
     When I go to "Composer" tab in System Information
     Then I see "Composer" system information table
@@ -16,12 +22,11 @@ Feature: System info verification
         | ezsystems/ez-support-tools              |
         | ezsystems/ezplatform-admin-ui           |
         | ezsystems/ezplatform-admin-ui-assets    |
-        | ezsystems/ezplatform-admin-ui-modules   |
         | ezsystems/ezplatform-design-engine      |
         | ezsystems/ezplatform-http-cache         |
         | ezsystems/ezplatform-solr-search-engine |
-        | ezsystems/ezpublish-kernel              |
-        | ezsystems/repository-forms              |
+        | ezsystems/ezplatform-kernel             |
+        | ezsystems/ezplatform-content-forms      |
 
   @javascript @common
   Scenario: Check Database System Information
@@ -46,14 +51,13 @@ Feature: System info verification
         | Name                                      |
         | EzPlatformAdminUiAssetsBundle             |
         | EzPlatformAdminUiBundle                   |
-        | EzPlatformAdminUiModulesBundle            |
         | EzPlatformDesignEngineBundle              |
         | EzPublishCoreBundle                       |
         | EzPublishIOBundle                         |
         | EzPublishLegacySearchEngineBundle         |
-        | EzPublishRestBundle                       |
+        | EzPlatformRestBundle                      |
         | EzSystemsEzPlatformSolrSearchEngineBundle |
         | EzSystemsEzSupportToolsBundle             |
         | EzSystemsPlatformHttpCacheBundle          |
         | EzSystemsPlatformInstallerBundle          |
-        | EzSystemsRepositoryFormsBundle            |
+        | EzPlatformContentFormsBundle              |

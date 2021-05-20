@@ -33,20 +33,13 @@ use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationCopyData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationCopySubtreeData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationMoveData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationSwapData;
-use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashContainerData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashData;
-use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashWithAssetData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationUpdateVisibilityData;
-use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ContentObjectStateUpdateData;
-use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStateCreateData;
-use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStateDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStateGroupCreateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStateGroupDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStateGroupsDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStateGroupUpdateData;
-use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStatesDeleteData;
-use EzSystems\EzPlatformAdminUi\Form\Data\ObjectState\ObjectStateUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Policy\PoliciesDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Policy\PolicyCreateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Policy\PolicyDeleteData;
@@ -64,9 +57,9 @@ use EzSystems\EzPlatformAdminUi\Form\Data\Section\SectionCreateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Section\SectionDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Section\SectionsDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\Section\SectionUpdateData;
-use EzSystems\EzPlatformAdminUi\Form\Data\Trash\TrashEmptyData;
-use EzSystems\EzPlatformAdminUi\Form\Data\Trash\TrashItemDeleteData;
-use EzSystems\EzPlatformAdminUi\Form\Data\Trash\TrashItemRestoreData;
+use EzSystems\EzPlatformAdminUi\Form\Data\URLWildcard\URLWildcardData;
+use EzSystems\EzPlatformAdminUi\Form\Data\URLWildcard\URLWildcardDeleteData;
+use EzSystems\EzPlatformAdminUi\Form\Data\URLWildcard\URLWildcardUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\User\Setting\UserSettingUpdateData;
 use EzSystems\EzPlatformAdminUi\Form\Data\User\UserDeleteData;
 use EzSystems\EzPlatformAdminUi\Form\Data\User\UserEditData;
@@ -99,20 +92,13 @@ use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationCopySubtreeType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationCopyType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationMoveType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationSwapType;
-use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationTrashContainerType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationTrashType;
-use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationTrashWithAssetType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationUpdateType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Location\LocationUpdateVisibilityType;
-use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ContentObjectStateUpdateType;
-use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStateCreateType;
-use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStateDeleteType;
 use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStateGroupCreateType;
 use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStateGroupDeleteType;
 use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStateGroupsDeleteType;
 use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStateGroupUpdateType;
-use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStatesDeleteType;
-use EzSystems\EzPlatformAdminUi\Form\Type\ObjectState\ObjectStateUpdateType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Policy\PoliciesDeleteType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Policy\PolicyCreateType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Policy\PolicyCreateWithLimitationType;
@@ -131,10 +117,10 @@ use EzSystems\EzPlatformAdminUi\Form\Type\Section\SectionCreateType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Section\SectionDeleteType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Section\SectionsDeleteType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Section\SectionUpdateType;
-use EzSystems\EzPlatformAdminUi\Form\Type\Trash\TrashEmptyType;
-use EzSystems\EzPlatformAdminUi\Form\Type\Trash\TrashItemDeleteType;
-use EzSystems\EzPlatformAdminUi\Form\Type\Trash\TrashItemRestoreType;
-use EzSystems\EzPlatformAdminUi\Form\Type\User\Setting\UserSettingUpdateType;
+use EzSystems\EzPlatformAdminUi\Form\Type\URLWildcard\URLWildcardType;
+use EzSystems\EzPlatformAdminUi\Form\Type\URLWildcard\URLWildcardDeleteType;
+use EzSystems\EzPlatformAdminUi\Form\Type\URLWildcard\URLWildcardUpdateType;
+use EzSystems\EzPlatformUser\Form\Type\UserSettingUpdateType;
 use EzSystems\EzPlatformAdminUi\Form\Type\User\UserDeleteType;
 use EzSystems\EzPlatformAdminUi\Form\Type\User\UserEditType;
 use EzSystems\EzPlatformAdminUi\Form\Type\User\UserPasswordChangeType;
@@ -142,32 +128,32 @@ use EzSystems\EzPlatformAdminUi\Form\Type\User\UserPasswordForgotType;
 use EzSystems\EzPlatformAdminUi\Form\Type\User\UserPasswordForgotWithLoginType;
 use EzSystems\EzPlatformAdminUi\Form\Type\User\UserPasswordResetType;
 use EzSystems\EzPlatformAdminUi\Form\Type\Version\VersionRemoveType;
-use EzSystems\RepositoryForms\Data\URL\URLListData;
-use EzSystems\RepositoryForms\Data\URL\URLUpdateData;
-use EzSystems\RepositoryForms\Form\Type\URL\URLEditType;
-use EzSystems\RepositoryForms\Form\Type\URL\URLListType;
+use EzSystems\EzPlatformAdminUi\Form\Data\URL\URLListData;
+use EzSystems\EzPlatformAdminUi\Form\Data\URL\URLUpdateData;
+use EzSystems\EzPlatformAdminUi\Form\Type\URL\URLEditType;
+use EzSystems\EzPlatformAdminUi\Form\Type\URL\URLListType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Util\StringUtil;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FormFactory
 {
     /** @var \Symfony\Component\Form\FormFactoryInterface */
-    protected $formFactory;
+    private $formFactory;
 
     /** @var \Symfony\Component\Routing\Generator\UrlGeneratorInterface */
     protected $urlGenerator;
 
-    /** @var \Symfony\Component\Translation\TranslatorInterface */
+    /** @var \Symfony\Contracts\Translation\TranslatorInterface */
     private $translator;
 
     /**
      * @param \Symfony\Component\Form\FormFactoryInterface $formFactory
      * @param \Symfony\Component\Routing\Generator\UrlGeneratorInterface $urlGenerator
-     * @param \Symfony\Component\Translation\TranslatorInterface $translator
+     * @param \Symfony\Contracts\Translation\TranslatorInterface $translator
      */
     public function __construct(
         FormFactoryInterface $formFactory,
@@ -502,53 +488,6 @@ class FormFactory
         $name = $name ?: StringUtil::fqcnToBlockPrefix(LocationUpdateType::class);
 
         return $this->formFactory->createNamed($name, LocationUpdateType::class, $data);
-    }
-
-    /**
-     * @param TrashItemRestoreData|null $data
-     * @param string|null $name
-     *
-     * @return FormInterface
-     */
-    public function restoreTrashItem(
-        TrashItemRestoreData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: StringUtil::fqcnToBlockPrefix(TrashItemRestoreType::class);
-
-        return $this->formFactory->createNamed($name, TrashItemRestoreType::class, $data);
-    }
-
-    /**
-     * @param \EzSystems\EzPlatformAdminUi\Form\Data\Trash\TrashItemDeleteData|null $data
-     * @param string|null $name
-     *
-     * @return \Symfony\Component\Form\FormInterface
-     *
-     * @throws \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
-     */
-    public function deleteTrashItem(
-        TrashItemDeleteData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: StringUtil::fqcnToBlockPrefix(TrashItemDeleteType::class);
-
-        return $this->formFactory->createNamed($name, TrashItemDeleteType::class, $data);
-    }
-
-    /**
-     * @param TrashEmptyData|null $data
-     * @param string|null $name
-     *
-     * @return FormInterface
-     */
-    public function emptyTrash(
-        TrashEmptyData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: StringUtil::fqcnToBlockPrefix(TrashEmptyType::class);
-
-        return $this->formFactory->createNamed($name, TrashEmptyType::class, $data);
     }
 
     /**
@@ -962,6 +901,9 @@ class FormFactory
     }
 
     /**
+     * @deprecated Since eZ Platform 3.0.2 method moved to EzPlatformUser Bundle. Use it instead.
+     * @see \EzSystems\EzPlatformUser\Form\Factory\FormFactory::changeUserPassword.
+     *
      * @param \EzSystems\EzPlatformAdminUi\Form\Data\User\UserPasswordChangeData $data
      * @param string|null $name
      * @param \eZ\Publish\API\Repository\Values\User\User|null $user
@@ -983,6 +925,9 @@ class FormFactory
     }
 
     /**
+     * @deprecated Since eZ Platform 3.0.2 method moved to EzPlatformUser Bundle. Use it instead.
+     * @see \EzSystems\EzPlatformUser\Form\Factory\FormFactory::forgotUserPassword.
+     *
      * @param \EzSystems\EzPlatformAdminUi\Form\Data\User\UserPasswordForgotData $data
      * @param string|null $name
      *
@@ -1000,6 +945,9 @@ class FormFactory
     }
 
     /**
+     * @deprecated Since eZ Platform 3.0.2 method moved to EzPlatformUser Bundle. Use it instead.
+     * @see \EzSystems\EzPlatformUser\Form\Factory\FormFactory::forgotUserPassword.
+     *
      * @param \EzSystems\EzPlatformAdminUi\Form\Data\User\UserPasswordForgotWithLoginData $data
      * @param string|null $name
      *
@@ -1017,6 +965,9 @@ class FormFactory
     }
 
     /**
+     * @deprecated Since eZ Platform 3.0.2 method moved to EzPlatformUser Bundle. Use it instead.
+     * @see \EzSystems\EzPlatformUser\Form\Factory\FormFactory::resetUserPassword.
+     *
      * @param \EzSystems\EzPlatformAdminUi\Form\Data\User\UserPasswordResetData $data
      * @param string|null $name
      * @param \eZ\Publish\API\Repository\Values\User\User|null $user
@@ -1134,98 +1085,6 @@ class FormFactory
     }
 
     /**
-     * @param ObjectStateCreateData|null $data
-     * @param string|null $name
-     *
-     * @return FormInterface
-     *
-     * @deprecated since version 2.2, to be removed in 3.0. Use Use \Symfony\Component\Form\FormFactoryInterface::create directly instead.
-     */
-    public function createObjectState(
-        ?ObjectStateCreateData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: StringUtil::fqcnToBlockPrefix(ObjectStateCreateType::class);
-
-        return $this->formFactory->createNamed(
-            $name,
-            ObjectStateCreateType::class,
-            $data ?? new ObjectStateCreateData()
-        );
-    }
-
-    /**
-     * @param ObjectStateDeleteData|null $data
-     * @param string|null $name
-     *
-     * @return FormInterface
-     *
-     * @deprecated since version 2.2, to be removed in 3.0. Use Use \Symfony\Component\Form\FormFactoryInterface::create directly instead.
-     */
-    public function deleteObjectState(
-        ObjectStateDeleteData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: sprintf('delete-object-state-%d', $data->getObjectState()->id);
-
-        return $this->formFactory->createNamed($name, ObjectStateDeleteType::class, $data);
-    }
-
-    /**
-     * @param ObjectStatesDeleteData|null $data
-     * @param string|null $name
-     *
-     * @return FormInterface
-     *
-     * @throws InvalidOptionsException
-     *
-     * @deprecated since version 2.2, to be removed in 3.0. Use Use \Symfony\Component\Form\FormFactoryInterface::create directly instead.
-     */
-    public function deleteObjectStates(
-        ObjectStatesDeleteData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: StringUtil::fqcnToBlockPrefix(ObjectStatesDeleteType::class);
-
-        return $this->formFactory->createNamed($name, ObjectStatesDeleteType::class, $data);
-    }
-
-    /**
-     * @param ObjectStateUpdateData|null $data
-     * @param string|null $name
-     *
-     * @return FormInterface
-     *
-     * @deprecated since version 2.2, to be removed in 3.0. Use Use \Symfony\Component\Form\FormFactoryInterface::create directly instead.
-     */
-    public function updateObjectState(
-        ObjectStateUpdateData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: sprintf('update-object-state-%d', $data->getObjectState()->id);
-
-        return $this->formFactory->createNamed($name, ObjectStateUpdateType::class, $data);
-    }
-
-    /**
-     * @param ContentObjectStateUpdateData|null $data
-     * @param string|null $name
-     *
-     * @return FormInterface
-     *
-     * @deprecated since version 2.2, to be removed in 3.0. Use Use \Symfony\Component\Form\FormFactoryInterface::create directly instead.
-     */
-    public function updateContentObjectState(
-        ContentObjectStateUpdateData $data,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: sprintf('update-content-%d-object-state-group-%d', $data->getContentInfo()->id,
-            $data->getObjectStateGroup()->id);
-
-        return $this->formFactory->createNamed($name, ContentObjectStateUpdateType::class, $data);
-    }
-
-    /**
      * @param \EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationCopySubtreeData $data
      * @param string|null $name
      *
@@ -1256,6 +1115,9 @@ class FormFactory
     }
 
     /**
+     * @deprecated Since eZ Platform 3.0.2 method moved to EzPlatformUser Bundle. Use it instead.
+     * @see \EzSystems\EzPlatformUser\Form\Factory\FormFactory::updateUserSetting.
+     *
      * @param string $userSettingIdentifier
      * @param \EzSystems\EzPlatformAdminUi\Form\Data\User\Setting\UserSettingUpdateData $data
      * @param string|null $name
@@ -1297,23 +1159,6 @@ class FormFactory
     }
 
     /**
-     * @param \EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashWithAssetData|null $data
-     * @param string|null $name
-     *
-     * @return \Symfony\Component\Form\FormInterface
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     */
-    public function trashLocationWithAsset(
-        LocationTrashWithAssetData $data = null,
-        ?string $name = null
-    ): FormInterface {
-        $name = $name ?: StringUtil::fqcnToBlockPrefix(LocationTrashWithAssetType::class);
-
-        return $this->formFactory->createNamed($name, LocationTrashWithAssetType::class, $data);
-    }
-
-    /**
      * @param \EzSystems\EzPlatformAdminUi\Form\Data\Content\Draft\ContentRemoveData|null $data
      * @param string|null $name
      *
@@ -1329,17 +1174,65 @@ class FormFactory
     }
 
     /**
-     * @param \EzSystems\EzPlatformAdminUi\Form\Data\Location\LocationTrashContainerData|null $data
+     * @param \EzSystems\EzPlatformAdminUi\Form\Data\URLWildcard\URLWildcardData|null $data
      * @param string|null $name
+     *
+     * @throws \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
      *
      * @return \Symfony\Component\Form\FormInterface
      */
-    public function trashContainerLocation(
-        LocationTrashContainerData $data = null,
+    public function createURLWildcard(
+        ?URLWildcardData $data = null,
         ?string $name = null
     ): FormInterface {
-        $name = $name ?: StringUtil::fqcnToBlockPrefix(LocationTrashContainerType::class);
+        $name = $name ?: StringUtil::fqcnToBlockPrefix(URLWildcardType::class);
 
-        return $this->formFactory->createNamed($name, LocationTrashContainerType::class, $data);
+        return $this->formFactory->createNamed(
+            $name,
+            URLWildcardType::class,
+            $data ?? new URLWildcardData()
+        );
+    }
+
+    /**
+     * @param \EzSystems\EzPlatformAdminUi\Form\Data\URLWildcard\URLWildcardUpdateData|null $data
+     * @param string|null $name
+     *
+     * @throws \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
+     *
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    public function createURLWildcardUpdate(
+        ?URLWildcardUpdateData $data = null,
+        ?string $name = null
+    ): FormInterface {
+        $name = $name ?: StringUtil::fqcnToBlockPrefix(URLWildcardUpdateType::class);
+
+        return $this->formFactory->createNamed(
+            $name,
+            URLWildcardUpdateType::class,
+            $data ?? new URLWildcardUpdateData()
+        );
+    }
+
+    /**
+     * @param \EzSystems\EzPlatformAdminUi\Form\Data\URLWildcard\URLWildcardDeleteData|null $data
+     * @param string|null $name
+     *
+     * @throws \Symfony\Component\OptionsResolver\Exception\InvalidOptionsException
+     *
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    public function deleteURLWildcard(
+        ?URLWildcardDeleteData $data = null,
+        ?string $name = null
+    ): FormInterface {
+        $name = $name ?: StringUtil::fqcnToBlockPrefix(URLWildcardDeleteType::class);
+
+        return $this->formFactory->createNamed(
+            $name,
+            URLWildcardDeleteType::class,
+            $data ?? new URLWildcardDeleteData()
+        );
     }
 }
