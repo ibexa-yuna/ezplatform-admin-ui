@@ -32,6 +32,7 @@ jobs:
         with:
           ref: ${{ env.DEST_BRANCH }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Perform Upmerge of ${{ env.SOURCE_BRANCH }} to ${{ env.DEST_BRANCH }}
         run: |
