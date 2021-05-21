@@ -15,6 +15,9 @@ jobs:
 
       - name: Set Environment
         run: |
+          # List of branch destinations
+          # describing which branch to merge to which branch
+          # Note: Uses Bash 4.x feature, doesn't work on MacOS
           declare -A destinations
           destinations["1.5"]="2.2"
           destinations["2.2"]="2.3"
